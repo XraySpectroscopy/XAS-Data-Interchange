@@ -6,11 +6,10 @@ use Module::Build;
 
 my $build = Module::Build
  -> new(
-	create_readme      => 0,
-	##create_makefile_pl => 'traditional',
-	license            => 'perl',
 	module_name        => 'Xray::XDI',
-	dist_author        => 'Bruce Ravel',
+	license            => 'perl',
+	dist_author        => 'Bruce Ravel <bravel AT bnl DOT gov>',
+	dist_abstract      => "perl implementation of the XDI specification",
 	requires           => {
 			       'Moose'             => 1.21,
 			       'Parse::RecDescent' => 1.965001,
