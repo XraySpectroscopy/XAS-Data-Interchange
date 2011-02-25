@@ -578,10 +578,9 @@ The interplaner spacing of the monochromator's crystals, in {\AA}ngstroms.
 
 \begin{HeaderField}{End\_time}{<timestamp>}{2003-04-01T13:01:02}
   The date and time that this scan ended, using the timestamp format
-  specified in ISO 8601\footnote{ISO 8601, \textit{Data elements and
-      interchange formats –-- Information interchange --–
-      Representation of dates and times} is explained succintly
-    \href{http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/date_and_time_format.htm}{here}}.
+  specified in ISO 8601\footnote{ISO 8601, \textit{
+      Representation of dates and times} is explained succintly at\\
+    \href{http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/date_and_time_format.htm}{http://www.iso.org/iso/support/faqs/faqs\_widely\_used\_standards/widely\_used\_standards\_other/date\_and\_time\_format.htm}}.
   The example above represents one minute and two seconds after one
   o'clock in the afternoon of April 1$^{\mathrm{st}}$,
   2003.\mcomm{Time zones}{anchor:timezones}
@@ -646,10 +645,9 @@ The current of the synchrotron's storage ring, in milliamperes.
 
 \begin{HeaderField}{Start\_time}{<timestamp>}{2003-04-01T13:01:02}
   The date and time that this scan started, using the timestamp format
-  specified in ISO 8601\footnote{ISO 8601, \textit{Data elements and
-      interchange formats –-- Information interchange --–
-      Representation of dates and times} is explained succintly
-    \href{http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/date_and_time_format.htm}{here}}.
+  specified in ISO 8601\footnote{ISO 8601, \textit{
+      Representation of dates and times} is explained succintly at\\
+    \href{http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/date_and_time_format.htm}{http://www.iso.org/iso/support/faqs/faqs\_widely\_used\_standards/widely\_used\_standards\_other/date\_and\_time\_format.htm}}.
   The example above represents one minute and two seconds after one
   o'clock in the afternoon of April 1$^{\mathrm{st}}$, 2003.\mcomm{Time zones}{anchor:timezones}
 \begin{verbatim}
@@ -975,14 +973,14 @@ MX data acquisition system in use at the beamline.
      SOURCE             = "#"  "Source"             ": "  *WORD
      UNDULATOR-HARMONIC = "#"  "Undulator-harmonic" ": "  HARMONIC-VALUE
 
-     DEFINEDFIELDS      = *(  ABSCISSA     / BEAMLINE    / CRYSTAL
-                            / COLLIMATION  / DSPACING    / EDGEENERGY
-                            / ENDTIME      / FOCUSING    / HARMONIC_REJECTION
-                            / MUFLUOR      / MUREF       / MUTRANS
-                            / RINGCURRENT  / RINGENERGY  / STARTTIME 
-                            / SOURCE       / UNDULATOR_HARMONIC
-                            / EXT_FIELD    / FIELD_LINE
-                           ) FIELD-END EOL
+     DEFINEDFIELDS      = *( (  ABSCISSA     / BEAMLINE    / CRYSTAL
+                              / COLLIMATION  / DSPACING    / EDGEENERGY
+                              / ENDTIME      / FOCUSING    / HARMONIC_REJECTION
+                              / MUFLUOR      / MUREF       / MUTRANS
+                              / RINGCURRENT  / RINGENERGY  / STARTTIME 
+                              / SOURCE       / UNDULATOR_HARMONIC
+                              / EXT_FIELD    / FIELD_LINE
+                             ) EOL ) FIELD-END
 \end{verbatim}
 
 \subsubsection{Extension Fields}
@@ -991,7 +989,7 @@ MX data acquisition system in use at the beamline.
      FIELD-LINE     = DEFINEDFIELDS
      EXT-FIELD-NAME = WORD  *("-"  WORD)
 
-     FIELD-LINE     = "#"  FIELD-NAME      ": "  *WORD  EOL
+     FIELD-LINE     = "#"  FIELD-NAME      ": "  *WORD   EOL
      EXT-FIELD      = "#"  EXT-FIELD-NAME  ": "  *VCHAR  EOL
 \end{verbatim}
 

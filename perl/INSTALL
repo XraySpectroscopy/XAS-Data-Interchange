@@ -1,0 +1,19 @@
+
+Do these steps at the command line:
+
+   perl Build.PL
+   ./Build
+   ./Build test
+   sudo ./Build install
+
+If you are on a system that uses root, you should become root before
+doing the last step, then simply type
+
+  ./Build install
+
+The first step will warn you if you have any missing dependencies.  If
+you are, doing 
+
+   sudo ./Build installdeps
+
+should build and install everythinig that is needed.
