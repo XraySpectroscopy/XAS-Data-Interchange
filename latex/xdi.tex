@@ -1,0 +1,1033 @@
+\documentclass{article}
+\usepackage{fancybox}           % shadow and oval boxes
+\usepackage{amsmath, amssymb}   % AMS mathematics
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{fancybox}         % shadow and oval boxes
+\definecolor{purple}{rgb}{.48, .31, .69}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=purple]{hyperref}
+
+\setlength{\hoffset}{0cm}
+\setlength{\voffset}{0cm}
+\setlength{\topmargin}{0cm}
+\setlength{\marginparsep}{0.25cm}
+\setlength{\marginparwidth}{2.5cm}
+\setlength{\textheight}{22cm}
+
+\setlength{\textwidth}{16.5cm}
+%\setlength{\topmargin}{-1cm}
+\setlength{\oddsidemargin}{0cm}
+\setlength{\evensidemargin}{0cm}
+\setlength{\headsep}{0.5cm}
+\setlength{\parindent}{0.0pt}
+\setlength{\parskip}{1.0em}
+
+\newcommand{\sltt}[1]{\texttt{\textsl{#1}}}
+\newcommand{\DAQ}{data acquisition}
+\newcommand{\DAN}{data analysis}
+\newcommand{\xdi}{\textsf{XDI}}
+\newcommand{\xdiversion}{1.0}
+
+\newcommand{\mcomm}[2]{\marginpar{\quad\includegraphics[width=1.0cm]{exclamation.jpg}\\%
+    See p.~\pageref{#2}\\\textit{#1}}}
+
+\newenvironment{Boxedminipage}%
+    {\begin{Sbox}\begin{minipage}}%
+    {\end{minipage}\end{Sbox}\shadowbox{\TheSbox}}
+
+
+\newenvironment{HeaderField}[3]%
+{\vspace{1ex}%
+    \noindent$\blacklozenge$\quad{\textbf{#1:}}%
+    \quad\texttt{[#2]}\quad\dotfill\quad\texttt{\textsl{#3}}%
+    \\[0.5ex]%
+}{}
+
+\newenvironment{Boxedshadowpage}%
+{\begin{Sbox}\begin{minipage}}%
+    {\end{minipage}\end{Sbox}\shadowbox{\TheSbox}}
+\newenvironment{Coloredbox}[2]%
+{\color{#1}\begin{Boxedshadowpage}[h]{#2}\color{black}\vspace{0.3ex}\begin{center}}%
+    {\vspace{0.5ex}\end{center}\end{Boxedshadowpage}}
+
+\definecolor{MyGray}{rgb}{0.5,0.5,0.55}
+\newenvironment{OpenIssue}%
+{\begin{center}\begin{Coloredbox}{MyGray}{0.8\linewidth}%
+      \noindent{\textbf{Open Issue:}}\it
+    }%
+{\end{Coloredbox}\end{center}}
+\newenvironment{Todo}%
+{\begin{center}\begin{Coloredbox}{MyGray}{0.8\linewidth}%
+      \noindent{\textbf{To do:}}\it
+    }%
+{\end{Coloredbox}\end{center}}
+
+
+
+
+\begin{document}
+
+\begin{center}
+  \huge
+  The XAS Data Interchange Format\\
+  Draft Specification, version \xdiversion\\[4ex]
+  \Large
+  XDI Working Group\\[2ex]
+  \normalsize
+  Bruce Ravel (NIST) bravel\char64 bnl.gov\\
+  ...and...
+\end{center}
+
+\tableofcontents
+
+\section*{Typography notes}
+\label{typography}
+
+In this draft, an exclamation symbol in the margin, shown to the
+right, indicates that an open issue related to that text is discussed
+in Sec.~\ref{sec:future}.\mcomm{}{sec:future}
+
+\newpage
+
+\section{Introduction}
+\label{sec:introduction}
+% FIXME: need an introductory blurb
+
+\subsection{Purpose}
+\label{sec:purpose}
+
+This document describes the XAS Data Interchange Format ({\xdi}),
+version \xdiversion, a simple file format for a single X-ray
+Absorption Spectroscopy (XAS) measurement.  We are defining this
+format to accomplish the following goals:
+
+\begin{enumerate}
+\item Establish a common language for transferring data between XAS
+  beamlines, XAS experimenters, data analysis packages, web
+  applications, and anything else that needs to process XAS data.
+\item Increase the relevance and longevity of experimental data by
+  reducing the amount of \textit{data archeology}\footnote{The Farrel
+    Lytle database
+    (\href{http://ixs.csrri.iit.edu/database/data/index.html}
+    {\texttt{http://ixs.csrri.iit.edu/database/data/index.html}}) is a
+    particularly trenchant example of data archeology.} future
+  interpretations of that data will require.
+\item Enhance the user experience by promoting interoperability among
+  data acquisition systems and data analysis packages.
+\item Provide a mechanism for extracting and preserving a single
+  XAS-like data set from a related experiment (for example, A DAFS
+  measurement) or from a complex data structure (for example, a
+  database or a hierarchical data file used to store a multispectral
+  data set).
+\end{enumerate}
+
+This format is intended to encode single-scan data files with
+metadata.  It is not intended to encode relationships between many XAS
+measurements or between an XAS measurement and other parts of a
+multispectral experiment.
+
+In order to fulfill these goals, {\xdi} files provide a flexible,
+consistent representation of information common to all XAS
+experiments.  This format is simpler than a format based on XML, HDF,
+or a database; it yields self-documenting files; and it is easy for
+both humans and computers to read.  Its structure is inspired by that
+of Internet electronic mail\footnote{See \textit{RFC822: Standard for
+    ARPA Internet Text Messages},
+  \href{http://www.w3.org/Protocols/rfc822/}
+  {\texttt{http://www.w3.org/Protocols/rfc822/}}}, a plain-text data
+format which has proven to be robust, extensible, and enduring.  Due
+to these advantages, and because of our intention to develop free
+software tools and libraries that support {\xdi}, we hope that this
+file format described in this specification will see wide adoption in
+the XAS community.
+
+
+\subsection{Scope}
+\label{sec:scope}
+
+We do not intend this specification to dictate the file formats used
+by data acquisition systems during XAS experiments, although this is
+certainly a suitable format for that purpose.  Any attempt to do
+so would be unreasonable due to the number of different data
+acquisition systems currently deployed at synchrotrons around the
+world, the variety of experiments performed at these installations,
+and the continuing development of new experimental techniques.
+Instead, this specification addresses the representation of a single
+scan of XAS data after an experiment has been completed.
+
+A beamline which adopts this specification shall either use this
+format as its native file format or shall provide their users with
+tools that convert between their native file formats and {\xdi}.  In
+short, they will send their users home with their XAS data stored in
+this format.  We intend to encourage this practice by developing tools
+for reading, editing, writing, and validating {\xdi} files.  Beamlines
+may choose to modify their data acquisition systems to write data
+using this format in situations where that would be appropriate.  We
+plan to assist in this effort by developing libraries for popular
+programming languages which can read, manipulate, and write {\xdi}
+files.
+
+With their experiment data stored in {\xdi} files, users may choose
+data analysis packages which are capable of reading this format.  It
+is our hope that, as this specification gains wider adoption, users
+will ultimately be freed from the responsibility of understanding file
+formats.  With this aim in mind, we shall assist software developers
+in supporting {\xdi} files.
+
+
+\section{The Contents of the XDI File}
+\label{sec:contents_ixsif}
+
+{\xdi} files contain two sections, a header with information about one
+scan of an XAS experiment and the data collected during that scan.
+The header consists of versioning information, a series of fields that
+contain a single pieces of information, an area for users to store
+comments about the experiment, and a sequence of labels for the
+columns of data.  The data section contains these columns, with each
+row corresponding to one point of the scan.
+
+Although the header has been designed to contain arbitrary
+information, the meanings of several fields are explicitly defined.
+These fields, described below, contain the most common information
+about XAS experiments.  We hope that users will benefit from their
+existence when using data analysis packages that support {\xdi}
+files.  However, none of the defined fields are required to be
+present.  For example, some of these fields may not be appropriate for
+certain experiments and should be omitted in that case.
+
+Some examples of header information follow.  A complete list of
+defined headers along with their specifications is found in
+Sec.~\ref{sec:ixsif_fields_standard}.
+
+\begin{description}
+\item[Beamline:] the location where the experiment was performed.
+\item[Crystal:] information about the monochromator used in the experiment.
+\item[Edge Energy:] edge energy value defined by the data acquisition software.
+\item[Focusing:] comments about the focusing optics used in the experiment.
+\item[Harmonic:] undulator harmonic used in the experiment.
+\item[Ring Current:] current of the synchrotron's storage ring.
+\item[Ring Energy:] energy of the synchrotron's storage ring.
+\item[Source:] the type of x-ray source used in the experiment.
+\item[Timestamps:] start and end times of this scan.
+\item[Mu expressions:] math expressions for calculating experimental
+  spectra from the data columns.
+\end{description}
+
+
+\section{Definintion of the IXS Interchange Format}
+\label{sec:def_ixsif}
+
+This section of the {\xdi} specification formally describes the
+structure of {\xdi} files.
+
+\subsection{Requirements}
+\label{sec:def_requirements}
+
+The key words ``\textbf{must}'', ``\textbf{must not}'',
+``\textbf{required}'', ``\textbf{shall}'', ``\textbf{shall not}'',
+``\textbf{should}'', ``\textbf{should not}'',
+``\textbf{recommended}'', ``\textbf{may}'', and ``\textbf{optional}''
+in this document are to be interpreted as described in RFC
+2119.\footnote{\textit{Key words for use in RFCs to Indicate
+    Requirement Levels} \href{http://www.ietf.org/rfc/rfc2119.txt}
+  {\texttt{http://www.ietf.org/rfc/rfc2119.txt}}.}
+
+An {\xdi} implementation is not compliant if it fails to satisfy
+one or more of the \textbf{must} or \textbf{required} level
+requirements presented in this specification.
+
+\subsection{Notational Conventions}
+\label{sec:def_notation}
+
+All of the representations defined in this document are described both
+in prose and using an augmented Backus-Naur Form (BNF).  The syntax
+used in these grammars is defined in RFC
+5234\footnote{\textit{Augmented BNF for Syntax Specifications}
+  \href{http://tools.ietf.org/html/rfc5234}
+  {\texttt{http://tools.ietf.org/html/rfc5234}}}.
+% section 2.1 of the Internet
+% Engineering Task Force (IETF)
+% \href{http://www.ietf.org/rfc/rfc2616.txt}{Request for Comments (RFC)
+%   2616}, ``The Hypertext Transfer Protocol''. 
+Software developers who wish to implement support for {\xdi} files
+themselves will need to familiarize themselves with this notation to
+understand this specification.
+
+The basic rules used throughout this section to define parsing
+constructs are presented in the appendix in~\ref{apdx:gram_core} and
+\ref{apdx:gram_basic} as part of the complete grammar. All parsing
+rules that consist of a sequence of multi-character tokens
+\textbf{must} be delimited by white space unless the tokens of the
+sequence may be unambiguously identified.
+
+\subsection{Text Encoding}
+\label{sec:def_encoding}
+
+The header and data sections of an {\xdi} file are comprised of
+structured US-ASCII\footnote{ASCII table:
+  \href{http://en.wikipedia.org/wiki/ASCII}
+  {\texttt{http://en.wikipedia.org/wiki/ASCII}}} text.  Header field values
+that are ``free-form'' or ``text'' \textbf{may} contain UTF-8 encoded
+Unicode text, although Unicode support in applications that use {\xdi}
+files is OPTIONAL.  The US-ASCII coded character set is formally by
+ANSI X3.4-186.  The Universal Character Set (Unicode) is defined by
+ISO/IEC 10646.  The UTF-8 translation format is defined by IETF RFC
+3629.\mcomm{Unicode}{anchor:unicode}
+
+\subsection{Header Section}
+\label{sec:def_hdr}
+
+The header section of an {\xdi} file appears at the beginning of the
+file and is comprised of structured text.  Every line of the header
+\textbf{must} begin with a comment character and \textbf{must} end
+with an end-of-line sequence, both of which are defined below.  There
+are no multi-line headers.  Lines may be of any length.  Support for
+the Posix, Apple, or Microsoft end-of-line conventions is provided to
+increase cross-platform portability.
+
+\begin{verbatim}
+        COMM           = "#" | ";"
+        EOL            = CR  |  LF |  CRLF
+\end{verbatim}
+
+Header lines are subdivided into four \textbf{optional} subsections
+--- versioning information, header fields, user comments, and column
+labels --- with two separators that are \textbf{required} when when
+header sections are present.  These are organized in the following
+sequence:
+
+\begin{enumerate}
+\item The \textbf{optional} first line of the file is the version
+  line.
+\item This is followed by zero or more header fields, which can be
+  \textit{defined} headers or \textit{extension} headers.  These two
+  header types are explained in Sec.~\ref{sec:def_hdr_fields}.
+\item The header lines are separated from the user comments by the
+  \texttt{FIELD-END} rule, which is a comment character followed one
+  or more slashes (\texttt{/}) followed by an end-of-line.
+\item The comment section is for user-supplied, free-format text.
+  Each line begins with a comment character and ends with an
+  end-of-line.
+\item The comment section ends with the \texttt{HEADER-END} rule,
+  which is a line of dashes which starts with a comment character and
+  ends with an end-of-line.
+\item The last line before the data is a line of column labels which
+  identify the columns of data.  There should be as many labels as
+  there are columns.  The label line begins with a comment character
+  and ends with an end-of-line.
+\end{enumerate}
+
+All header sections are \textbf{optional}.  In a file that does not
+follow the {\xdi} specification but which contains an obvious header
+(obvious in the sense that lines begin with a comment character and
+end with an end-of-line), the obvious header lines \textbf{should} be
+interpreted as user comments.
+
+The \textbf{optional} status of the headers is to accommodate data
+files which contain obvious header lines but which are not compliant
+with this specification.  In that case, all header lines are
+interpretted as user comments.  Of course, in that case few of the
+advantages of the {\xdi} format are realized.
+
+The separator lines (\texttt{FIELD-END} and \texttt{HEADER-END}) serve
+specific, syntactic purposes in the {\xdi} grammer.  The line of
+dashes is a common visual cue denoting the end of the headers and
+beginning of the data.  The \texttt{FIELD-END} serves to separate and
+distinguish field lines from freely-formatted user comments, which may
+resemble a header fields or other gramatical constructs.  Similarly,
+the \texttt{HEADER-END} serves to distinguish column labels from user
+comments, which are otherwise grammatically identical elements of the
+data file.
+
+\begin{verbatim}
+        FIELD-END   = "#"  1*"/"  EOL
+        HEADER-END  = "#"  2*"-"  EOL
+\end{verbatim}
+
+
+\subsubsection{Version Information}
+\label{sec:def_hdr_version}
+
+The first line of the {\xdi} header contains the {\xdi} version to
+which the file conforms.  {\xdi} represents versions of the file
+format with a \texttt{<major>.<minor>} numbering scheme.  The
+\texttt{<minor>} version is incremented when changes are made to the
+format that do not affect compatibility with previous versions, as
+when new defined header fields are defined.  (A parser compliant with
+an earlier minor version would treat the newly defined header as an
+extension field.  Propagated to an output file as an extension field,
+this field would then be interpretted correctly by a more recent
+parser.)  The \texttt{<major>} version is incremented when other
+changes are made to the format, as when the definition of the contents
+of a defined header field is altered.
+
+A series of optional version entries, separated by white space, may
+follow the {\xdi} version.  These version entries exist to allow
+various programs to annotate the file as it proceeds through the
+collection and analysis process. Such annotation is \textbf{optional}
+although version information \textbf{must} be included in this
+sequence by software that create {\xdi} files containing extension
+fields (see section~\ref{sec:ixsif_fields_extension}).  The order of
+the optional version entries is undefined but \textbf{should} be
+preserved to accurately represent the sequence in which applications
+have manipulated the file.
+
+\begin{verbatim}
+        XDI-VERSION     = "XDI/"  1*DIGIT  ". " 1*DIGIT
+        APPLICATIONS    = VCHAR
+        VERSION         = "#"  XDI-VERSION  *APPLICATIONS  EOL
+\end{verbatim}
+
+Note that the {\xdi} major and minor version numbers \textbf{must} be
+treated as integers that \textbf{may} contain more than a single
+digit.  ``XDI/1.12'' is a higher (more recent) version than
+``XDI/1.2''.
+
+This specification does not impose a restriction on how applications
+identify and version themselves.  However, a single application
+\textbf{must} identify and version itself using a single text sequence
+without white space.  Some acceptible examples follow.  The first
+example shows an application which uses the same format as the XDI
+version rule; the second shows the names of the data acquisition and
+data processing programs are specified by name but without version
+numbers; the third shows some arbitrary method of versioning an
+application.
+
+\begin{verbatim}
+     # XDI/1.0 Datacollectatron/7.75
+
+     # XDI/1.0 XDAC Athena
+
+     # XDI/1.0 XAS!Collect-3000
+\end{verbatim}
+
+
+\subsubsection{Header Fields}
+\label{sec:def_hdr_fields}
+
+The lines immediately following the version line of the header contain
+the fields of the header.  These fields are arranged in a manner
+similar to the the header of an Internet electronic mail message,
+although {\xdi} fields may not span multiple lines.  Each field
+consists of a case-insensitive name, a separating colon, and an
+associated value.  When multiple occurrences of the same field are
+present the value of the last occurrence \textbf{must} be used as the
+value for the field.
+
+Although the values of some fields have a required structure, all
+values are assumed to be free-form text in the following rules.  Rules
+for each of the defined fields are defined in
+section~\ref{sec:ixsif_fields_standard} and the complete definition of
+the \texttt{FIELDS} rule may be found in
+section~\ref{apdx:gram_hdr_fields}.  Although some defined fields take
+more specificly specified contant, the generic definition of a field
+looks like this:
+
+\begin{verbatim}
+        PROPERWORD     = ALPHA  *(ALPHA  |  DIGIT  |  "_")
+        WORD           = *(ALPHA  |  DIGIT  |  "_")
+        FIELD-NAME     = PROPERWORD
+        FIELD-VALUE    = *WORD
+        FIELD-LINE     = "#"  FIELD-NAME  ": "  FIELD-VALUE EOL
+        FIELDS         = *FIELD-LINE  FIELD-END
+\end{verbatim}
+
+The header fields subsection is ended with a \texttt{FIELD-END} line.
+Note that because no fields are required to be present, this
+subsection may contain no lines. The dividing line \textbf{must} be
+present if any header lines are present but \textbf{may} be absent if
+no header lines are present.  Also note that because
+\texttt{FIELD-VALUE} matches zero or more \texttt{WORD} terminals, it
+is not required to contain any text.
+
+\subsubsection{User Comments}
+\label{sec:def_hdr_comments}
+
+Following the dividing line at the end of the header fields subsection
+is the area of the header that contains user comments. Please note
+that this area is reserved for comments supplied by the experimenters
+and \textbf{must not} be used by software as a place to store other
+information.  Refer to section~\ref{sec:ixsif_fields_extension} for
+information about using extension fields for this purpose.
+
+\begin{verbatim}
+        COMMENT-LINE   = "#"  *VCHAR  EOL
+        COMMENTS       = *COMMENT-LINE  HEADER-END
+\end{verbatim}
+
+As with the header fields, this section may contain no lines of
+commentary or lines that contain no comment text but \textbf{must} end
+with a dividing line.  When extracting the comment subsection from an
+{\xdi} file, software \textbf{should} remove a single leading space
+and any trailing white space from each comment line but \textbf{must
+  not} further alter the line's contents.
+
+Applications \textbf{must} preserve all comment fields.
+
+\subsubsection{Column Labels}
+\label{sec:def_hdr_labels}
+
+The final line of the {\xdi} header contains the labels for each
+column of data in the data section of the file, separated by
+white space.  There \textbf{must} be one label present for each column
+of data present in the data section.
+
+\begin{verbatim}
+        LABEL          = *WORD
+        LABELS         = "#"  1*LABEL  EOL
+\end{verbatim}
+
+The number of column labels \textbf{must} equal the number of columns
+of data in the data section.
+
+\subsection{Data Section}
+\label{sec:def_data}
+
+The data section of the file contains white space delimited columns of
+floating-point numbers.  If the abscissa is not explicitly identified
+using the \texttt{ABSCISSA} header, then the first column of this section
+\textbf{must} contain the abscissa.  The remaining columns
+\textbf{must} correspond to experimental values at that abscissa.  If
+the abscissa is not the photon energy, then the \texttt{ABSCISSA}
+\textbf{must} define a math expression for converting the abscissa
+column to energy.\mcomm{Floats}{anchor:floats}
+
+\begin{verbatim}
+        DATA-LINE      = *FLOAT EOL
+        DATA           = *DATA-LINE
+\end{verbatim}
+
+Note that blank lines in this section \textbf{must} be discarded; the
+number of columns \textbf{must} be the same for all lines that contain
+data; and any measurements of times present \textbf{must} be
+represented as floating point numbers.
+
+
+\section{XDI Fields}
+\label{sec:ixsif_fields}
+
+\subsection{Defined Fields}
+\label{sec:ixsif_fields_standard}
+
+When present, the following header fields \textbf{must} comply with
+their associated parsing rules.  Any fields which fail to do so
+\textbf{must} be ignored by preprocessing and analysis software.  The
+text in brackets to the right of the token provides a quick overview
+of the expected format, and any text following the line of dots is an
+example of a valid value.  The grammer rule for the header follows.
+
+\begin{HeaderField}{Abscissa}{<math expression>}{\$1}
+This field identifies the column containing the abscissa of the data
+contained in the file.  The math expression can be used to specify how
+to convert the specified column to energy.  For instance, if data are
+recorded as a function of encoder value, then the math expression
+might be something like:
+\begin{verbatim}
+     12398.61 / (2 * dspacing) / sin( $1 / (57.29577951 * stpdeg) )
+\end{verbatim}
+where 12398.61 is $\hbar c$ in eV$\cdot${\AA} units, 57.29577951 is
+the constant for converting between radians and degrees, and
+\texttt{dspacing} and \texttt{stpdeg} would be replaced by the
+d-spacing and number of steps per degree for that
+monochromator.\mcomm{\texttt{MATH} rule}{anchor:math}
+\begin{verbatim}
+        ABSCISSA       = "#"  "Abscissa"  ": "  MATH EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Beamline}{<text>}{APS 10ID}
+The location where the experiment was performed.
+\begin{verbatim}
+        BEAMLINE       = "#"  "Beamline"  ": "  *WORD EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Collimation}{<text>}{fixed-angle, Rh-coated torroid}
+A brief description of the collimating mirrors used at the beamline.
+\begin{verbatim}
+        COLLIMATION    = "#" "Collimation"  ": "  *WORD  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Crystal}{<material> <reflection>}{Si 111}
+  Information about the crystals of the monochromator used in the
+  experiment.\mcomm{Monochro-\\mators}{anchor:mono}
+\begin{verbatim}
+        MATERIAL       = (  "Si" / "Ge" / "Diamond" / "YB66" / "InSb" 
+                          / "Beryl" / "Multilayer")
+        REFLECTION     = 3DIGIT
+        CRYSTAL        = "#" "Crystal"  ": " MATERIAL REFLECTION EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{D\_spacing}{<float>}{3.13555}
+The interplaner spacing of the monochromator's crystals, in {\AA}ngstroms.
+\begin{verbatim}
+        DSPACING       = "#"  "D_spacing"  ": "  FLOAT  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Edge\_energy}{<float>}{5465}
+  The energy reference of the scan -- often the zero-valent edge
+  energy of the absoring atom -- as defined in the data acquisition
+  software, in electron volts.\mcomm{Energy units}{anchor:units}
+\begin{verbatim}
+        EDGEENERGY     = "#"  "Edge_energy"  ": "  FLOAT  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{End\_time}{<timestamp>}{2003-04-01T13:01:02}
+  The date and time that this scan ended, using the timestamp format
+  specified in ISO 8601\footnote{ISO 8601, \textit{Data elements and
+      interchange formats –-- Information interchange --–
+      Representation of dates and times} is explained succintly
+    \href{http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/date_and_time_format.htm}{here}}.
+  The example above represents one minute and two seconds after one
+  o'clock in the afternoon of April 1$^{\mathrm{st}}$,
+  2003.\mcomm{Time zones}{anchor:timezones}
+\begin{verbatim}
+        DATETIME  = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
+        ENDTIME   = "#"  "End-time"  ": "  DATETIME  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Focusing}{<text>}{sagitally bent second crystal}
+A brief description of the focusing optics used in the experiment.
+\begin{verbatim}
+        FOCUSING       = "#"  "Focusing"  ": "  *WORD  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Harmonic\_rejection}{<text>}{50\% detuning of 2nd xtal}
+A brief description of the harmonic rejection strategy used at the beamline.
+\begin{verbatim}
+        HARMONIC-REJECTION  = "#" "Harmonic_rejection"  ": "  *VCHAR  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Mu\_fluorescence}{<math expression>}{\$4/\$2}
+  The math expression for calculating the $\mu(E)$ of fluorescence
+  from this file's data section.\mcomm{\texttt{MATH} rule}{anchor:math}
+\begin{verbatim}
+        MUFLUOR        = "#"  "Mu_fluorescence"  ": "  MATH  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Mu\_reference}{<math expression>}{ln(\$3/\$5)}
+  The math expression for calculating the $\mu(E)$ of the reference
+  channel from this file's data section.
+\begin{verbatim}
+        MUREF          = "#"  "Mu_reference"  ": "  MATH  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Mu\_transmission}{<math expression>}{ln(\$2/\$3)}
+  The math expression for calculating the $\mu(E)$ of transmission
+  from this file's data section.
+\begin{verbatim}
+        MUTRANS        = "#"  "Mu_transmission"  ": "  MATH  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Ring\_current}{<float>}{101.2}
+The current of the synchrotron's storage ring, in milliamperes.
+\mcomm{Ring current}{anchor:current}
+\begin{verbatim}
+        RINGCURRENT    = "#"  "Ring_current"  ": "  FLOAT  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Ring\_energy}{<float>}{7.01}
+  The energy of the synchrotron's storage ring, in giga-electron volts (GeV).
+\begin{verbatim}
+        RINGENERGY     = "#"  "Ring_energy"  ": "  FLOAT  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Start\_time}{<timestamp>}{2003-04-01T13:01:02}
+  The date and time that this scan started, using the timestamp format
+  specified in ISO 8601\footnote{ISO 8601, \textit{Data elements and
+      interchange formats –-- Information interchange --–
+      Representation of dates and times} is explained succintly
+    \href{http://www.iso.org/iso/support/faqs/faqs_widely_used_standards/widely_used_standards_other/date_and_time_format.htm}{here}}.
+  The example above represents one minute and two seconds after one
+  o'clock in the afternoon of April 1$^{\mathrm{st}}$, 2003.\mcomm{Time zones}{anchor:timezones}
+\begin{verbatim}
+        DATETIME  = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
+        STARTTIME = "#"  "End-time"  ": "  DATETIME  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\begin{HeaderField}{Source}{<text>}{APS undulator A}
+  The type of x-ray source used in the experiment.
+\begin{verbatim}
+        SOURCE         = "#"  "Source"  ": "  *WORD  EOL
+\end{verbatim}
+\end{HeaderField}
+
+% \begin{HeaderField}{Step\_offset}{<float>}{0.0}
+% The photon energy is calculated from the abscissa using the the value of this
+% field in the equation $E(a) = a*{\rm scale} + {\rm offset}$.  If the
+% \texttt{Step-scale} field is not present, the default value of $1$ is used.
+% \begin{verbatim}
+%         STEPOFFSET     = "#"  "Step_offset"  ": "  FLOAT  EOL
+% \end{verbatim}
+% \end{HeaderField}
+
+% \begin{HeaderField}{Step\_scale}{<float>}{1.0}
+% The photon energy is calculated from the abscissa using the the value of this
+% field in the equation $E(a) = a*{\rm scale} + {\rm offset}$.  If the
+% \texttt{Step-offset} field is not present, the default value of $0$ is used.
+% \begin{verbatim}
+%         STEPSCALE      = "#"  "Step_scale"  ": "  FLOAT  EOL
+% \end{verbatim}
+% \end{HeaderField}
+
+% \begin{OpenIssue}
+%   The step-* fields are probably not the right way to go.  They are
+%   intended to help translate from encoder reading to energy, however a
+%   different formula is required to translate from angle to energy.
+%   Much better would be to define a field which takes an
+%   \texttt{MATH} for translating a column to energy.
+% \end{OpenIssue}
+
+
+\begin{HeaderField}{Undulator\_harmonic}{<int>}{3}
+The undulator harmonic used in the experiment.\mcomm{Sources}{anchor:sources}
+\begin{verbatim}
+        HARMONIC-VALUE = 1*2DIGIT
+        HARMONIC       = "#"  "Undulator_harmonic"  ": "  HARMONIC-VALUE  EOL
+\end{verbatim}
+\end{HeaderField}
+
+\subsection{Extension Fields}
+\label{sec:ixsif_fields_extension}
+
+Extension fields are fields present in the header of an {\xdi} file
+that are not defined in that file's version of {\xdi}.  Such fields
+are interpreted as having values of free-form text.  Any field not
+defined in section~\ref{sec:ixsif_fields_standard} \textbf{must} be
+considered an extension field, providing backwards compatibility
+between different minor versions of this specification.
+
+\begin{verbatim}
+        EXT-FIELD-NAME = PROPERWORD  *("-"  PROPERWORD)
+        EXT-FIELD      = "#"  EXT-FIELD-NAME  ": "  *VCHAR EOL
+\end{verbatim}
+
+Data acquisition systems and data analysis packages may embed
+additional information in an {\xdi} file by adding extension fields to
+the header.  Extension fields created by applications \textbf{should}
+begin with a form of the application name used in the version line,
+followed by a hyphen (in appendix~\ref{apdx:example} examples such as
+\texttt{MX-SSRS} are shown in the example data file, where MX is the
+name of the data acquisition software at that beamline).  This
+requirement prevents field name collisions between different
+applications and between applications and future versions of this
+specification.
+
+Applications that read {\xdi} files \textbf{may} attempt to parse the
+values of extension fields to extract the additional information about
+the scan.  They \textbf{should} propagate these fields into output
+files they create, but \textbf{must} propagate the associated version
+information if they do so.
+
+When multiple occurrences of the same field are present the value of
+the all occurrences \textbf{must} be preserved.  In this way,
+extension fields are interpreted differently from defined headers.
+
+\subsection{Grammar for the Header Fields}
+\label{sec:ixsif_fields_grammar}
+
+Having defined the rules of the defined header fields, it is now
+possible to create a complete version of the \texttt{FIELDS} rule that
+was provisionally defined in section~\ref{sec:def_hdr_fields}.  The
+complete {\xdi} grammer is found in appendix~\ref{apdx:gram}.
+Section~\ref{apdx:gram_hdr_fields} shows the complete definition of
+the header fields.
+
+\section{Future prospects}
+\label{sec:future}
+
+There are several limitations to the current grammer.  These are
+candidates for future development and are presented in no special
+order.
+
+\begin{description}
+\item[Sample:] Headers for describing the sample and its preparation
+  are not provided in the version.
+\item[White space:] Use of white space is ambiguous in most rules.
+\item[Abscissa:] The \texttt{MATH} rule should include a way of
+  specifying a function converting wavelength to energy, something
+  like \texttt{k2e(\$1)}.  Also need to recognize \texttt{sin()}, as
+  shown in the explanation of the \texttt{ABSCISS}
+  field.\label{anchor:math}
+\item[Math rule:] The math expression language for providing hints for
+  converting columns in useful spectra needs a more complete
+  definition.  This should be flexible enough to provide hints for
+  doing dead-time corrections.
+\item[Energy units:] Other energy units -- eV, keV, {\AA}ngstroms,
+  degrees, encoder counts.  Do we need a defined header that defines
+  abscissa units?\label{anchor:units}
+\item[Other spectroscopies:] {\xdi} would be quite satisfactory for
+  single scan files of several other types of spectroscopy, including
+  XES, NIXS, DAFS, and ReffleXAFS.  Supporting these types would
+  require definition of new defined headers.  Headers similar to
+  \texttt{Mu\_tranmission} (i.e.\ headers which take \texttt{MATH}
+  rules) could simultaneously identify the spectroscopy type and
+  provide the appropriate hint for constructing a spectrum from the
+  columns.
+\item[Theory:] {\xdi} would be suitable for single-spectrum output
+  files from \textsc{feff} and other theory programs.  Metadata for
+  these theories is probably best supported by extension fields and
+  identifying the theory code can be done in the version line.
+  However, a defined header identifying the theory program and hinting
+  fields taking \texttt{MATH} rules might be appropriate.
+\item[Monochromators:] Should crystal materials be explicitly listed?
+  Should it be free-form instead?  What about asymmetric crystals?
+  4-bounce monos?  Polychromators?\label{anchor:mono}
+\item[Internationalization:] The current draft of {\xdi} is
+  English-centric because the initial developers are native English
+  speakers.  Internationalization could be implemented in the grammer.
+  That is, a line like \texttt{\# Beamline:\ APS 10ID} could be
+  localized in Spanish as \texttt{\# Linea:\ APS 10ID}.
+  Internationalization of defined headers would require a complete
+  (and competent) translation and definition of defined headers using
+  alternation, for example \texttt{BEAMLINE\_TAG = ("Beamline" / "Linea")}.
+
+  Note that neither comment lines nor column labels are defined in a
+  localized way in the current grammer (i.e.\ they can be in any
+  language).  Also note that an octet \textit{is} defined in the
+  grammer, so extending to western languages should be trivial.
+\item[Unicode:] The current grammer does not explicitly consider
+  unicode.  This is an essential future development so that comments,
+  column labels, and extension fields are handled correctly anywhere
+  in the world.  Internationalization of defined headers will require
+  proper handling of unicode.\label{anchor:unicode}
+\item[Time zones:] Do we need a header defining time zone for complete
+  interpretation of timestamps? Or is the source header sufficient for
+  determining location of the measurement?\label{anchor:timezones}
+\item[Floating point numbers:] Does the type for the data need to be
+  defined, i.e.\ single or double precision or
+  otherwise?\label{anchor:floats}
+\item[Sources:] The current draft contains defined headers specific to
+  undulator sources.  Appropriate headers need to be specified for
+  other sources, e.g.\ gap width of a variable-gap wiggler.  Headers
+  for unconventional sources (i.e.\ plasma source, laboratory source)
+  should be defined.\label{anchor:sources}
+\item[Ring current:] In non-top-off mode, the ring current will change
+  throughout the scan.  What value should be recorded in the file?
+  The current at the beginning of the scan?  At the end?  Something
+  else (say, the average throughout the scan)?\label{anchor:current}
+\item[Case sensitivity:] RFC 5234 specifies case insensitivity for all
+  rules.  This specification uses capitalized words for defined
+  headers.  This is permissable by RFC 5234, so long as they are
+  specified as explicit strings.  Should defined fields be
+  case-insentive?
+\item[Target programming languages:] A minimal set of languages for
+  which {\xdi} support \textbf{should} be provided to assist in its
+  wide-spread adoption includes: C, C++, Fortran, Java, Python, Perl,
+  LabView, IDL.  But all language are welcome.
+\end{description}
+
+\newpage
+\appendix
+
+\section{Example XDI File}
+\label{apdx:example}
+
+Here is an example of a file conforming to this specification and
+providing substantial metadata.  This was edited by hand from a real
+data file measured at beamline ID10 at the APS in 2005.  The lines
+beginning \texttt{MX-} are extension fields denoting parameters of the
+MX data acquisition system in use at the beamline.
+
+\begin{center}
+\begin{Boxedminipage}[h]{0.7\linewidth}
+\begin{verbatim}
+   # XDI/1.0 MX/2.0
+   # Beamline: APS 10ID
+   # Source: undulator a
+   # Ring_energy: 7.00
+   # Undulator_harmonic: 3
+   # Crystal: Si 111
+   # Collimation: none
+   # Focusing: none
+   # Harmonic_rejection: flat Rh-coated mirror
+   # Start_time 2005-03-08T20:08:57
+   # Edge_energy: 7112.00
+   # Abscissa: $1
+   # Mu_transmission: ln($2/$3)
+   # Mu_fluorescence: $4/$2
+   # Mu_reference: ln($3/$5)
+   # MX-Num-regions: 1
+   # MX-SRB: 6900
+   # MX-SRSS: 0.5
+   # MX-SPP: 0.1
+   # MX-Settling-time: 0
+   # MX-Offsets: 11408.00 11328.00 13200.00 10774.00
+   # MX-Gains: 8.00 7.00 7.00 9.00
+   #///
+   # Fe K-edge, Lepidocrocite powder on kapton tape, RT
+   # 4 layers of tape
+   # exafs, 20 invang
+   #---
+   # energy     mcs3     mcs4     mcs6     mcs5
+    6899.9609  48120 19430 2250 54540
+    6900.1421  48390 19540 2260 54860
+    6900.5449  48520 19610 2250 55110
+    6900.9678  48930 19780 2280 55650
+    6901.3806  48460 19590 2250 55110
+        (....etc....)
+\end{verbatim}
+\end{Boxedminipage}
+\end{center}
+
+
+\newpage
+
+\section{Grammar of the XDI}
+\label{apdx:gram}
+
+\subsection{Start rule}
+\label{sec:startrule}
+
+\begin{verbatim}
+     XDI            = [VERSION] [FIELDS] [COMMENTS] [LABELS] 1DATA
+\end{verbatim}
+
+\subsection{Core rules}
+\label{apdx:gram_core}
+\begin{verbatim}
+     OCTET          = %x00-FF             ; 8 bits of data
+     UPALPHA        = %x41-5A             ; upper case letters A - Z
+     LOALPHA        = %x61-7A             ; lower case letters a - z
+     CHAR           = %x01-7F             ; any 7-bit US-ASCII character, excluding NUL
+     VCHAR          = %x21-7E             ; visible (printing) characters, 7-bit (US-ASCII)
+     ALPHA          = UPALPHA / LOALPHA   ; US-ASCII letters
+     DIGIT          = %x30-39             ; digits 0 - 9
+     CTL            = %x00-1F / %x7F      ; control characters (octets 0 - 31) and DEL (127)
+     CR             = %x0D                ; carriage return
+     LF             = %x0A                ; line feed
+     CRLF           = CR LF               ; MS newline = carriage return line feed
+     SP             = %x20                ; space
+     HT             = %x09                ; horizontal tab
+     WS             = SP  /  HT           ; white space
+     EOL            = CR  /  LF  /  CRLF  ; cross-platform end-of-line 
+\end{verbatim}
+
+\subsection{Basic Constructs}
+\label{apdx:gram_basic}
+\marginpar{Is \texttt{FLOAT}\\specified\\correctly?}
+\begin{verbatim}
+     SIGN           = "+"  /  "-"
+     EXPONENT       = ("e"  /  "E"  /  "d"  /  "D")  [SIGN]  1*DIGIT
+     NUMBER         = 1*DIGIT  ["."  *DIGIT]  [EXPONENT]
+     INF            = ("i"  /  "I")  ("n"  /  "N")  ("f"  /  "F")
+     NAN            = ("n"  /  "N")  ("a"  /  "A")  ("n"  /  "N")
+     FLOAT          = [SIGN]  (NUMBER  /  INF  / NAN )
+
+     TEXT           = %09 / %x20-FF        ; any OCTET except CTLs, including WS
+     COMM           = "#" / ";"
+     PROPERWORD     = ALPHA  *(ALPHA  /  DIGIT  /  "_")
+     WORD           = *(ALPHA  /  DIGIT  /  "_")
+     MATH           = ["ln"] *("-"  /  "+"  /  "*"  /  "$"  /  "/"  /  "("  /  ")"  DIGIT)
+
+     FIELD-END      = "#"  1*"/"  EOL
+     HEADER-END     = "#"  2*"-"  EOL
+\end{verbatim}
+\mcomm{\texttt{MATH} is\\not right}{anchor:math}
+
+\subsection{Version Information}
+\label{apdx:gram_version}
+\begin{verbatim}
+     XDI-VERSION    = "XDI/"  1*DIGIT  ". " 1*DIGIT
+     APPLICATIONS   = VCHAR
+     VERSION        = "#"  XDI-VERSION  *APPLICATIONS  EOL
+\end{verbatim}
+
+\subsection{Header Fields}
+\label{apdx:gram_hdr_fields}
+
+\subsubsection{Defined Fields}
+\label{apdx:gram_hdr_defined}
+\begin{verbatim}
+     REFLECTION     = 3DIGIT
+     ELEMENT        = ("Si" / "Ge" / "Diamond" / "YB66" / "InSb" / "Beryl" / "Multilayer")
+     DATETIME       = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
+     HARMONIC-VALUE = 1*2DIGIT
+
+     ABSCISSA           = "#"  "Abscissa"           ": "  MATH
+     BEAMLINE           = "#"  "Beamline"           ": "  *WORD
+     COLLIMATION        = "#"  "Collimation"        ": "  *WORD
+     CRYSTAL            = "#"  "Crystal"            ": "  MATERIAL  REFLECTION
+     DSPACING           = "#"  "D_spacing"          ": "  FLOAT
+     EDGEENERGY         = "#"  "Edge_energy"        ": "  FLOAT
+     ENDTIME            = "#"  "End_time"           ": "  DATETIME
+     FOCUSING           = "#"  "Focusing"           ": "  *WORD
+     HARMONIC-REJECTION = "#"  "Harmonic_rejection" ": "  *VCHAR
+     MUFLUOR            = "#"  "Mu_fluorescence"    ": "  MATH
+     MUREF              = "#"  "Mu_reference"       ": "  MATH
+     MUTRANS            = "#"  "Mu_transmission"    ": "  MATH
+     RINGCURRENT        = "#"  "Ring_current"       ": "  FLOAT
+     RINGENERGY         = "#"  "Ring_energy"        ": "  FLOAT
+     STARTTIME          = "#"  "Start_time"         ": "  DATETIME
+     SOURCE             = "#"  "Source"             ": "  *WORD
+     UNDULATOR-HARMONIC = "#"  "Undulator-harmonic" ": "  HARMONIC-VALUE
+
+     DEFINEDFIELDS      = *(  ABSCISSA     / BEAMLINE    / CRYSTAL
+                            / COLLIMATION  / DSPACING    / EDGEENERGY
+                            / ENDTIME      / FOCUSING    / HARMONIC_REJECTION
+                            / MUFLUOR      / MUREF       / MUTRANS
+                            / RINGCURRENT  / RINGENERGY  / STARTTIME 
+                            / SOURCE       / UNDULATOR_HARMONIC
+                            / EXT_FIELD    / FIELD_LINE
+                           ) FIELD-END EOL
+\end{verbatim}
+
+\subsubsection{Extension Fields}
+\label{apdx:gram_hdr_extension}
+\begin{verbatim}
+     FIELD-LINE     = DEFINEDFIELDS
+     EXT-FIELD-NAME = WORD  *("-"  WORD)
+
+     FIELD-LINE     = "#"  FIELD-NAME      ": "  *WORD  EOL
+     EXT-FIELD      = "#"  EXT-FIELD-NAME  ": "  *VCHAR  EOL
+\end{verbatim}
+
+\subsubsection{All Fields}
+\label{apdx:gram_fields}
+\begin{verbatim}
+     FIELDS         =  (FIELD-LINE / EXT-FIELD)(s) FIELD_END
+\end{verbatim}
+
+
+\subsection{User Comments}
+\label{apdx:gram_comments}
+\begin{verbatim}
+     COMMENT-LINE   = "#"  *VCHAR  EOL
+     COMMENTS       = *COMMENT-LINE  HEADER-END
+\end{verbatim}
+
+\subsection{Column Labels}
+\label{apdx:gram_labels}
+\begin{verbatim}
+     LABEL          = PROPERWORD
+     LABELS         = "#" 1*LABEL  EOL
+\end{verbatim}
+
+\subsection{Data Section}
+\label{apdx:gram_data}
+\begin{verbatim}
+     DATA-LINE      = *FLOAT EOL
+     DATA           = *DATA-LINE
+\end{verbatim}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% reftex-mode: t
+%%% TeX-PDF-mode: t
+%%% TeX-master: t
+%%% End:
