@@ -289,8 +289,8 @@ an exported XDI file:
 =head2 Structural elements
 
 The following attributes defines XDI-complient character sequences for
-use in exported files.  Compliance means that the exported file can be
-imported as an XDI-compliant file.
+use in exported files.  A compliantly exported file can be imported as
+an XDI-compliant file.
 
 =over 4
 
@@ -321,7 +321,106 @@ in the data lines.  The default is a single tab.
 
 This grammer is expressed in BNF form as:
 
-  blah blah
+   ;; augmented BNF grammar for the XAS Data Interchange format
+   ;; see RFC 5234, http://tools.ietf.org/html/rfc5234, for grammar syntax
+
+   ;; start rule
+   XDI            = [VERSION] [FIELDS] [COMMENTS] [LABELS] 1DATA
+
+   ;; core rules
+   OCTET          = %x00-FF             ; 8 bits of data
+   UPALPHA        = %x41-5A             ; upper case letters A - Z
+   LOALPHA        = %x61-7A             ; lower case letters a - z
+   CHAR           = %x01-7F             ; any 7-bit US-ASCII character, excluding NUL
+   VCHAR          = %x21-7E             ; visible (printing) characters, 7-bit (US-ASCII)
+   ALPHA          = UPALPHA / LOALPHA   ; US-ASCII letters
+   DIGIT          = %x30-39             ; digits 0 - 9
+   CTL            = %x00-1F / %x7F      ; control characters (octets 0 - 31) and DEL (127)
+   CR             = %x0D                ; carriage return
+   LF             = %x0A                ; line feed
+   CRLF           = CR LF               ; MS newline = carriage return line feed
+   SP             = %x20                ; space
+   HT             = %x09                ; horizontal tab
+   WS             = SP  /  HT           ; white space
+   EOL            = CR  /  LF  /  CRLF  ; cross-platform end-of-line 
+
+   ;; Basic Constructs
+   SIGN           = "+"  /  "-"
+   EXPONENT       = ("e"  /  "E"  /  "d"  /  "D")  [SIGN]  1*DIGIT
+   NUMBER         = 1*DIGIT  ["."  *DIGIT]  [EXPONENT]
+   INF            = ("i"  /  "I")  ("n"  /  "N")  ("f"  /  "F")
+   NAN            = ("n"  /  "N")  ("a"  /  "A")  ("n"  /  "N")
+   FLOAT          = [SIGN]  (NUMBER  /  INF  / NAN )
+
+   TEXT           = %09 / %x20-FF        ; any OCTET except CTLs, including WS
+   COMM           = "#" / ";"
+   PROPERWORD     = ALPHA  *(ALPHA  /  DIGIT  /  "_")
+   WORD           = *(ALPHA  /  DIGIT  /  "_")
+   MATH           = ["ln"] *("-"  /  "+"  /  "*"  /  "$"  /  "/"  /  "("  /  ")"  DIGIT)
+
+   FIELD-END      = "#"  1*"/"  EOL
+   HEADER-END     = "#"  2*"-"  EOL
+
+   ;; Version Information
+   XDI-VERSION    = "XDI/"  1*DIGIT  ". " 1*DIGIT
+   APPLICATIONS   = VCHAR
+   VERSION        = "#"  XDI-VERSION  *APPLICATIONS  EOL
+
+   ;; Defined Fields
+   REFLECTION     = 3DIGIT
+   ELEMENT        = ("Si" / "Ge" / "Diamond" / "YB66" / "InSb" / "Beryl" / "Multilayer")
+   DATETIME       = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
+   HARMONIC-VALUE = 1*2DIGIT
+
+   ABSCISSA           = "#"  "Abscissa"           ": "  MATH
+   BEAMLINE           = "#"  "Beamline"           ": "  *WORD
+   COLLIMATION        = "#"  "Collimation"        ": "  *WORD
+   CRYSTAL            = "#"  "Crystal"            ": "  MATERIAL  REFLECTION
+   DSPACING           = "#"  "D_spacing"          ": "  FLOAT
+   EDGEENERGY         = "#"  "Edge_energy"        ": "  FLOAT
+   ENDTIME            = "#"  "End_time"           ": "  DATETIME
+   FOCUSING           = "#"  "Focusing"           ": "  *WORD
+   HARMONIC-REJECTION = "#"  "Harmonic_rejection" ": "  *VCHAR
+   MUFLUOR            = "#"  "Mu_fluorescence"    ": "  MATH
+   MUREF              = "#"  "Mu_reference"       ": "  MATH
+   MUTRANS            = "#"  "Mu_transmission"    ": "  MATH
+   RINGCURRENT        = "#"  "Ring_current"       ": "  FLOAT
+   RINGENERGY         = "#"  "Ring_energy"        ": "  FLOAT
+   STARTTIME          = "#"  "Start_time"         ": "  DATETIME
+   SOURCE             = "#"  "Source"             ": "  *WORD
+   UNDULATOR-HARMONIC = "#"  "Undulator-harmonic" ": "  HARMONIC-VALUE
+
+   DEFINEDFIELDS      = *( (  ABSCISSA     / BEAMLINE    / CRYSTAL
+                             / COLLIMATION  / DSPACING    / EDGEENERGY
+                             / ENDTIME      / FOCUSING    / HARMONIC_REJECTION
+                             / MUFLUOR      / MUREF       / MUTRANS
+                             / RINGCURRENT  / RINGENERGY  / STARTTIME 
+                             / SOURCE       / UNDULATOR_HARMONIC
+                             / EXT_FIELD    / FIELD_LINE
+                            ) EOL ) FIELD-END
+
+   ;; Extension Fields
+   FIELD-LINE     = DEFINEDFIELDS
+   EXT-FIELD-NAME = WORD  *("-"  WORD)
+
+   FIELD-LINE     = "#"  FIELD-NAME      ": "  *WORD   EOL
+   EXT-FIELD      = "#"  EXT-FIELD-NAME  ": "  *VCHAR  EOL
+
+   ;; All Fields
+   FIELDS         =  (FIELD-LINE / EXT-FIELD)(s) FIELD_END
+
+
+   ;; User Comments
+   COMMENT-LINE   = "#"  *VCHAR  EOL
+   COMMENTS       = *COMMENT-LINE  HEADER-END
+
+   ;; Column Labels
+   LABEL          = PROPERWORD
+   LABELS         = "#" 1*LABEL  EOL
+
+   ;; Data Section
+   DATA-LINE      = *FLOAT EOL
+   DATA           = *DATA-LINE
 
 =head1 BUGS AND LIMITATIONS
 
