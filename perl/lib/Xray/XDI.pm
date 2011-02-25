@@ -3,19 +3,19 @@ package Xray::XDI;
 use autodie qw(open close);
 use Carp;
 use version;
-$VERSION  = version->new("1.0");
 
 use Moose;
 use Moose::Util qw(apply_all_roles);
 use MooseX::AttributeHelpers;
 use Parse::RecDescent;
 
-use vars qw($object);
+use vars qw($object $VERSION);
+$VERSION  = version->new("1.0");
 $object = q{};
 
 has 'file'	   => (is => 'rw', isa => 'Str', default => q{});
 has 'out'	   => (is => 'rw', isa => 'Str', default => q{});
-has 'xdi_version'  => (is => 'rw', isa => 'Str', default => $VERSION,
+has 'xdi_version'  => (is => 'rw', isa => 'Str', default => sub{sprintf "%s", $VERSION},
 		       trigger => sub{my ($self, $new) = @_; $self->get_grammar });
 has 'grammar'      => (is => 'rw', isa => 'Str', default => q{});
 
