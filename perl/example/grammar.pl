@@ -1,13 +1,11 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I ../lib/
 
 use Xray::XDI;
 #$::RD_HINT = 1; # Parse::RecDescent hints
 #$::RD_TRACE = 1; # Parse::RecDescent trace
 my $xdi = Xray::XDI->new();
-#print $xdi->grammer;
 $xdi -> file('../t/xdi.aps10id');
 #$xdi -> file('../t//mo_foil.003');
-$xdi -> parse;
 
 print "xdi_version = ",  $xdi->xdi_version,        $/;
 print "applications = ", $xdi->applications,       $/;
@@ -17,9 +15,9 @@ print "collimation = ",	 $xdi->collimation,        $/;
 print "crystal = ",	 $xdi->crystal,            $/;
 print "edgeenergy = ",	 $xdi->edge_energy,        $/;
 print "focusing = ",	 $xdi->focusing,           $/;
+print "mutrans = ",	 $xdi->mu_transmission,    $/;
 print "mufluor = ",	 $xdi->mu_fluorescence,    $/;
 print "muref = ",	 $xdi->mu_reference,       $/;
-print "mutrans = ",	 $xdi->mu_transmission,    $/;
 print "rejection = ",	 $xdi->harmonic_rejection, $/;
 print "ringenergy = ",	 $xdi->ring_energy,        $/;
 print "starttime = ",	 $xdi->start_time,         $/;

@@ -201,9 +201,12 @@ Sec.~\ref{sec:ixsif_fields_standard}.
 
 \begin{description}
 \item[Beamline:] the location where the experiment was performed.
-\item[Crystal:] information about the monochromator used in the experiment.
-\item[Edge Energy:] edge energy value defined by the data acquisition software.
-\item[Focusing:] comments about the focusing optics used in the experiment.
+\item[Crystal:] information about the monochromator used in the
+  experiment.
+\item[Edge Energy:] edge energy value defined by the data acquisition
+  software.
+\item[Focusing:] comments about the focusing optics used in the
+  experiment.
 \item[Harmonic:] undulator harmonic used in the experiment.
 \item[Ring Current:] current of the synchrotron's storage ring.
 \item[Ring Energy:] energy of the synchrotron's storage ring.
@@ -287,7 +290,7 @@ increase cross-platform portability.
 
 \begin{verbatim}
         COMM           = "#" | ";"
-        EOL            = CR  |  LF |  CRLF
+        EOL            = CR  | LF |  CRLF
 \end{verbatim}
 
 Header lines are subdivided into four \textbf{optional} subsections
@@ -330,7 +333,7 @@ interpretted as user comments.  Of course, in that case few of the
 advantages of the {\xdi} format are realized.
 
 The separator lines (\texttt{FIELD-END} and \texttt{HEADER-END}) serve
-specific, syntactic purposes in the {\xdi} grammer.  The line of
+specific, syntactic purposes in the {\xdi} grammar.  The line of
 dashes is a common visual cue denoting the end of the headers and
 beginning of the data.  The \texttt{FIELD-END} serves to separate and
 distinguish field lines from freely-formatted user comments, which may
@@ -514,7 +517,7 @@ their associated parsing rules.  Any fields which fail to do so
 \textbf{must} be ignored by preprocessing and analysis software.  The
 text in brackets to the right of the token provides a quick overview
 of the expected format, and any text following the line of dots is an
-example of a valid value.  The grammer rule for the header follows.
+example of a valid value.  The grammar rule for the header follows.
 
 \begin{HeaderField}{Abscissa}{<math expression>}{\$1}
 This field identifies the column containing the abscissa of the data
@@ -740,14 +743,14 @@ extension fields are interpreted differently from defined headers.
 Having defined the rules of the defined header fields, it is now
 possible to create a complete version of the \texttt{FIELDS} rule that
 was provisionally defined in section~\ref{sec:def_hdr_fields}.  The
-complete {\xdi} grammer is found in appendix~\ref{apdx:gram}.
+complete {\xdi} grammar is found in appendix~\ref{apdx:gram}.
 Section~\ref{apdx:gram_hdr_fields} shows the complete definition of
 the header fields.
 
 \section{Future prospects}
 \label{sec:future}
 
-There are several limitations to the current grammer.  These are
+There are several limitations to the current grammar.  These are
 candidates for future development and are presented in no special
 order.
 
@@ -786,7 +789,7 @@ order.
   4-bounce monos?  Polychromators?\label{anchor:mono}
 \item[Internationalization:] The current draft of {\xdi} is
   English-centric because the initial developers are native English
-  speakers.  Internationalization could be implemented in the grammer.
+  speakers.  Internationalization could be implemented in the grammar.
   That is, a line like \texttt{\# Beamline:\ APS 10ID} could be
   localized in Spanish as \texttt{\# Linea:\ APS 10ID}.
   Internationalization of defined headers would require a complete
@@ -794,10 +797,10 @@ order.
   alternation, for example \texttt{BEAMLINE\_TAG = ("Beamline" / "Linea")}.
 
   Note that neither comment lines nor column labels are defined in a
-  localized way in the current grammer (i.e.\ they can be in any
+  localized way in the current grammar (i.e.\ they can be in any
   language).  Also note that an octet \textit{is} defined in the
-  grammer, so extending to western languages should be trivial.
-\item[Unicode:] The current grammer does not explicitly consider
+  grammar, so extending to western languages should be trivial.
+\item[Unicode:] The current grammar does not explicitly consider
   unicode.  This is an essential future development so that comments,
   column labels, and extension fields are handled correctly anywhere
   in the world.  Internationalization of defined headers will require

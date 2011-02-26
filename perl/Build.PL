@@ -11,8 +11,10 @@ my $build = Module::Build
 	dist_author        => 'Bruce Ravel <bravel AT bnl DOT gov>',
 	dist_abstract      => "perl implementation of the XDI specification",
 	requires           => {
-			       'Moose'             => 1.21,
-			       'Parse::RecDescent' => 1.965001,
+			       'Moose'                    => 1.21,
+			       'Parse::RecDescent'        => 1.965001,
+			       'MooseX::AttributeHelpers' => 0.23,
+			       'MooseX::Aliases'          => 0.08,
 			      },
 	recommends         => {},
 	sign               => 0,

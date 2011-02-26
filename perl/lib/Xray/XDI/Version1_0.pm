@@ -30,10 +30,14 @@ has 'source'		 => (is => 'rw', isa => 'Str', default => q{});
 #has 'step_scale'	 => (is => 'rw', isa => 'Str', default => q{});
 has 'undulator_harmonic' => (is => 'rw', isa => 'Str', default => q{});
 
+## note that the MooseX::Aliases 0.08 pod is incorrect in how to get
+## an alias applied in a role.  the following works, but was a bit
+## hard to figure out.  version 0.09 does *not* fix the problem
+## (although it might with Moose 1.24)
 has 'comment_character'  => (is => 'rw', isa => 'Str', default => q{#},
 			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
 			     alias=>'cc');
-has 'field_end'          => (is => 'rw', isa => 'Str', default => q{#}.'/' x 2,
+has 'field_end'          => (is => 'rw', isa => 'Str', default => q{#}.'/' x 3,
 			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
 			     alias=>'fe');
 has 'header_end'         => (is => 'rw', isa => 'Str', default => q{#}.'-' x 60,
@@ -247,17 +251,17 @@ _EOGRAMMAR_
 
 =head1 NAME
 
-Xray::XDI::Version1_0 - XDI 1.0 grammer definition
+Xray::XDI::Version1_0 - XDI 1.0 grammar definition
 
 =head1 VERSION
 
-This role defined version 1.0 of the XAS Data Interchange grammer.
+This role defines version 1.0 of the XAS Data Interchange grammar.
 
 =head1 ATTRIBUTES
 
 =head2 Defined fields
 
-One attribute is provided for each defined field in the grammer.  Each
+One attribute is provided for each defined field in the grammar.  Each
 attribute is spelled exactly the same as it is expected in an XDI
 header, except that XDI headers are specified to be first-letter
 capitalized while attribute names are all lower case.
@@ -304,7 +308,7 @@ line.  The default is C<#>.
 The character sequence which marks the end of the defined and
 extension fields.  The default is C<#//>.
 
-=item C<header_end> (alias: C<fe>)
+=item C<header_end> (alias: C<he>)
 
 The character sequence which marks the end of the header.  It follows
 the user comment section.  The default is C<#> followed by 60 dashes
@@ -317,9 +321,9 @@ in the data lines.  The default is a single tab.
 
 =back
 
-=head1 BNF GRAMMER
+=head1 BNF GRAMMAR
 
-This grammer is expressed in BNF form as:
+This grammar is expressed in BNF form as:
 
    ;; augmented BNF grammar for the XAS Data Interchange format
    ;; see RFC 5234, http://tools.ietf.org/html/rfc5234, for grammar syntax

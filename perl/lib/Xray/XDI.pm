@@ -13,7 +13,8 @@ use vars qw($object $VERSION);
 $VERSION  = version->new("1.0");
 $object = q{};
 
-has 'file'	   => (is => 'rw', isa => 'Str', default => q{});
+has 'file'	   => (is => 'rw', isa => 'Str', default => q{},
+		       trigger => sub{my ($self, $new) = @_; $self->parse;});
 has 'out'	   => (is => 'rw', isa => 'Str', default => q{});
 has 'xdi_version'  => (is => 'rw', isa => 'Str', default => sub{sprintf "%s", $VERSION},
 		       trigger => sub{my ($self, $new) = @_; $self->get_grammar });
@@ -83,6 +84,7 @@ sub parse {
   $self->file        or croak("File has not been specified");
   (-e $self->file)   or croak(sprintf("File %s does not exist", $self->file));
   (-r $self->file)   or croak(sprintf("File %s cannot be read", $self->file));
+  $self->clear;
   ## need to peek at the first line to determine version number
   my $data;
   {
@@ -96,6 +98,18 @@ sub parse {
   $object = $self;
   my $parser = Parse::RecDescent->new($self->grammar) or croak ("Bad grammar!");
   defined $parser->XDI($data) or croak ("Not XDI data!");
+  return $self;
+};
+
+sub clear {
+  my ($self) = @_;
+  foreach my $p (@{$self->order}) {
+    $self->$p(q{});
+  };
+  $self->clear_extensions;
+  $self->clear_comments;
+  $self->clear_labels;
+  $self->clear_data;
   return $self;
 };
 
@@ -176,20 +190,20 @@ Import an XDI file:
   $xdi -> file('data.dat');
   $xdi -> parse;
 
-If the input data file is an XDI file, the grammer version will be
+If the input data file is an XDI file, the grammar version will be
 taken from the first line.
 
 Export an XDI file:
 
   $xdi -> export("outfile.dat");
 
-=head1 GRAMMERS
+=head1 GRAMMARS
 
-Grammers are provided a roles.  For example, version 1.0 of the XDI
-grammer is provided by L<Xray::XDI::Version1_0>.  The role provides
+Grammars are provided a roles.  For example, version 1.0 of the XDI
+grammar is provided by L<Xray::XDI::Version1_0>.  The role provides
 attributes, one for each defined field in that version of the XDI
-grammer.  The role also provides a method called C<define_grammer>
-which returns the grammer in the form expected by
+grammar.  The role also provides a method called C<define_grammar>
+which returns the grammar in the form expected by
 L<Parse::RecDescent>.  Attributes called C<order>,
 C<comment_character>, and C<dividiing_line> are used to format the
 exported file.
@@ -197,14 +211,15 @@ exported file.
 =head1 ATTRIBUTES
 
 All attributes for defined fields are provided by the role which
-provides the grammer.  This base class provides the following
+provides the grammar.  This base class provides the following
 attributes:
 
 =over 4
 
 =item C<file>
 
-The name of the imported data file.
+The name of the imported data file.  Parsing the file is triggered
+when this attribite is set.
 
 =item C<out>
 
@@ -212,11 +227,13 @@ The name of the exported data file.
 
 =item C<xdi_version>
 
-The version of the grammer to be used to parse the imported file.
+The version of the grammar to be used to parse the imported file.
+Setting this attribute triggers loading the appropariate grammar
+version and setting the C<grammar> attribute.
 
-=item C<grammer>
+=item C<grammar>
 
-The text of the L<Parse::RecDescent> grammer used to parse the
+The text of the L<Parse::RecDescent> grammar used to parse the
 imported file.
 
 =item C<extensions>
@@ -247,17 +264,51 @@ points.
 
 =over 4
 
-=item C<get_grammer>
+=item C<get_grammar>
+
+(Re)Load the C<grammar> attribute with the grammar version specified
+by C<xdi_version>.
 
 =item C<parse>
 
+Import and intepret the data file specified by C<file>.
+
 =item C<add_data_point>
+
+Add a point to the C<data> attribute.  A point is an array reference
+containing the abscissa value of the data point followed by values of
+all the scalars (i.e. data columns) in the data file.
 
 =item C<add_data_arrays>
 
+Add entire arrays, indexed by the abscissa array, to the C<data>
+attribute.  This currently does not work.
+
 =back
 
-=head1 DIAGNOSTOCS
+=head1 DIAGNOSTICS
+
+=over 4
+
+=item *
+
+Grammar version does not exist (fatal error)
+
+=item *
+
+Input file not specified, does not exist, or cannot be read (fatal
+error)
+
+=item *
+
+"Bad grammar", i.e. the grammar is specified incorrectly (fatal error)
+
+=item *
+
+"Not XDI data!", i.e. the input file cannot be interpreted as
+XDI-compliant (fatal error)
+
+=back
 
 =head1 DEPENDENCIES
 
@@ -269,11 +320,19 @@ L<Parse::RecDescent>
 
 =item *
 
-L<Moose>
+L<Moose>, L<MooseX::AttributeHelpers>, L<MooseX::Aliases>
 
 =back
 
 =head1 BUGS AND LIMITATIONS
+
+=over 4
+
+=item *
+
+Add data column by column.
+
+=back
 
 Please report problems to Bruce Ravel (bravel AT bnl DOT gov)
 

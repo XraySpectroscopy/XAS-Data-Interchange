@@ -16,13 +16,13 @@ my $here  = dirname($0);
 
 my $xdi = Xray::XDI->new();
 $xdi -> file(File::Spec->catfile($here, 'xdi.aps10id'));
-$xdi -> parse;
-ok( $xdi->xdi_version eq $Xray::XDI::VERSION,       "version recognized");
-ok( $xdi->beamline eq "APS 10ID",                   "defined header (beamline) recognized");
-ok( any {$_ eq "MX-SRB: 6900"} @{$xdi->extensions}, "extension header (beamline) recognized");
-ok( $#{$xdi->comments} == 2,                        "comments imported");
-ok( $#{$xdi->data} == 4,                            "data imported");
-ok( join(" ", @{$xdi->labels}) eq "energy mcs3 mcs4 mcs6 mcs5",     "labels imported");
+#print join("|", $xdi->xdi_version, $Xray::XDI::VERSION), $/;
+ok( $xdi->xdi_version eq $Xray::XDI::VERSION,                   "version recognized");
+ok( $xdi->beamline eq "APS 10ID",                               "defined header (beamline) recognized");
+ok( (any {$_ eq "MX-SRB: 6900"} @{$xdi->extensions}),           "extension header (beamline) recognized");
+ok( $#{$xdi->comments} == 2,                                    "comments imported");
+ok( $#{$xdi->data} == 4,                                        "data imported");
+ok( join(" ", @{$xdi->labels}) eq "energy mcs3 mcs4 mcs6 mcs5", "labels imported");
 
 undef $xdi;
 
@@ -30,8 +30,7 @@ undef $xdi;
 
 $xdi = Xray::XDI->new();
 $xdi -> file(File::Spec->catfile($here, 'mo_foil.003'));
-$xdi -> parse;
-ok( $#{$xdi->extensions} == -1,                      "extenstions do not exist in this file");
-ok( $#{$xdi->comments} == 44,                        "comments imported");
-ok( $#{$xdi->data} == 179,                           "data imported");
-ok( join(" ", @{$xdi->labels}) eq "P1 P2 D1 D2",     "labels imported");
+ok( $#{$xdi->extensions} == -1,                  "extenstions do not exist in this file");
+ok( $#{$xdi->comments} == 44,                    "comments imported");
+ok( $#{$xdi->data} == 179,                       "data imported");
+ok( join(" ", @{$xdi->labels}) eq "P1 P2 D1 D2", "labels imported");
