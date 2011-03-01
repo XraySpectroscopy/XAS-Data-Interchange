@@ -1,88 +1,25 @@
-package Xray::XDI::XDAC;
+package Xray::XDI::Alien::XDAC;
 
 use Moose::Role;
 use MooseX::Aliases;
+with 'Xray::XDI::Version1_0';	# use all the attributes, provide own get_grammar
 
 use vars qw($debug);
 $debug = 0;
 
-has 'version'	         => (is => 'rw', isa => 'Str', default => q{1.0});
-
-has 'applications'	 => (is => 'rw', isa => 'Str', default => q{});
-
-has 'abscissa'   	 => (is => 'rw', isa => 'Str', default => q{});
-has 'beamline'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'collimation'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'crystal'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'd_spacing'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'edge_energy'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'end_time'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'focusing'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'harmonic_rejection' => (is => 'rw', isa => 'Str', default => q{});
-has 'mu_fluorescence'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'mu_reference'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'mu_transmission'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'ring_current'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'ring_energy'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'start_time'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'source'		 => (is => 'rw', isa => 'Str', default => q{});
-#has 'step_offset'	 => (is => 'rw', isa => 'Str', default => q{});
-#has 'step_scale'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'undulator_harmonic' => (is => 'rw', isa => 'Str', default => q{});
-
-## note that the MooseX::Aliases 0.08 pod is incorrect in how to get
-## an alias applied in a role.  the following works, but was a bit
-## hard to figure out.  version 0.09 does *not* fix the problem
-## (although it might with Moose 1.24)
-has 'comment_character'  => (is => 'rw', isa => 'Str', default => q{#},
-			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
-			     alias=>'cc');
-has 'field_end'          => (is => 'rw', isa => 'Str', default => q{#}.'/' x 3,
-			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
-			     alias=>'fe');
-has 'header_end'         => (is => 'rw', isa => 'Str', default => q{#}.'-' x 60,
-			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
-			     alias=>'he');
-has 'record_separator'   => (is => 'rw', isa => 'Str', default => "\t",
-			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
-			     alias=>'rs');
-
-
-has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
-		       default => sub{ ['applications',
-					'beamline',
-					'source',
-					'undulator_harmonic',
-					'ring_energy',
-					'ring_current',
-					'collimation',
-					'crystal',
-					'd_spacing',
-					'focusing',
-					'harmonic_rejection',
-					'edge_energy',
-					'start_time',
-					'end_time',
-					'abscissa',
-					'mu_transmission',
-					'mu_fluorescence',
-					'mu_reference',
-				       ] });
-
-
 sub x3a {
   my ($self) = @_;
-  $self->collimation(q{});
+  $self->collimation(q{none});
   $self->focusing(q{sagittally bent second crystal});
-  $self->harmonic_rejection(q{});
+  $self->harmonic_rejection(q{flat cylindrically bent mirror});
   return $self;
 };
 
 sub x3b {
   my ($self) = @_;
-  $self->collimation(q{});
+  $self->collimation(q{none});
   $self->focusing(q{sagittally bent second crystal});
-  $self->harmonic_rejection(q{});
+  $self->harmonic_rejection(q{Nickel coated cylindrically bent mirror });
   return $self;
 };
 
@@ -90,7 +27,7 @@ sub x11a {
   my ($self) = @_;
   $self->collimation(q{none});
   $self->focusing(q{none});
-  $self->harmonic_rejection(q{detuned first crystal});
+  $self->harmonic_rejection(q{detuned mono});
   return $self;
 };
 
@@ -104,25 +41,25 @@ sub x11b {
 
 sub x18a {
   my ($self) = @_;
-  $self->collimation(q{});
-  $self->focusing(q{});
-  $self->harmonic_rejection(q{});
+  $self->collimation(q{none});
+  $self->focusing(q{Cylindrical, rhodium-coated aluminum 1:1 focusing mirror});
+  $self->harmonic_rejection(q{detuned mono});
   return $self;
 };
 
 sub x18b {
   my ($self) = @_;
-  $self->collimation(q{});
-  $self->focusing(q{});
-  $self->harmonic_rejection(q{});
+  $self->collimation(q{none});
+  $self->focusing(q{none});
+  $self->harmonic_rejection(q{detuned mono});
   return $self;
 };
 
 sub x19a {
   my ($self) = @_;
-  $self->collimation(q{});
-  $self->focusing(q{});
-  $self->harmonic_rejection(q{});
+  $self->collimation(q{Rh-coated spherical mirror, 3 mrad incident angle});
+  $self->focusing(q{Rh-coated toroidal mirror});
+  $self->harmonic_rejection(q{detuned mono});
   return $self;
 };
 
@@ -136,22 +73,30 @@ sub x23a2 {
 
 sub x23b {
   my ($self) = @_;
-  $self->collimation(q{});
-  $self->focusing(q{});
-  $self->harmonic_rejection(q{});
+  $self->collimation(q{Pt-coated flat silicon mirror with 4-point bender});
+  $self->focusing(q{Nii-coated quartz toroidal mirror});
+  $self->harmonic_rejection(q{upstream mirrors});
+  return $self;
+};
+
+sub x24a {
+  my ($self) = @_;
+  $self->collimation(q{Ni-coated graphite spherical mirror});
+  $self->focusing(q{Pt-coated quartz toroidal mirror});
+  $self->harmonic_rejection(q{upstream mirrors});
   return $self;
 };
 
 sub u7a {
   my ($self) = @_;
-  $self->collimation(q{blah});
-  $self->focusing(q{blah});
-  $self->harmonic_rejection(q{blah});
+  $self->collimation(q{none});
+  $self->focusing(q{Au-coated ULE toroidal mirror with Au-coated ULE toroidal refocusuing mirror});
+  $self->harmonic_rejection(q{none});
   return $self;
 };
 
 
-sub define_grammar {
+sub define_grammar  {
   return <<'_EOGRAMMAR_';
 XDI: <skip: qr/[ \t]*/> COMMENTS LABELS(1) DATA
 
@@ -200,15 +145,15 @@ FILE:       QUOTE /[^\"]*/ QUOTE "created on" INTEGER "/" INTEGER "/" INTEGER "a
                my $min   = $item[13];
                my $sec   = $item[15];
 	       $Xray::XDI::object->start_time(sprintf("%d-%d-%d%s%d:%d:%d", $year, $month, $day, 'T', $hour, $min, $sec));
-	       $Xray::XDI::object->beamline($item[18]);
-               (my $method = lc($item[18])) =~ s{-}{};
-               $Xray::XDI::object->$method;
+               (my $beamline = lc($item[18])) =~ s{-}{};
+	       $Xray::XDI::object->beamline("NSLS ".uc($beamline));
+               $Xray::XDI::object->$beamline;
 	       $Xray::XDI::object->source('bend magnet');
             }
 
-REFLECTION:     /\(\d{3}\)/
-MATERIAL:       ("Si" | "Ge" | "Diamond" | "YB66" | "InSb" | "Beryl" | "Multilayer")
-CRYSTAL:    "Diffraction element=" (MATERIAL|INTEGER) (REFLECTION | "l/mm") "." "Ring energy=" FLOAT "GeV" {
+REFLECTION: /\(\d{3}\)/
+MATERIAL:   ("Si" | "Ge" | "Diamond" | "YB66" | "InSb" | "Beryl" | "Multilayer")
+CRYSTAL:    "Diffraction element=" (MATERIAL | INTEGER) (REFLECTION | "l/mm") "." "Ring energy=" FLOAT "GeV" {
                print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
                if ($item[2] =~ m{\A\d+\z}) {
                  $Xray::XDI::object->crystal(join(" ", "Grating", $item[2], $item[3]));
@@ -288,3 +233,53 @@ _EOGRAMMAR_
 
 
 1;
+
+
+=head1 NAME
+
+Xray::XDI::Alien::XDAC - Import an NSLS XDAC file in an XDI object
+
+=head1 VERSION
+
+This role defines NSLS XDAC import for version 1.0 of the XAS Data
+Interchange grammar.
+
+=head1 ATTRIBUTES
+
+All attributes are inherited from L<Xray::XDI::Version1_0>.
+
+=head1 METHODS
+
+This provides its own C<get_grammer> method for parsing XDAC files and
+collecting XDI metadata from the headers.
+
+This also provides a series of beamline-specific methods that, in
+effect, provide a lookup table of values for XDI defined fields having
+to do with beamline optics.
+
+=head1 BUGS AND LIMITATIONS
+
+This inherits the bugs and limitations of L<Xray::XDI::Version1_0>.
+
+Please report problems to Bruce Ravel (bravel AT bnl DOT gov)
+
+Patches are welcome.
+
+=head1 AUTHOR
+
+Bruce Ravel (bravel AT bnl DOT gov)
+
+L<http://cars9.uchicago.edu/~ravel/software/>
+
+=head1 LICENCE AND COPYRIGHT
+
+Copyright (c) 2011 Bruce Ravel (bravel AT bnl DOT gov). All rights reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlgpl>.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

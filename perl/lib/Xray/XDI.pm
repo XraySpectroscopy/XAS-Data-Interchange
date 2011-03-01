@@ -81,8 +81,8 @@ sub get_grammar {
     eval {apply_all_roles($self, 'Xray::XDI::Version'.$version)};
     $@ and croak("Grammar version Xray::XDI::Version$version does not exist");
   } elsif ($version eq 'xdac') {
-    eval {apply_all_roles($self, 'Xray::XDI::XDAC')};
-    $@ and croak("Grammar version Xray::XDI::XDAC does not exist");
+    eval {apply_all_roles($self, 'Xray::XDI::Alien::XDAC')};
+    $@ and croak("Grammar version Xray::XDI::Alien::XDAC does not exist");
   };
   $self->grammar($self->define_grammar);
   return $self;
@@ -127,6 +127,7 @@ sub clear {
   foreach my $p (@{$self->order}) {
     $self->$p(q{});
   };
+  $self->applications(q{});
   $self->grammar(q{});
   $self->clear_extensions;
   $self->clear_comments;

@@ -38,9 +38,9 @@ print join("\n\t", @{$xdi->comments}), $/;
 print "\nlabels:\n\t";
 print join(" ", @{$xdi->labels}), $/;
 
-#print "\ndata:\n";
-#foreach my $p (@{$xdi->data}) {
-#  print "\t", join(" ", @{$p}), $/
-#}
+print "\ndata:\n";
+foreach my $p (@{$xdi->data}) {
+  print "\t", join(" ", @{$p}), $/
+}
 
 $xdi->export('xdi.out');

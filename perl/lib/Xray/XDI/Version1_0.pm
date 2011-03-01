@@ -18,7 +18,9 @@ has 'd_spacing'		 => (is => 'rw', isa => 'Str', default => q{});
 has 'edge_energy'	 => (is => 'rw', isa => 'Str', default => q{});
 has 'end_time'		 => (is => 'rw', isa => 'Str', default => q{});
 has 'focusing'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'harmonic_rejection' => (is => 'rw', isa => 'Str', default => q{});
+has 'harmonic_rejection' => (is => 'rw', isa => 'Str', default => q{},
+			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
+			     alias=>'rejection');
 has 'mu_fluorescence'	 => (is => 'rw', isa => 'Str', default => q{});
 has 'mu_reference'	 => (is => 'rw', isa => 'Str', default => q{});
 has 'mu_transmission'	 => (is => 'rw', isa => 'Str', default => q{});
@@ -49,8 +51,7 @@ has 'record_separator'   => (is => 'rw', isa => 'Str', default => "\t",
 
 
 has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
-		       default => sub{ ['applications',
-					'beamline',
+		       default => sub{ ['beamline',
 					'source',
 					'undulator_harmonic',
 					'ring_energy',
