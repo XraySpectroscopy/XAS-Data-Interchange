@@ -8,10 +8,13 @@ use Moose;
 use Moose::Util qw(apply_all_roles);
 use MooseX::AttributeHelpers;
 use Parse::RecDescent;
+use Scalar::Util qw(looks_like_number);
 
 use vars qw($object $VERSION);
 $VERSION  = version->new("1.0");
 $object = q{};
+
+has 'is_xdi'       => (is => 'rw', isa => 'Bool', default => 0,);
 
 has 'file'	   => (is => 'rw', isa => 'Str', default => q{},
 		       trigger => sub{my ($self, $new) = @_; $self->parse;});
@@ -72,9 +75,15 @@ sub BUILD {
 sub get_grammar {
   my ($self) = @_;
   my $version = $self->xdi_version;
-  $version =~ s{\.}{_}g;
-  eval {apply_all_roles($self, 'Xray::XDI::Version'.$version)};
-  $@ and croak("Grammar version Xray::XDI::Version$version does not exist");
+  #print $version, $/;
+  if (looks_like_number($version)) {
+    $version =~ s{\.}{_}g;
+    eval {apply_all_roles($self, 'Xray::XDI::Version'.$version)};
+    $@ and croak("Grammar version Xray::XDI::Version$version does not exist");
+  } elsif ($version eq 'xdac') {
+    eval {apply_all_roles($self, 'Xray::XDI::XDAC')};
+    $@ and croak("Grammar version Xray::XDI::XDAC does not exist");
+  };
   $self->grammar($self->define_grammar);
   return $self;
 };
@@ -93,11 +102,23 @@ sub parse {
     $data = <$D>;
     close $D;
   };
-  $self->xdi_version($1) if ($data =~ m{\A[\#;][ \t]*XDI/(\d+\.\d+)});
+  if ($data =~ m{\A[\#;][ \t]*XDI/(\d+\.\d+)}) {
+    $self->xdi_version($1);
+    $self->is_xdi(1);
+  } elsif ($data =~ m{\AXDAC}) { # handle known alien grammers
+    $self->xdi_version('xdac');
+    $self->is_xdi(1);
+  } else {
+    $self->is_xdi(0);
+    return $self;
+  };
   $self->xdi_version or croak("Grammar version has not been specified");
   $object = $self;
   my $parser = Parse::RecDescent->new($self->grammar) or croak ("Bad grammar!");
   defined $parser->XDI($data) or croak ("Not XDI data!");
+
+  ## restore the proper number if the version is an alien
+  $self->xdi_version("$Xray::XDI::VERSION") if $self->xdi_version eq 'xdac';
   return $self;
 };
 
@@ -106,6 +127,7 @@ sub clear {
   foreach my $p (@{$self->order}) {
     $self->$p(q{});
   };
+  $self->grammar(q{});
   $self->clear_extensions;
   $self->clear_comments;
   $self->clear_labels;
@@ -220,6 +242,19 @@ attributes:
 
 The name of the imported data file.  Parsing the file is triggered
 when this attribite is set.
+
+=item C<is_xdi>
+
+This boolean attribute is set to true if C<file> can be parsed as an
+XDI file.  To check if a file has been interpreted as an XDI file do
+this:
+
+   $xdi->file("my.data");
+   if ($xdi->is_xdi) {
+     # process accordingly
+   } else {
+     # do something else
+   };
 
 =item C<out>
 
