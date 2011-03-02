@@ -83,7 +83,8 @@ WORD:       /[-a-zA-Z0-9_]+/
 PROPERWORD: /[a-zA-Z][-a-zA-Z0-9_]+/
 NOTDASH:    /^[#;][ \t]*(?!-+)/
 ## including # in ANY is problematic
-ANY:        /[^\#; \t\n\r]+/
+#ANY:        /[^\#; \t\n\r]+/
+ANY:        /\A(?!-{3,})[^ \t\n\r]+/
 COMM:       /^[\#;]/
 
 CR:         /\n/
@@ -230,7 +231,7 @@ COMMENT_LINE: NOTDASH  ANY(s?) EOL {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
              $Xray::XDI::object->push_comment(join(" ", @{$item[2]}));
             }
-COMMENTS:     COMMENT_LINE(s)  HEADER_END
+COMMENTS:     COMMENT_LINE(s?)  HEADER_END
 
 LABEL:    ANY
 LABELS:   COMM  LABEL(s) EOL {

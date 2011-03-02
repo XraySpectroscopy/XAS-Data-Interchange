@@ -1,12 +1,17 @@
 #!/usr/bin/perl -I ../lib/
 
 use Xray::XDI;
-#$::RD_HINT = 1; # Parse::RecDescent hints
+$::RD_HINT = 1; # Parse::RecDescent hints
 #$::RD_TRACE = 1; # Parse::RecDescent trace
 my $xdi = Xray::XDI->new();
 #$xdi -> file('../t/xdac_x.dat');
-$xdi -> file('../t/xdac_uv.dat');
+#$xdi -> file('../t/xdac_uv.dat');
+#$xdi -> file('../t/mx_id.dat');
 #$xdi -> file('../t/test.t');
+#$xdi->file('/home/bruce/Data/NIST/10BM/2010.12/10Dec_Ni2.010');
+#$xdi->file('/home/bruce/Data/ANL/10ID/2005.06_U/B.Subtilis/ubs45.113');
+
+$xdi -> file('/home/bruce/codes/demeter/foo');
 
 if (not $xdi->is_xdi) {
   print "that wasn't an xdi file\n";
@@ -38,9 +43,9 @@ print join("\n\t", @{$xdi->comments}), $/;
 print "\nlabels:\n\t";
 print join(" ", @{$xdi->labels}), $/;
 
-print "\ndata:\n";
-foreach my $p (@{$xdi->data}) {
-  print "\t", join(" ", @{$p}), $/
-}
+#print "\ndata:\n";
+#foreach my $p (@{$xdi->data}) {
+#  print "\t", join(" ", @{$p}), $/
+#}
 
 $xdi->export('xdi.out');

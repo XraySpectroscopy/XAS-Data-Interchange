@@ -108,10 +108,10 @@ DIGIT:      /[0-9]/
 WORD:       /[-a-zA-Z0-9_]+/
 PROPERWORD: /[a-zA-Z][-a-zA-Z0-9_]+/
 NOTDASH:    /^[#;][ \t]*(?!-+)/
-ANY:        /\A.(?!-{3,})[^ \t\n\r]+/ # use the zero-width negative look-ahead
-                                      # assertion to try to distinguish between
-                                      # the line of dashes and a word that starts
-                                      # with a dash
+ANY:        /\A(?!-{3,})[^ \t\n\r]+/ # use the zero-width negative look-ahead
+                                     # assertion to try to distinguish between
+                                     # the line of dashes and a word that starts
+                                     # with a dash
 
 CR:         /\n/
 LF:         /\r/
@@ -132,19 +132,19 @@ EORK:       /[+-]?\ *(\d+(\.\d*)?|\.\d+)([eEdD][+-]?\d+)?(k?)/
 HEADER_END: /-{2,}/ EOL
 
 VERSION:    "XDAC V"  FLOAT "Datafile V" DIGIT  {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
 	     $Xray::XDI::object->applications("XDAC/".$item[2]);
             }
 
 FILE:       QUOTE /[^\"]*/ QUOTE "created on" INTEGER "/" INTEGER "/" INTEGER "at" INTEGER ":" INTEGER ":" INTEGER /[AP]M/ "on" ANY {
-               print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+               print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
                my $day   = $item[7];
                my $month = $item[5];
                my $year  = ($item[9] > 79) ? 1900+$item[9] : 2000+$item[9];
                my $hour  = (lc($item[16]) eq 'am') ? $item[11] : $item[11]+12;
                my $min   = $item[13];
                my $sec   = $item[15];
-	       $Xray::XDI::object->start_time(sprintf("%d-%d-%d%s%d:%d:%d", $year, $month, $day, 'T', $hour, $min, $sec));
+	       $Xray::XDI::object->start_time(sprintf("%d-%2.2d-%2.2d%s%2.2d:%2.2d:%2.2d", $year, $month, $day, 'T', $hour, $min, $sec));
                (my $beamline = lc($item[18])) =~ s{-}{};
 	       $Xray::XDI::object->beamline("NSLS ".uc($beamline));
                $Xray::XDI::object->$beamline;
@@ -154,7 +154,7 @@ FILE:       QUOTE /[^\"]*/ QUOTE "created on" INTEGER "/" INTEGER "/" INTEGER "a
 REFLECTION: /\(\d{3}\)/
 MATERIAL:   ("Si" | "Ge" | "Diamond" | "YB66" | "InSb" | "Beryl" | "Multilayer")
 CRYSTAL:    "Diffraction element=" (MATERIAL | INTEGER) (REFLECTION | "l/mm") "." "Ring energy=" FLOAT "GeV" {
-               print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+               print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
                if ($item[2] =~ m{\A\d+\z}) {
                  $Xray::XDI::object->crystal(join(" ", "Grating", $item[2], $item[3]));
                } else {
@@ -164,52 +164,58 @@ CRYSTAL:    "Diffraction element=" (MATERIAL | INTEGER) (REFLECTION | "l/mm") ".
                $Xray::XDI::object->ring_energy($energy);
             }
 
+## XDAC V1.2 files do not report the diffracting element on the ring energy line
+RINGENERGY: "Ring energy=" FLOAT "GeV" {
+               my $energy = ($item[2] > 100) ? $item[2]/1000 : $item[2];
+               $Xray::XDI::object->ring_energy($energy);
+            }
+
 ENOT:       "E0=" FLOAT {
-               print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+               print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
                $Xray::XDI::object->edge_energy($item[2]);
             }
 
 REGIONS:    "NUM_REGIONS=" INTEGER {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-NUM_REGIONS" . ': '. $item[2]);
             }
 
 SRB:        "SRB=" EORK(s) {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-SRB" . ': '. join(" ", @{$item[2]}));
             }
 
 SRSS:       "SRSS=" EORK(s) {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-SRSS" . ': '. join(" ", @{$item[2]}));
             }
 
 SPP:        "SPP=" EORK(s) {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-SPP" . ': '. join(" ", @{$item[2]}));
             }
 
 SETTLE:     "Settling time=" FLOAT {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-Settling_time" . ': '. join(" ", $item[2]));
             }
 
 OFFSETS:    "Offsets=" FLOAT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-Offsets" . ': '. join(" ", @{$item[2]}));
             }
 
 GAINS:      "Gains=" FLOAT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_extension("XDAC-Gains" . ': '. join(" ", @{$item[2]}));
             }
 
 COMMLINE:   ANY(s) {
-             print("comment: ", join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print("comment: ", join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_comment(join(" ", @{$item[1]}));
             }
 
-HEADER: ( VERSION | FILE | CRYSTAL | ENOT | 
+HEADER: ( VERSION | FILE | CRYSTAL | RINGENERGY | ENOT |
           REGIONS | SRB | SRSS | SPP | SETTLE | OFFSETS | GAINS |
           COMMLINE ) EOL
 COMMENTS:  HEADER(s) HEADER_END
@@ -217,12 +223,12 @@ COMMENTS:  HEADER(s) HEADER_END
 
 LABEL:    ANY
 LABELS:   LABEL(s) EOL {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->push_label(@{$item[1]});
             }
 
 DATA_LINE: FLOAT(s) EOL {
-             print(join("~", @item), $/) if $Xray::XDI::XDAC::debug;
+             print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
              $Xray::XDI::object->add_data_point(@{$item[1]})  if $#{$item[1]}>-1;
              #print join("~", "DATA_LINE", @{$item[2]}), $/;
             }
