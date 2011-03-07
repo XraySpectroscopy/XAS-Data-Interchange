@@ -149,6 +149,10 @@ class XDIFile(object):
             msg = "%s (line %i)\n   %s" % (msg, self.lineno, self.line)
         raise XDIFileException(msg)
 
+    def write(self, fname):
+        "write out an XDI File"
+        pass
+
     def read(self, fname=None):
         "read, validate XDI datafile"
         if fname is None and self.fname is not None:
