@@ -1,0 +1,14 @@
+Installation instructions for XDI Python module
+===============================================
+
+To install the xdi module from source, use 
+
+   python setup.py build
+   python setup.py install
+
+This assumes that Python 2.6 or higher is installed. 
+
+Matt Newville <newville@cars.uchicago.edu>
+Last Update:  2011-March-06
+
+
