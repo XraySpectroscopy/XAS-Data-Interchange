@@ -205,26 +205,60 @@ class XDIFile(object):
                 self.data.append(dat)
             elif state == 'FIELDS':
                 fieldname, value = [i.strip() for i in line.split(':', 1)]
+                validator = validate_chars
                 if fieldname in defined_fields:
                     attr = fieldname.lower().replace('-','_')
                     validator = defined_fields[fieldname]
-                    if validator(value):
-                        setattr(self, attr, value)
-                    else:
-                        self.error("invalid field value '%s'" % value)
-                else:
-                    if not validate_properword(fieldname):
-                        self.error("invalid field name '%s'" % fieldname)
-                    if not validate_chars(value):
-                        self.error("invalid field value '%s'" % value)
+                elif not validate_properword(fieldname):
+                    self.error("invalid field name '%s'" % fieldname)                    
 
+                if not validator(value):
+                    self.error("invalid field value '%s'" % value)                    
+                if fieldname in defined_fields:
+                    setattr(self, attr, value)
+                else:
                     self.attributes[fieldname] = value
 
         if HAS_NUMPY:
             self.data = numpy.array(self.data)
-            
+        self.assign_arrays()
+        
+    def assign_arrays(self):
+        # energy:
+        enx = int(validate_mathexpr(self.abscissa).groups()[2].replace('$', ''))
+
+        i0x, i1x, ifx, irx = -1, -1, -1, -1
+        trans =  validate_mathexpr(self.mu_transmission).groups()
+        if trans is not None and trans[1] == 'ln' and trans[3] == '/':
+            if trans[0] == '-':
+                i0x = int(trans[4].replace('$', ''))
+                i1x = int(trans[2].replace('$', ''))
+            else:
+                i0x = int(trans[2].replace('$', ''))
+                i1x = int(trans[4].replace('$', ''))
+        refer =  validate_mathexpr(self.mu_reference).groups()
+        if refer is not None and refer[1] == 'ln' and refer[3] == '/':
+            if refer[0] == '-':
+                irx = int(refer[2].replace('$', ''))
+            else:
+                irx = int(refer[4].replace('$', ''))
+        fluor =  validate_mathexpr(self.mu_fluorescence).groups()
+        if fluor is not None:
+            ifx = int(fluor[2].replace('$', ''))
+                
+        if HAS_NUMPY:
+            self.energy = self.data[:,enx-1]
+            if i0x > 0:
+                self.i0 = self.data[:,i0x-1]
+            if i1x > 0:
+                self.trans = self.data[:,i1x-1]
+            if ifx > 0:
+                self.fluor = self.data[:,ifx-1]
+            if irx > 0:
+                self.refer = self.data[:,irx-1]
+                
 if __name__ == '__main__':
-    testfile = os.path.join('..', 'perl', 't', 'xdi.aps10id')
+    testfile = os.path.join('..', '..', 'perl', 't', 'xdi.aps10id')
     
     f = XDIFile(testfile)
     print 'Read file ', f.fname, ' Version: ', f.file_version
@@ -240,9 +274,15 @@ if __name__ == '__main__':
 
     print '==User Comments:'
     print '\n'.join(f.comments)
+    print '==Labels:'
+    print f.labels
     if HAS_NUMPY:
         print '==Data: numeric array', f.data.shape
+
     else:
         print '==Data: lists', len(f.data)
-    print f.data[0:3]        
+    print f.energy, f.i0, f.refer
         
+
+    
+
