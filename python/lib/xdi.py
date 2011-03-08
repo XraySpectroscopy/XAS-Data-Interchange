@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 """
 Read/Write XAS Data Interchange Format for Python
-
 """
-
-import os
 import re
-from string import printable
-
+import math
 try:
-    import numpy
+    import numpy as np
     HAS_NUMPY = True
 except ImportError:
     HAS_NUMPY = False
-    
+
+# HAS_NUMPY = False    
+
+PRINTABLES = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
 
 ALLOWED_CRYSTALS = ("Si", "Ge", "Diamond", "YB66",
                     "InSb", "Beryl", "Multilayer")
 MATHEXPR = r'(-+)?(ln|exp|sin|asin)?\(?(\$\d)([/\*])*(\$\d)*\)?$'
 DATETIME = r'(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{1,2}):(\d{1,2})$'
-match = {'word':       re.compile(r'[a-zA-Z0-9_]+$').match,
+
+MATCH = {'word':       re.compile(r'[a-zA-Z0-9_]+$').match,
          'properword': re.compile(r'[a-zA-Z_][a-zA-Z0-9_-]*$').match,
          'mathexpr':   re.compile(MATHEXPR).match,
          'datetime':   re.compile(DATETIME).match
@@ -27,11 +27,11 @@ match = {'word':       re.compile(r'[a-zA-Z0-9_]+$').match,
 
 def validate_datetime(sinput):
     "validate allowed datetimes"
-    return match['datetime'](sinput)
+    return MATCH['datetime'](sinput)
 
 def validate_mathexpr(sinput):
     "validate mathematical expression"
-    return match['mathexpr'](sinput)
+    return MATCH['mathexpr'](sinput)
 
 def validate_crystal(sinput):
     """validate allowed names of crystal reflections:
@@ -73,19 +73,19 @@ def validate_float_or_nan(sinput):
 
 def validate_words(sinput):
     "validate for words"
-    for s in sinput.strip().split(' '):
-        if not match['word'](s):
+    for word in sinput.strip().split(' '):
+        if not MATCH['word'](word):
             return False
     return True
 
 def validate_properword(sinput):
     "validate for words"
-    return  match['properword'](sinput)
+    return  MATCH['properword'](sinput)
 
 def validate_chars(sinput):
     "validate for string"
-    for s in sinput:
-        if s not in printable:
+    for char in sinput:
+        if char not in PRINTABLES:
             return False
     return True
 
@@ -101,44 +101,94 @@ class XDIFileException(Exception):
     def __init__(self, msg, **kws):
         Exception.__init__(self)
         self.msg = msg
+
     def __str__(self):
         return self.msg
 
+COLUMN_NAMES = ('energy', 'i0', 'itrans', 'ifluor', 'irefer')
 
-defined_fields = {
-    "Abscissa": validate_mathexpr,
-    "Beamline": validate_words,
-    "Collimation": validate_words,
-    "Crystal" : validate_crystal,
-    "D_spacing" : validate_float,
-    "Edge_energy": validate_float, 
-    "End_time"   : validate_datetime,
-    "Focusing"   : validate_words, 
-    "Harmonic_rejection": validate_chars,
-    "Mu_fluorescence" : validate_mathexpr,
-    "Mu_reference"    : validate_mathexpr,
-    "Mu_transmission" : validate_mathexpr,
-    "Ring_current"  : validate_float,
-    "Ring_energy"   : validate_float,
-    "Start_time"    : validate_datetime, 
-    "Source"        : validate_words, 
-    "Undulator_harmonic" : validate_int}
+DEFINED_FIELDS = {
+    "abscissa": validate_mathexpr,
+    "beamline": validate_words,
+    "collimation": validate_words,
+    "crystal" : validate_crystal,
+    "d_spacing" : validate_float,
+    "edge_energy": validate_float, 
+    "end_time"   : validate_datetime,
+    "focusing"   : validate_words, 
+    "harmonic_rejection": validate_chars,
+    "mu_fluorescence" : validate_mathexpr,
+    "mu_reference"    : validate_mathexpr,
+    "mu_transmission" : validate_mathexpr,
+    "ring_current"  : validate_float,
+    "ring_energy"   : validate_float,
+    "start_time"    : validate_datetime, 
+    "source"        : validate_words, 
+    "undulator_harmonic" : validate_int}
 
 class XDIFile(object):
-    """ XAS Data Interchange Format"""
+    """ XAS Data Interchange Format:
+
+    See https://github.com/bruceravel/XAS-Data-Interchange
+
+    for further details
+
+    >>> xdi_file = XDFIile(filename)
+
+    Principle data members:
+      columns:  dict of column data, with keys
+                       'energy', 'i0', 'itrans', 'ifluor', 'irefer'
+                 some of which may be None.  These hold
+                 energy array (required to be not None for writing data!),
+                 monitor array, transmission array, fluorescence array,
+                 and reference array.
+      mu:        dict of calculated mu values, with keys:
+                       'trans', 'fluor', 'refer'
+      
+      comments:  list of user comments
+      labels:    original column labels.
+      abscissa:  column # for abscissa of data
+      beamline:    text description of beamline 
+      collimation:  text description of source collimation
+      crystal :    text description of crystal
+      d_spacing :  monochromator d spacing (Angstroms?)
+      edge_energy: nominal edge energy (ev?)
+      end_time   : ending datetime
+      focusing   : text description of beamline focusing
+      harmonic_rejection: text description of harmonic rejection
+      mu_fluorescence : math expression to calculate mu_fluorescence 
+      mu_reference    : math expression to calculate mu_reference
+      mu_transmission : math expression to calculate mu_transmission 
+      ring_current  : value of ring current (mA?)
+      ring_energy   : value of ring energy (GeV?)
+      start_time    : starting datetime, 
+      source        : text description of source
+      undulator_harmonic : value of undulator harmonic
+       
+    Principle methods:
+      read():     read XDI data file, set column data and attributes
+      write(filename):  write xdi_file data to an XDI file.
+      
+    """
     def __init__(self, fname=None):
         self.fname = fname
         self.attributes = {}
         self.comments = []
         self.data = []
+        self.columns  = {}
+        self.mu  = {}
+        self.has_numpy = HAS_NUMPY
+        for key in COLUMN_NAMES:
+            self.columns[key] = None
+
         self.npts = 0
         self.file_version = None
         self.application_info = None
         self.lineno  = 0
         self.line    = ''
         self.labels = []
-        for keyname in defined_fields:
-            setattr(self, keyname.lower().replace('-','_'), None)
+        for keyname in DEFINED_FIELDS:
+            setattr(self, keyname, None)
         if self.fname:
             self.read(self.fname)
 
@@ -151,21 +201,62 @@ class XDIFile(object):
 
     def write(self, fname):
         "write out an XDI File"
-        pass
 
+        if self.columns['energy'] is None:
+            self.error("cannot write datafile '%s': No data to write" % fname)
+        
+        topline = "# XDI/1.0"
+        if hasattr(self, 'application_info'):
+            topline = "%s %s" % (topline, '/'.join(self.application_info))
+        buff = [topline]
+        labels = []
+        for icol, attrib in enumerate(COLUMN_NAMES):
+            if self.columns[attrib] is not None:
+                buff.append('# Column_%s: %i' % (attrib, 1+icol))
+                labels.append(attrib)
+                
+        buff.append('# Abscissa: $1')
+        for attrib in sorted(DEFINED_FIELDS):
+            if attrib.startswith('abscissa'):
+                continue
+            if hasattr(self, attrib) and getattr(self, attrib) is not None:
+                buff.append("# %s: %s" % (attrib.title(),
+                                          str(getattr(self, attrib))))
+                
+        for key, val in self.attributes.items():
+            buff.append("# %s: %s" % (key.title(), str(val)))
+        buff.append("# Original_Labels: %s" % (' '.join(self.labels)))
+        
+        buff.append('# ///')
+        for cline in self.comments:
+            buff.append("# %s" % cline)
+        
+        buff.append('#----')        
+        buff.append('# %s' % ' '.join(labels))
+        for idx in range(len(self.columns['energy'])):
+            dat = []
+            for lab in labels:
+                dat.append(str(self.columns[lab][idx]))
+            buff.append("  %s" % '  '.join(dat))
+        
+        fout = open(fname, 'w')
+        fout.write("%s\n" % "\n".join(buff))
+        fout.close()
+        
+    
     def read(self, fname=None):
         "read, validate XDI datafile"
         if fname is None and self.fname is not None:
             fname = self.fname
         text  = open(fname, 'r').readlines()
         line0 = strip_comment(text.pop(0))
-        try:
-            if not line0.startswith('XDI/'):
-                raise TypeError
-            self.file_version, other = line0[4:].split(' ', 1)
-            self.application_info = other.split('/')
-        except:
+
+        if not line0.startswith('XDI/'):
             self.error('is not a valid XDI File.', with_line=False)
+
+        self.file_version, other = line0[4:].split(' ', 1)
+        self.application_info = other.split('/')
+            
 
         self.lineno = 1
         state = 'FIELDS'
@@ -199,32 +290,30 @@ class XDIFile(object):
                         self.error("inconsistent number of data points")
                 try:
                     [validate_float_or_nan(i) for i in dat]
-                except:
+                except ValueError:
                     self.error("non-numeric data")
                 dat = [float(d) for d in dat]
                 self.data.append(dat)
             elif state == 'FIELDS':
                 fieldname, value = [i.strip() for i in line.split(':', 1)]
-                validator = validate_chars
-                if fieldname in defined_fields:
-                    attr = fieldname.lower().replace('-','_')
-                    validator = defined_fields[fieldname]
-                elif not validate_properword(fieldname):
-                    self.error("invalid field name '%s'" % fieldname)                    
-
+                attrib = fieldname.lower().replace('-','_')
+                validator = DEFINED_FIELDS.get(attrib, validate_chars)
+                if (attrib not in DEFINED_FIELDS and 
+                    not validate_properword(fieldname)):
+                    self.error("invalid field name '%s'" % fieldname)
                 if not validator(value):
-                    self.error("invalid field value '%s'" % value)                    
-                if fieldname in defined_fields:
-                    setattr(self, attr, value)
+                    self.error("invalid field value '%s'" % value)
+                if attrib in DEFINED_FIELDS:
+                    setattr(self, attrib, value)
                 else:
                     self.attributes[fieldname] = value
 
-        if HAS_NUMPY:
-            self.data = numpy.array(self.data)
+        if self.has_numpy:
+            self.data = np.array(self.data)
         self.assign_arrays()
         
     def assign_arrays(self):
-        # energy:
+        """assign data arrays for i0, itrans, ifluor, irefer"""
         enx = int(validate_mathexpr(self.abscissa).groups()[2].replace('$', ''))
 
         i0x, i1x, ifx, irx = -1, -1, -1, -1
@@ -236,6 +325,7 @@ class XDIFile(object):
             else:
                 i0x = int(trans[2].replace('$', ''))
                 i1x = int(trans[4].replace('$', ''))
+            
         refer =  validate_mathexpr(self.mu_reference).groups()
         if refer is not None and refer[1] == 'ln' and refer[3] == '/':
             if refer[0] == '-':
@@ -245,44 +335,35 @@ class XDIFile(object):
         fluor =  validate_mathexpr(self.mu_fluorescence).groups()
         if fluor is not None:
             ifx = int(fluor[2].replace('$', ''))
-                
-        if HAS_NUMPY:
-            self.energy = self.data[:,enx-1]
-            if i0x > 0:
-                self.i0 = self.data[:,i0x-1]
-            if i1x > 0:
-                self.trans = self.data[:,i1x-1]
-            if ifx > 0:
-                self.fluor = self.data[:,ifx-1]
-            if irx > 0:
-                self.refer = self.data[:,irx-1]
-                
-if __name__ == '__main__':
-    testfile = os.path.join('..', '..', 'perl', 't', 'xdi.aps10id')
-    
-    f = XDIFile(testfile)
-    print 'Read file ', f.fname, ' Version: ', f.file_version
-    print '==Pre-Defined Fields=='
-    for key in sorted(defined_fields):
-        attr = key.lower().replace('-','_')
-        if hasattr(f, attr):
-            print '  %s: %s' % (key, getattr(f, attr))
 
-    print '==Extra Fields'
-    for key, val in f.attributes.items():
-        print '  %s: %s' % (key, val)
+        for name, index in zip(COLUMN_NAMES, (enx, i0x, i1x, ifx, irx)):
+            self.columns[name] = self.get_column(index)
 
-    print '==User Comments:'
-    print '\n'.join(f.comments)
-    print '==Labels:'
-    print f.labels
-    if HAS_NUMPY:
-        print '==Data: numeric array', f.data.shape
-
-    else:
-        print '==Data: lists', len(f.data)
-    print f.energy, f.i0, f.refer
+        if trans is not None:
+            self.mu['trans'] = self._take_ratio(i0x, i1x, use_log=True)
+        if fluor is not None:
+            self.mu['fluor'] = self._take_ratio(ifx, i0x, use_log=False)
+        if refer is not None:
+            self.mu['refer'] = self._take_ratio(i1x, irx, use_log=True)
+            
+    def _take_ratio(self, i1, i2, use_log=False):
+        if use_log:
+            if self.has_numpy:
+                return np.log(self.data[:,i1-1] / self.data[:, i2-1])
+            else:
+                return [math.log(row[i1-1]/row[i2-1]) for row in self.data]
+        else:
+            if self.has_numpy:
+                return (self.data[:,i1-1] / self.data[:, i2-1])
+            else:
+                return [(row[i1-1]/row[i2-1]) for row in self.data]
         
-
+    def get_column(self, idx):
+        if idx < 1:
+            return None
+        if self.has_numpy:
+            return self.data[:, idx-1]
+        else:
+            return [row[idx-1] for row in self.data]
     
 
