@@ -10,8 +10,6 @@ try:
 except ImportError:
     HAS_NUMPY = False
 
-# HAS_NUMPY = False    
-
 PRINTABLES = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
 
 ALLOWED_CRYSTALS = ("Si", "Ge", "Diamond", "YB66",

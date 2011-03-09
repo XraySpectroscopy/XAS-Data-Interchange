@@ -21,3 +21,8 @@ __version__ = '0.1.0'
 
 from . import xdi
 XDIFile = xdi.XDIFile
+XDIFileException = xdi.XDIFileException
+
+DEFINED_FIELDS = tuple(sorted(xdi.DEFINED_FIELDS.keys()))
+COLUMN_NAMES = xdi.COLUMN_NAMES
+
