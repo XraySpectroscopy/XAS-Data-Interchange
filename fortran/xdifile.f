@@ -1,66 +1,5 @@
-       subroutine echo(msg)
-       character*(*) msg
-       integer ilen, istrln
-       external istrln
-       ilen = istrln(msg)       
-       write(*, '(1x, a)') msg(1:ilen)
-       return 
-       end
-       subroutine openfl(iunit, file, status, iexist, ierr)
-c  open a file, 
-c   if unit <= 0, the first unused unit number greater than 7 will 
-c                be assigned.
-c   if status = 'old', the existence of the file is checked.
-c   if the file does not exist iexist is set to -1
-c   if the file does exist, iexist = iunit.
-c   if any errors are encountered, ierr is set to -1.
-c
-c   note: iunit, iexist, and ierr may be overwritten by this routine
-       implicit none
-       character*(*)  file, status, stat*10
-       integer    iunit, iexist, ierr, istrln
-       logical    exist, open
-c
-c make sure there is a unit number, and that it's pointing to
-c an unopened logical unit number other than 5 or 6
-       ierr   = -3
-       iexist =  0
-       iunit  = max(1, iunit)
- 10    continue 
-       inquire (unit=iunit, opened=open)
-       if (open) then
-          iunit = iunit + 1
-          if ((iunit.eq.5).or.(iunit.eq.6)) iunit = 7
-          goto 10
-       endif
-       print*, iunit
-c
-c if status = 'old', check that the file name exists
-       ierr = -2
-       stat =  status                          
-       call lower(stat)
-       print*, istrln(file), file
-       if (stat.eq.'old') then
-          iexist = -1
-          inquire(file=file, exist=exist)
-          if (.not.exist) then
-             return
-          endif
-          iexist = iunit
-       end if
-c 
-c open the file
-       ierr = -1
-       print*, ' openfl, unit ', iunit, ' file ', file(:40)
-       open(unit=iunit, file=file, status=status, err=100)
-       ierr = 0
- 100   continue
-       return
-c end  subroutine openfl
-       end
-
        subroutine read_xdi(fname,  max_attr, max_pts, max_comments,
-     $     attr_names, attr_values, labels, comments,  
+     $     attr_names, attr_values, version, labels, comments,  
      $     npts, energy, dat_i0, dat_it, dat_if, dat_ir)
 
 c 
@@ -79,26 +18,28 @@ c Last Update:  2011-March-08
 c
        implicit none
        save
-       integer  max_attr, max_pts, max_comments
-       integer  mwords , maxcol 
+       integer  max_attr, max_pts, max_comments, mwords, maxcol
        parameter(mwords = 128, maxcol = 16)
 
        character*128  words(mwords)
        character*(*)  comments(max_comments), labels(maxcol)
        character*(*)  attr_names(max_attr), attr_values(max_attr)
-       character*(*)  fname
-       integer   npts, ipts, i, j, k, istrln, ilen
-
+       character*(*)  fname, version
+       integer   npts, istrln, ilen, iread
+       integer i, icomm, iattr
        double precision energy(max_pts), dat_i0(max_pts)
        double precision dat_it(max_pts), dat_if(max_pts)
        double precision dat_ir(max_pts)
-
-       integer    mpts, lun, nwords, ndata, iex, ier
-       character*(*)  stat*10, predef*10, comchr*1, cchars*5
-       character*128  type, form, tmpnam, label, del*1
+       
+       logical isComment
+       integer    lun, nwords,  iex, ier, jline
+       character*(*)  stat*10,  comchr*1, cchars*2
+       character*128  tmpline, state*16, tmpstr*256
        character*2048 line, labstr, msg
-
+       external istrln, iread
        npts = max_pts
+
+       cchars = ';#'
 
 c now that the needed program variables are known, the strategy is:
 c   1. open file, with error checking
@@ -113,18 +54,117 @@ c  open file
        lun = -1
        stat = 'old'
        ilen = istrln(fname)
-       print*, ' checking for ', fname(:ilen)
        call openfl(lun, fname(1:ilen), stat, iex, ier)
        if ((ier.lt.0).or.(iex.lt.0)) then
           ilen = istrln(fname)
           msg =   '**  '//fname
           call echo('** read_xdi: error opening file')
           call echo(msg)
-          print*, lun, stat, iex, ier
+cc           print*, lun, stat, iex, ier
           if (lun.gt.0) close(lun)
           
           return
        end if
+
+
+c while loop for reading data from open file
+       jline = 0
+       icomm = 0
+       iattr = 0
+       isComment = .false.
+       state = 'VERSION'
+100    continue
+       ilen = iread(lun,  line)
+       if (ilen .lt. 0) goto 2900
+cc       print*,  ilen, line(1:50)
+       jline = jline + 1
+       call triml(line)
+       if ((ilen.le.1).or.(line.eq.' ')) goto 100
+
+       isComment = (line(1:1).ne.' ').and.(index(cchars,line(1:1)).ne.0)
+       if (isComment) then
+          line = line(2:)
+       endif
+
+       tmpline = line(1:128)
+       call lower(tmpline)
+       nwords = 3
+       call bwords(tmpline, nwords, words)
+ccc       print*, nwords, words(1), words(2), words(3)
+       print*, words(1)(1:20), isComment, state, tmpline(1:3), 
+     $   tmpline(1:3).eq.'///'
+       
+       if  (tmpline(1:3).eq.'---')  then
+          state = 'LABELS'
+          
+       else if (tmpline(1:3).eq.'///') then
+          state = 'COMMENTS'
+
+       else if (state.eq.'VERSION') then
+          call triml(line)
+          if (line(1:4).ne.'XDI/') then 
+             ilen = istrln(fname)
+             msg =   '**  '//fname
+             call echo('** read_xdi: invalid XDI File')
+             call echo(msg)
+             return
+          endif
+          nwords = 3
+          call bwords(line(5:), nwords, words)
+          version = words(1)(1:istrln(words(1)))
+ 121      format ('Application_',i1.1)
+          if (nwords .ge. 1) then
+             do i = 1, nwords-1 
+                iattr = iattr+1
+                write(tmpstr, 121) i
+                attr_names(iattr) = tmpstr(1:istrln(tmpstr))
+                attr_values(iattr) = words(i+1)(1:istrln(words(i+1)))
+             enddo
+          endif
+          state = 'FIELDS'
+       else if (state.eq.'LABELS') then
+          labstr = line(1:istrln(line))
+          nwords = maxcol
+          call bwords(labstr, nwords, words)
+          do i = 1, nwords
+             labels(i) = words(i)(1:istrln(words(i)))
+          end do
+          state = 'DATA'
+       else if (state.eq.'COMMENTS') then
+          icomm = icomm + 1
+          if (icomm.le.max_comments) then
+             comments(icomm) = line(1:istrln(line))
+          endif
+       else if (state.eq.'FIELDS') then
+          nwords = 2
+          call  strsplit(line, nwords, words, ':')
+          print*, ' Field Line: ', words(1), words(2)
+          tmpstr = words(1)(:istrln(words(1))-1)
+          iattr = iattr + 1
+          attr_names(iattr)  = tmpstr(1:istrln(tmpstr))
+          attr_values(iattr) = words(2)(1:istrln(words(2)))
+c$$$ 121      format ('Application_',i1.1)
+c$$$          if (nwords .ge. 1) then
+c$$$             do i = 1, nwords-1 
+c$$$                iattr = iattr+1
+c$$$                write(tmpstr, 121) i
+c$$$                attr_names(iattr) = tmpstr(1:istrln(tmpstr))
+
+c$$$             enddo
+c$$$          endif
+
+       endif
+
+
+c$$$       if ((line(3:7).eq.'-----').and.(type.eq.'label')) then
+
+       if ((ilen.ge.0).or.(line.eq.' ')) goto 100
+c parsing complete
+ 200   continue 
+
+ 2900  continue 
+       if (lun.gt.0) close(lun)
+
       return
 c  end subroutine read_xdi
       end

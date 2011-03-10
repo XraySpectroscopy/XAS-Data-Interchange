@@ -1,3 +1,128 @@
+       subroutine echo(msg)
+       character*(*) msg
+       integer ilen, istrln
+       external istrln
+       ilen = istrln(msg)       
+       write(*, '(1x, a)') msg(1:ilen)
+       return 
+       end
+       subroutine openfl(iunit, file, status, iexist, ierr)
+c  open a file, 
+c   if unit <= 0, the first unused unit number greater than 7 will 
+c                be assigned.
+c   if status = 'old', the existence of the file is checked.
+c   if the file does not exist iexist is set to -1
+c   if the file does exist, iexist = iunit.
+c   if any errors are encountered, ierr is set to -1.
+c
+c   note: iunit, iexist, and ierr may be overwritten by this routine
+       implicit none
+       character*(*)  file, status, stat*10
+       integer    iunit, iexist, ierr, istrln
+       logical    exist, open
+c
+c make sure there is a unit number, and that it's pointing to
+c an unopened logical unit number other than 5 or 6
+       ierr   = -3
+       iexist =  0
+       iunit  = max(1, iunit)
+ 10    continue 
+       inquire (unit=iunit, opened=open)
+       if (open) then
+          iunit = iunit + 1
+          if ((iunit.eq.5).or.(iunit.eq.6)) iunit = 7
+          goto 10
+       endif
+c
+c if status = 'old', check that the file name exists
+       ierr = -2
+       stat =  status                          
+       call lower(stat)
+       print*, istrln(file), file
+       if (stat.eq.'old') then
+          iexist = -1
+          inquire(file=file, exist=exist)
+          if (.not.exist) then
+             return
+          endif
+          iexist = iunit
+       end if
+c 
+c open the file
+       ierr = -1
+       open(unit=iunit, file=file, status=status, err=100)
+       ierr = 0
+ 100   continue
+       return
+c end  subroutine openfl
+       end
+
+
+       integer function iread(iunit, line)
+c
+c reads line from an open file unit (iunit)
+c  return values:
+c   line length on success
+c            -1 on 'end'
+c            -2 on 'error'
+       implicit none
+       character*(*) line
+       integer    iunit, istrln, ilen
+       external   istrln
+       line = ' '
+ 10    continue 
+       read(iunit, '(a)', end = 40, err = 50) line
+       call sclean(line)
+       call triml(line)
+       iread = istrln(line)
+       if (iread .eq. 0) goto 10
+       return
+ 40    continue 
+       ilen = istrln(line)
+       if (ilen.ge.1) then
+          call sclean(line)
+          call triml(line)
+          iread = ilen
+       else 
+          line = ' '
+          iread= -1
+       endif
+          
+       return
+ 50    continue 
+       line = ' '
+       iread = -2
+       return
+       end
+
+       subroutine sclean(str) 
+c
+c  clean a string so that all: 
+c     char(0), and char(10)...char(15) are end-of-line comments,
+c        so that all following characters are explicitly blanked.
+c     all other characters below char(31) (including tab) are
+c        replaced by a single blank
+c
+c  note that this is mostly useful when getting a string generated
+c  by a non-fortran process (say, a C program) and for dealing with
+c  dos/unix/max line-ending problems
+       character*(*) str, blank*1
+       parameter (blank = ' ')
+       integer i,j,is
+       do 20 i = 1, len(str)
+          is = ichar(str(i:i))
+          if ((is.eq.0) .or. ((is.ge.10) .and. (is.le.15))) then
+             do 10 j= i, len(str)
+                str(j:j) = blank
+ 10          continue
+             return
+          endif
+          if (is.le.31) str(i:i)  = blank
+ 20    continue 
+       return
+c end subroutine sclean
+       end
+
        subroutine triml (string)
 c removes leading blanks.
        character*(*)  string, blank*1
