@@ -44,6 +44,9 @@
      $            attr_values(i)(1:istrln(attr_values(i)))
           endif
        enddo
-
+       print*, '== Data ', npts
+       do i = 1, npts
+          print*, energy(i), dat_i0(i), dat_it(i), dat_if(i), dat_ir(i)
+       enddo
        return
        end
