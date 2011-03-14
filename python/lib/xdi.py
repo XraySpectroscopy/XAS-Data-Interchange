@@ -4,6 +4,7 @@ Read/Write XAS Data Interchange Format for Python
 """
 import re
 import math
+import time
 try:
     import numpy as np
     HAS_NUMPY = True
@@ -29,6 +30,7 @@ def validate_datetime(sinput):
 
 def validate_mathexpr(sinput):
     "validate mathematical expression"
+    print 'Validate mathexpr ', sinput
     return MATCH['mathexpr'](sinput)
 
 def validate_crystal(sinput):
@@ -103,7 +105,8 @@ class XDIFileException(Exception):
     def __str__(self):
         return self.msg
 
-COLUMN_NAMES = ('energy', 'i0', 'itrans', 'ifluor', 'irefer')
+COLUMN_NAMES = ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
+                'mutrans', 'mufluor', 'murefer')
 
 DEFINED_FIELDS = {
     "abscissa": validate_mathexpr,
@@ -173,11 +176,13 @@ class XDIFile(object):
         self.attributes = {}
         self.comments = []
         self.data = []
+        self.column_data = {}
         self.columns  = {}
         self.mu  = {}
         self.has_numpy = HAS_NUMPY
         for key in COLUMN_NAMES:
             self.columns[key] = None
+            self.column_data[key] = None
 
         self.npts = 0
         self.file_version = None
@@ -208,9 +213,11 @@ class XDIFile(object):
             topline = "%s %s" % (topline, '/'.join(self.application_info))
         buff = [topline]
         labels = []
-        for icol, attrib in enumerate(COLUMN_NAMES):
-            if self.columns[attrib] is not None:
-                buff.append('# Column_%s: %i' % (attrib, 1+icol))
+        icol = 0
+        for attrib in COLUMN_NAMES:
+            if self.column_data[attrib] is not None:
+                icol = icol + 1
+                buff.append('# Column_%s: %i' % (attrib, icol))
                 labels.append(attrib)
                 
         buff.append('# Abscissa: $1')
@@ -221,9 +228,9 @@ class XDIFile(object):
                 buff.append("# %s: %s" % (attrib.title(),
                                           str(getattr(self, attrib))))
                 
-        for key, val in self.attributes.items():
-            buff.append("# %s: %s" % (key.title(), str(val)))
-        buff.append("# Original_Labels: %s" % (' '.join(self.labels)))
+        self.attributes['Original_Labels'] = ' '.join(self.labels)
+        for key  in sorted(self.attributes):
+            buff.append("# %s: %s" % (key.title(), str(self.attributes[key])))
         
         buff.append('# ///')
         for cline in self.comments:
@@ -231,16 +238,15 @@ class XDIFile(object):
         
         buff.append('#----')        
         buff.append('# %s' % ' '.join(labels))
-        for idx in range(len(self.columns['energy'])):
+        for idx in range(len(self.column_data['energy'])):
             dat = []
             for lab in labels:
-                dat.append(str(self.columns[lab][idx]))
+                dat.append(str(self.column_data[lab][idx]))
             buff.append("  %s" % '  '.join(dat))
         
         fout = open(fname, 'w')
-        fout.write("%s\n" % "\n".join(buff))
+        fout.writelines(('%s\n' % l for l in buff))
         fout.close()
-        
     
     def read(self, fname=None):
         "read, validate XDI datafile"
@@ -296,6 +302,12 @@ class XDIFile(object):
                 fieldname, value = [i.strip() for i in line.split(':', 1)]
                 attrib = fieldname.lower().replace('-','_')
                 validator = DEFINED_FIELDS.get(attrib, validate_chars)
+                isColumnLabel = False
+                if attrib.startswith('column_'):
+                    validator = validate_int
+                    isColumnLabel = True
+                    col_label = attrib[7:]
+                    
                 if (attrib not in DEFINED_FIELDS and 
                     not validate_properword(fieldname)):
                     self.error("invalid field name '%s'" % fieldname)
@@ -303,6 +315,8 @@ class XDIFile(object):
                     self.error("invalid field value '%s'" % value)
                 if attrib in DEFINED_FIELDS:
                     setattr(self, attrib, value)
+                elif isColumnLabel:
+                    self.columns[col_label] = int(value)
                 else:
                     self.attributes[fieldname] = value
 
@@ -312,52 +326,102 @@ class XDIFile(object):
         
     def assign_arrays(self):
         """assign data arrays for i0, itrans, ifluor, irefer"""
-        enx = int(validate_mathexpr(self.abscissa).groups()[2].replace('$', ''))
+        cols = self.columns
+        if cols['energy'] is None:            
+            expr = validate_mathexpr(self.abscissa).groups()
+            cols['energy'] = int(expr[2].replace('$', ''))
 
-        i0x, i1x, ifx, irx = -1, -1, -1, -1
-        trans =  validate_mathexpr(self.mu_transmission).groups()
-        if trans is not None and trans[1] == 'ln' and trans[3] == '/':
-            if trans[0] == '-':
-                i0x = int(trans[4].replace('$', ''))
-                i1x = int(trans[2].replace('$', ''))
-            else:
-                i0x = int(trans[2].replace('$', ''))
-                i1x = int(trans[4].replace('$', ''))
             
-        refer =  validate_mathexpr(self.mu_reference).groups()
-        if refer is not None and refer[1] == 'ln' and refer[3] == '/':
-            if refer[0] == '-':
-                irx = int(refer[2].replace('$', ''))
-            else:
-                irx = int(refer[4].replace('$', ''))
-        fluor =  validate_mathexpr(self.mu_fluorescence).groups()
-        if fluor is not None:
-            ifx = int(fluor[2].replace('$', ''))
+        ii0 = cols['i0']    
+        iit = cols['itrans']    
+        iif = cols['ifluor']    
+        iir = cols['irefer']    
+        imf = cols['mufluor']    
+        imt = cols['mutrans']
+        imr = cols['murefer']
 
-        for name, index in zip(COLUMN_NAMES, (enx, i0x, i1x, ifx, irx)):
-            self.columns[name] = self.get_column(index)
+        # is there i0 data?
 
-        if trans is not None:
-            self.mu['trans'] = self._take_ratio(i0x, i1x, use_log=True)
-        if fluor is not None:
-            self.mu['fluor'] = self._take_ratio(ifx, i0x, use_log=False)
-        if refer is not None:
-            self.mu['refer'] = self._take_ratio(i1x, irx, use_log=True)
+        # is there transmission data?
+        if imt is None and iit is None and self.mu_transmission is not None:
+            trans =  validate_mathexpr(self.mu_transmission).groups()
+            if trans is not None and trans[1] == 'ln' and trans[3] == '/':
+                if trans[0] == '-':
+                    ii0 = int(trans[4].replace('$', ''))
+                    iit = int(trans[2].replace('$', ''))
+                else:
+                    ii0 = int(trans[2].replace('$', ''))
+                    iit = int(trans[4].replace('$', ''))
+
+        # is there reference data?
+        if imr is None and iir is None and self.mu_reference is not None:            
+            refer =  validate_mathexpr(self.mu_reference).groups()
+            if refer is not None and refer[1] == 'ln' and refer[3] == '/':
+                if refer[0] == '-':
+                    iir = int(refer[2].replace('$', ''))
+                else:
+                    iir = int(refer[4].replace('$', ''))
+
+        # is there fluoreecence data?
+        if imf is None and iif is None and self.mu_fluorescence is not None:            
+            fluor =  validate_mathexpr(self.mu_fluorescence).groups()
+            if fluor is not None:
+                iif = int(fluor[2].replace('$', ''))
+
+        # set column_data and mu arrays
+        for name in COLUMN_NAMES:
+            print 'Assign Column Data: ', name, cols[name]
+            if cols[name] is not None:
+                self.column_data[name] = self.get_column(cols[name])
+
+        # complete column and mu assignments
+        if (cols['mutrans'] is None and cols['itrans'] is not None and
+            cols['i0'] is not None):
+            self.column_data['mutrans'] = self._operate('itrans', 'i0', '/', use_log=True)
+        elif (cols['itrans'] is None and cols['mutrans'] is not None and
+              cols['i0'] is not None):
+            self.column_data['itrans'] = self._operate('i0', 'mutrans', 'mul_exp')
+ 
+        if (cols['mufluor'] is None and cols['ifluor'] is not None and
+            cols['i0'] is not None):
+            self.column_data['mutrans'] = self._operate('ifluor', 'i0', '/')
+        elif (cols['ifluor'] is None and cols['mufluor'] is not None and
+              cols['i0'] is not None):
+            self.column_data['ifluor'] = self._take_ratio('mufluor', 'i0', '*')
+
+        if (cols['murefer'] is None and cols['irefer'] is not None and
+            cols['i0'] is not None):
+            self.column_data['murefer'] = self._operate('irefer', 'itrans', '/', use_log=True)
+        elif (cols['irefer'] is None and cols['murefer'] is not None and
+              cols['i0'] is not None):
+            self.column_data['irefer'] = self._operate('itrans', 'murefer', 'mul_exp')
+
             
-    def _take_ratio(self, i1, i2, use_log=False):
-        if use_log:
-            if self.has_numpy:
-                return np.log(self.data[:,i1-1] / self.data[:, i2-1])
-            else:
-                return [math.log(row[i1-1]/row[i2-1]) for row in self.data]
+    def _operate(self, col1, col2, op, use_log=False):
+        dat1 = self.column_data[col1]
+        dat2 = self.column_data[col2]
+        if self.has_numpy:
+            if op == '/':
+                out =  dat1 / dat2
+            elif op == '*':
+                out = dat1 * dat2
+            elif op=='mul_exp':
+                out = dat1 * np.exp(-dat2)
+            if use_log:
+                out = np.log(out)
         else:
-            if self.has_numpy:
-                return (self.data[:,i1-1] / self.data[:, i2-1])
-            else:
-                return [(row[i1-1]/row[i2-1]) for row in self.data]
+            if op == '/':
+                out =  [(1.0*d1/d2) for d1,d2 in zip(dat1,dat2)]
+            elif op == '*':
+                out = [(d1*d2) for d1,d2 in zip(dat1,dat2)]
+            elif op=='mul_exp':
+                out = [(1.0*d1*math.exp(-d2)) for d1,d2 in zip(dat1,dat2)]
+            if use_log:
+                out = [math.log(d1) for d1 in out]
+        return out
         
     def get_column(self, idx):
-        if idx < 1:
+        if idx is None or idx < 1:
             return None
         if self.has_numpy:
             return self.data[:, idx-1]

@@ -1,20 +1,24 @@
 import os
-from xdi import XDIFile, DEFINED_FIELDS
+import sys
+sys.path.insert(0, '../')
+import lib as  xdi
 
 testfile = os.path.join('..', '..', 'perl', 't', 'xdi.aps10id')
+if len(sys.argv) > 1:
+    testfile = sys.argv[1]
     
-f = XDIFile(testfile)
+f = xdi.XDIFile(testfile)
 
 print( 'Read file ', f.fname, ' Version: ', f.file_version)
-print( '==Pre-Defined Fields==')
-for key in sorted(DEFINED_FIELDS):
-    attr = key.lower().replace('-','_')
-    if hasattr(f, attr):
-        print( '  %s: %s' % (key, getattr(f, attr)))
-
-print( '==Extra Fields')
-for key, val in f.attributes.items():
-    print( '  %s: %s' % (key, val))
+# print( '==Pre-Defined Fields==')
+# for key in sorted(xdi.DEFINED_FIELDS):
+#     attr = key.lower().replace('-','_')
+#     if hasattr(f, attr):
+#         print( '  %s: %s' % (key, getattr(f, attr)))
+# 
+# print( '==Extra Fields')
+# for key, val in f.attributes.items():
+#     print( '  %s: %s' % (key, val))
 
 print( '==User Comments:')
 print( '\n'.join(f.comments))
@@ -27,15 +31,12 @@ if f.has_numpy:
 else:
     print( '==Data: lists', len(f.data))
 
+for key in f.columns:
+    out = None
+    if f.column_data[key] is not None:
+        out = len(f.column_data[key]), f.column_data[key][:5]
+        print key, f.columns[key],  out
 
-print( 'Energy: ', f.columns['energy'])
-print( 'Monitor:', f.columns['i0'])
-print( 'Trans: ', f.columns['itrans'])
-print( 'Fluor: ', f.columns['ifluor'])
-print( 'Refer: ',  f.columns['irefer'])
 
-print( 'Mu Trans: ',  f.mu['trans'])
-print( 'Mu Fluor: ',  f.mu['fluor'])
-print( 'Mu Refer: ',  f.mu['refer'])
 
-f.write('out.xdi')
+f.write('out3.xdi')
