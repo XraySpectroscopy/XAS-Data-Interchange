@@ -30,7 +30,6 @@ def validate_datetime(sinput):
 
 def validate_mathexpr(sinput):
     "validate mathematical expression"
-    print 'Validate mathexpr ', sinput
     return MATCH['mathexpr'](sinput)
 
 def validate_crystal(sinput):
@@ -137,14 +136,13 @@ class XDIFile(object):
     >>> xdi_file = XDFIile(filename)
 
     Principle data members:
-      columns:  dict of column data, with keys
+      columns:  dict of column indices, with keys
                        'energy', 'i0', 'itrans', 'ifluor', 'irefer'
-                 some of which may be None.  These hold
-                 energy array (required to be not None for writing data!),
-                 monitor array, transmission array, fluorescence array,
-                 and reference array.
-      mu:        dict of calculated mu values, with keys:
-                       'trans', 'fluor', 'refer'
+                       'mutrans', 'mufluor', 'murefer'
+                 some of which may be None.
+      column_data: dict of data for arrays -- same keys as
+                 for columns.
+
       
       comments:  list of user comments
       labels:    original column labels.
@@ -178,7 +176,6 @@ class XDIFile(object):
         self.data = []
         self.column_data = {}
         self.columns  = {}
-        self.mu  = {}
         self.has_numpy = HAS_NUMPY
         for key in COLUMN_NAMES:
             self.columns[key] = None
@@ -370,7 +367,6 @@ class XDIFile(object):
 
         # set column_data and mu arrays
         for name in COLUMN_NAMES:
-            print 'Assign Column Data: ', name, cols[name]
             if cols[name] is not None:
                 self.column_data[name] = self.get_column(cols[name])
 
