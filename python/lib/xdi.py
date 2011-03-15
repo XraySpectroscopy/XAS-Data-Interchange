@@ -329,71 +329,61 @@ class XDIFile(object):
             cols['energy'] = int(expr[2].replace('$', ''))
 
             
-        ii0 = cols['i0']    
-        iit = cols['itrans']    
-        iif = cols['ifluor']    
-        iir = cols['irefer']    
-        imf = cols['mufluor']    
-        imt = cols['mutrans']
-        imr = cols['murefer']
-
-        # is there i0 data?
-
         # is there transmission data?
-        if imt is None and iit is None and self.mu_transmission is not None:
+        if cols['mutrans'] is None and cols['itrans'] is None and \
+           self.mu_transmission is not None:
             trans =  validate_mathexpr(self.mu_transmission).groups()
             if trans is not None and trans[1] == 'ln' and trans[3] == '/':
                 if trans[0] == '-':
-                    ii0 = int(trans[4].replace('$', ''))
-                    iit = int(trans[2].replace('$', ''))
+                    cols['i0']  = int(trans[4].replace('$', ''))
+                    cols['itrans'] = int(trans[2].replace('$', ''))
                 else:
-                    ii0 = int(trans[2].replace('$', ''))
-                    iit = int(trans[4].replace('$', ''))
+                    cols['i0'] = int(trans[2].replace('$', ''))
+                    cols['itrans'] = int(trans[4].replace('$', ''))
 
         # is there reference data?
-        if imr is None and iir is None and self.mu_reference is not None:            
+        if cols['murefer'] is None and cols['irefer'] is None and \
+           self.mu_reference is not None:            
             refer =  validate_mathexpr(self.mu_reference).groups()
             if refer is not None and refer[1] == 'ln' and refer[3] == '/':
                 if refer[0] == '-':
-                    iir = int(refer[2].replace('$', ''))
+                    cols['irefer'] = int(refer[2].replace('$', ''))
                 else:
-                    iir = int(refer[4].replace('$', ''))
+                    cols['irefer'] = int(refer[4].replace('$', ''))
 
         # is there fluoreecence data?
-        if imf is None and iif is None and self.mu_fluorescence is not None:            
+        if cols['mufluor'] is None and cols['ifluor'] is None and \
+           self.mu_fluorescence is not None:            
             fluor =  validate_mathexpr(self.mu_fluorescence).groups()
             if fluor is not None:
-                iif = int(fluor[2].replace('$', ''))
-
+                cols['ifluor'] = int(fluor[2].replace('$', ''))
+            
         # set column_data and mu arrays
         for name in COLUMN_NAMES:
             if cols[name] is not None:
                 self.column_data[name] = self.get_column(cols[name])
 
         # complete column and mu assignments
-        if (cols['mutrans'] is None and cols['itrans'] is not None and
-            cols['i0'] is not None):
-            self.column_data['mutrans'] = self._operate('itrans', 'i0', '/', use_log=True)
-        elif (cols['itrans'] is None and cols['mutrans'] is not None and
-              cols['i0'] is not None):
-            self.column_data['itrans'] = self._operate('i0', 'mutrans', 'mul_exp')
+        dat = self.column_data
+        if cols['i0'] is not None:
+            if (cols['mutrans'] is None and cols['itrans'] is not None):
+                dat['mutrans'] = self._op('itrans', 'i0', '/', use_log=True)
+            elif (cols['itrans'] is None and cols['mutrans'] is not None):
+                dat['itrans'] = self._op('i0', 'mutrans', 'mul_exp')
  
-        if (cols['mufluor'] is None and cols['ifluor'] is not None and
-            cols['i0'] is not None):
-            self.column_data['mutrans'] = self._operate('ifluor', 'i0', '/')
-        elif (cols['ifluor'] is None and cols['mufluor'] is not None and
-              cols['i0'] is not None):
-            self.column_data['ifluor'] = self._take_ratio('mufluor', 'i0', '*')
+            if (cols['mufluor'] is None and cols['ifluor'] is not None):
+                dat['mufluor'] = self._op('ifluor', 'i0', '/')
+            elif (cols['ifluor'] is None and cols['mufluor'] is not None):
+                dat['ifluor'] = self._op('mufluor', 'i0', '*')
 
-        if (cols['murefer'] is None and cols['irefer'] is not None and
-            cols['i0'] is not None):
-            self.column_data['murefer'] = self._operate('irefer', 'itrans', '/', use_log=True)
-        elif (cols['irefer'] is None and cols['murefer'] is not None and
-              cols['i0'] is not None):
-            self.column_data['irefer'] = self._operate('itrans', 'murefer', 'mul_exp')
-
+        if cols['itrans'] is not None:
+            if (cols['murefer'] is None and cols['irefer'] is not None):
+                dat['murefer'] = self._op('irefer', 'itrans', '/', use_log=True)
+            elif (cols['irefer'] is None and cols['murefer'] is not None):
+                dat['irefer'] = self._op('itrans', 'murefer', 'mul_exp')
             
-    def _operate(self, col1, col2, op, use_log=False):
+    def _op(self, col1, col2, op, use_log=False):
+        "support two-array operations for intensity <-> mu calcs " 
         dat1 = self.column_data[col1]
         dat2 = self.column_data[col2]
         if self.has_numpy:
@@ -407,11 +397,11 @@ class XDIFile(object):
                 out = np.log(out)
         else:
             if op == '/':
-                out =  [(1.0*d1/d2) for d1,d2 in zip(dat1,dat2)]
+                out =  [(1.0*d1/d2) for d1, d2 in zip(dat1, dat2)]
             elif op == '*':
-                out = [(d1*d2) for d1,d2 in zip(dat1,dat2)]
+                out = [(d1*d2) for d1, d2 in zip(dat1, dat2)]
             elif op=='mul_exp':
-                out = [(1.0*d1*math.exp(-d2)) for d1,d2 in zip(dat1,dat2)]
+                out = [(1.0*d1*math.exp(-d2)) for d1, d2 in zip(dat1, dat2)]
             if use_log:
                 out = [math.log(d1) for d1 in out]
         return out

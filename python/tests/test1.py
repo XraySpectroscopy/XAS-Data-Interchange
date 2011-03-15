@@ -31,11 +31,10 @@ if f.has_numpy:
 else:
     print( '==Data: lists', len(f.data))
 
-for key in f.columns:
+for key in sorted(f.columns):
     out = None
     if f.column_data[key] is not None:
-        out = len(f.column_data[key]), f.column_data[key][:5]
-        print key, f.columns[key],  out
+        print key, f.columns[key], len(f.column_data[key]), f.column_data[key][:3]
 
 
 
