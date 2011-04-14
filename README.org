@@ -18,7 +18,12 @@ parse the contents of an XDI-compliant file.
 * Specification Document
 
 The XDI specification is currently maintained at its github wiki
-https://github.com/bruceravel/XAS-Data-Interchange/wiki
+[[https://github.com/bruceravel/XAS-Data-Interchange/wiki]]
+
+Please note that the LaTeX version of the specification is out-of-date
+with respect to the version on the wiki.  The LaTeX will be brought
+up-to-date when the final version 1.0 specification is agreed upon by
+those involved.
 
 
 * Implementations
