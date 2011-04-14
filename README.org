@@ -1,0 +1,37 @@
+
+#+TITLE: README file for XAS Data Interchange
+#+AUTHOR: Bruce Ravel
+#+EMAIL: bravel AT bnl DOT gov
+			 
+
+This README file explains the XAS Data Interchange (XDI) distribution.
+The XDI distribution contains the specification documents and various
+implementations of a formal, grammer-based system for reading and
+writing files containing single-scan XAS data.
+
+The specification is contained in [[https://github.com/bruceravel/XAS-Data-Interchange/blob/master/grammar][the grammer file]].  In that file,
+the file specification is defined as an augmeted Backus-Naur Form
+(BNF) grammer.  This grammer can be used by any aBNF-aware tool to
+parse the contents of an XDI-compliant file.
+
+
+* Specification Document
+
+The XDI specification is currently maintained at its github wiki
+https://github.com/bruceravel/XAS-Data-Interchange/wiki
+
+
+* Implementations
+
+Implementations are found in directories named according to the
+programming language.
+
+**  The perl implementation of XDI
+
+To install:
+
+    + perl Build.PL
+    + ./Build
+    + ./Build test
+    + ./Build install
+
