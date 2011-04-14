@@ -26,12 +26,3 @@ https://github.com/bruceravel/XAS-Data-Interchange/wiki
 Implementations are found in directories named according to the
 programming language.
 
-**  The perl implementation of XDI
-
-To install:
-
-    + perl Build.PL
-    + ./Build
-    + ./Build test
-    + ./Build install
-

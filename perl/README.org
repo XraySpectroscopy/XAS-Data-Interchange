@@ -1,0 +1,14 @@
+#+TITLE: Perl implementation of the XAS Data Interchange
+#+AUTHOR: Bruce Ravel
+#+EMAIL: bravel AT bnl DOT gov
+
+*  The perl implementation of XDI
+
+This is a CPAN-ready implementation of the XDI specification.
+
+To install:
+
+    + perl Build.PL
+    + ./Build
+    + ./Build test
+    + ./Build install
