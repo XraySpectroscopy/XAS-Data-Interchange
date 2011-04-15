@@ -1,0 +1,57 @@
+#
+# Makefile for XDI Fortran code
+#
+# you may want to customize these two items:
+#
+AR      = ar
+
+CC = @CC@
+CPP = @CPP@
+F77 = @F77@
+FFLAGS = @FFLAGS@  -Wall
+FLIBS = @FLIBS@
+MAKEINFO = @MAKEINFO@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+LDFLAGS = @LDFLAGS@
+bindir = @bindir@
+libdir = @libdir@
+
+F77LINK   = $(F77) $(FFLAGS) $(LDFLAGS) -o $@
+
+.f.o:
+	$(F77) $(FFLAGS) -c $*.f
+
+# you shouldn't have to alter anything below this line
+#---------------------------------
+EXAMPLE1  = xdi_example1
+LIBXDIF   = libxdif.a
+LINKXDIF = -L$(libdir) -L. -lxdif
+all: $(EXAMPLE1)
+
+$(EXAMPLE1).o: $(EXAMPLE1).f
+
+.PHONY: clean install default
+
+default: $(EXAMPLE1)
+
+XDI_OBJ = xdifile.o str_util.o
+
+$(LIBXDIF): $(XDI_OBJ)
+	@rm -f $@
+	$(AR) cru $(LIBXDIF) $(XDI_OBJ)
+	$(RANLIB) $(LIBXDIF)
+
+$(EXAMPLE1): $(LIBXDIF) $(EXAMPLE1).o 
+	$(F77LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LINKXDIF)  $(FLIBS)
+
+clean :
+	rm -f $(XDI_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF)
+
+install: $(LIBXDIF)
+	cp -pr $(LIBXDIF) $(libdir)/$(LIBXDIF)
