@@ -2,7 +2,7 @@
 ;; see RFC 5234, http://tools.ietf.org/html/rfc5234, for grammar syntax
 
 ;; start rule
-XDI            = [VERSION] [FIELDS] [COMMENTS] [LABELS] 1DATA
+XDI            = VERSION [FIELDS] [COMMENTS] [LABELS] DATA
 
 ;; core rules
 OCTET          = %x00-FF             ; 8 bits of data
@@ -23,77 +23,63 @@ EOL            = CR  /  LF  /  CRLF  ; cross-platform end-of-line
 
 ;; Basic Constructs
 SIGN           = "+"  /  "-"
-EXPONENT       = ("e"  /  "E"  /  "d"  /  "D")  [SIGN]  1*DIGIT
-NUMBER         = 1*DIGIT  ["."  *DIGIT]  [EXPONENT]
+EXPONENT       = ("e"  /  "E"  /  "d"  /  "D")  [SIGN]  *DIGIT
+NUMBER         = *DIGIT  ["."  1*DIGIT]  [EXPONENT]
 INF            = ("i"  /  "I")  ("n"  /  "N")  ("f"  /  "F")
 NAN            = ("n"  /  "N")  ("a"  /  "A")  ("n"  /  "N")
 FLOAT          = [SIGN]  (NUMBER  /  INF  / NAN )
+DATETIME       = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
 
 TEXT           = %09 / %x20-FF        ; any OCTET except CTLs, including WS
-COMM           = "#" / ";"
-PROPERWORD     = ALPHA  *(ALPHA  /  DIGIT  /  "_")
-WORD           = *(ALPHA  /  DIGIT  /  "_")
+COMM           = COMM / ";"
+PROPERWORD     = ALPHA  *(ALPHA  /  DIGIT  /  "_" / "-")
+WORD           = 1*(ALPHA  /  DIGIT  /  "_")
 MATH           = ["ln"] *("-"  /  "+"  /  "*"  /  "$"  /  "/"  /  "("  /  ")"  DIGIT)
 
-FIELD-END      = "#"  1*"/"  EOL
-HEADER-END     = "#"  2*"-"  EOL
+FIELD-END      = COMM  2*"/"  EOL
+HEADER-END     = COMM  2*"-"  EOL
 
 ;; Version Information
-XDI-VERSION    = "XDI/"  1*DIGIT  ". " 1*DIGIT
+XDI-VERSION    = "XDI/"  *DIGIT  ". " *DIGIT
 APPLICATIONS   = VCHAR
-VERSION        = "#"  XDI-VERSION  *APPLICATIONS  EOL
+VERSION        = COMM  XDI-VERSION  *APPLICATIONS  EOL
 
 ;; Defined Fields
-REFLECTION     = 3DIGIT
-ELEMENT        = ("Si" / "Ge" / "Diamond" / "YB66" / "InSb" / "Beryl" / "Multilayer")
-DATETIME       = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
-HARMONIC-VALUE = 1*2DIGIT
+ABSCISSA           = COMM  "Abscissa"           ": "  MATH
+BEAMLINE           = COMM  "Beamline"           ": "  *WORD
+DSPACING           = COMM  "D_spacing"          ": "  FLOAT
+EDGEENERGY         = COMM  "Edge_energy"        ": "  FLOAT
+ENDTIME            = COMM  "End_time"           ": "  DATETIME
+MUFLUOR            = COMM  "Mu_fluorescence"    ": "  MATH
+MUREF              = COMM  "Mu_reference"       ": "  MATH
+MUTRANS            = COMM  "Mu_transmission"    ": "  MATH
+STARTTIME          = COMM  "Start_time"         ": "  DATETIME
 
-ABSCISSA           = "#"  "Abscissa"           ": "  MATH
-BEAMLINE           = "#"  "Beamline"           ": "  *WORD
-COLLIMATION        = "#"  "Collimation"        ": "  *WORD
-CRYSTAL            = "#"  "Crystal"            ": "  MATERIAL  REFLECTION
-DSPACING           = "#"  "D_spacing"          ": "  FLOAT
-EDGEENERGY         = "#"  "Edge_energy"        ": "  FLOAT
-ENDTIME            = "#"  "End_time"           ": "  DATETIME
-FOCUSING           = "#"  "Focusing"           ": "  *WORD
-HARMONIC-REJECTION = "#"  "Harmonic_rejection" ": "  *VCHAR
-MUFLUOR            = "#"  "Mu_fluorescence"    ": "  MATH
-MUREF              = "#"  "Mu_reference"       ": "  MATH
-MUTRANS            = "#"  "Mu_transmission"    ": "  MATH
-RINGCURRENT        = "#"  "Ring_current"       ": "  FLOAT
-RINGENERGY         = "#"  "Ring_energy"        ": "  FLOAT
-STARTTIME          = "#"  "Start_time"         ": "  DATETIME
-SOURCE             = "#"  "Source"             ": "  *WORD
-UNDULATOR-HARMONIC = "#"  "Undulator-harmonic" ": "  HARMONIC-VALUE
-
-DEFINEDFIELDS      = *( (  ABSCISSA     / BEAMLINE    / CRYSTAL
-                          / COLLIMATION  / DSPACING    / EDGEENERGY
-                          / ENDTIME      / FOCUSING    / HARMONIC_REJECTION
+DEFINEDFIELDS      = *( (   ABSCISSA     / BEAMLINE   
+                          / DSPACING     / EDGEENERGY
+                          / STARTTIME    / ENDTIME
                           / MUFLUOR      / MUREF       / MUTRANS
-                          / RINGCURRENT  / RINGENERGY  / STARTTIME 
-                          / SOURCE       / UNDULATOR_HARMONIC
                           / EXT_FIELD    / FIELD_LINE
                          ) EOL ) FIELD-END
 
 ;; Extension Fields
 FIELD-LINE     = DEFINEDFIELDS
-EXT-FIELD-NAME = WORD  *("-"  WORD)
+EXT-FIELD-NAME = PROPERWORD  *("-"  PROPERWORD)
 
-FIELD-LINE     = "#"  FIELD-NAME      ": "  *WORD   EOL
-EXT-FIELD      = "#"  EXT-FIELD-NAME  ": "  *VCHAR  EOL
+FIELD-LINE     = COMM  FIELD-NAME      ": "  *WORD   EOL
+EXT-FIELD      = COMM  EXT-FIELD-NAME  ": "  *VCHAR  EOL
 
 ;; All Fields
 FIELDS         =  (FIELD-LINE / EXT-FIELD)(s) FIELD_END
 
 
 ;; User Comments
-COMMENT-LINE   = "#"  *VCHAR  EOL
+COMMENT-LINE   = COMM  *VCHAR  EOL
 COMMENTS       = *COMMENT-LINE  HEADER-END
 
 ;; Column Labels
-LABEL          = PROPERWORD
-LABELS         = "#" 1*LABEL  EOL
+LABEL          = WORD
+LABELS         = COMM 1*LABEL  EOL
 
 ;; Data Section
 DATA-LINE      = *FLOAT EOL
