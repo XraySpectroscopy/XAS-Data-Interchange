@@ -2,7 +2,7 @@
 ;; see RFC 5234, http://tools.ietf.org/html/rfc5234, for grammar syntax
 
 ;; start rule
-XDI            = VERSION [FIELDS] [COMMENTS] [LABELS] DATA
+XDI            = VERSION FIELDS [COMMENTS] [LABELS] DATA
 
 ;; core rules
 OCTET          = %x00-FF             ; 8 bits of data
@@ -24,62 +24,59 @@ EOL            = CR  /  LF  /  CRLF  ; cross-platform end-of-line
 ;; Basic Constructs
 SIGN           = "+"  /  "-"
 EXPONENT       = ("e"  /  "E"  /  "d"  /  "D")  [SIGN]  *DIGIT
-NUMBER         = *DIGIT  ["."  1*DIGIT]  [EXPONENT]
+NUMBER         = *DIGIT  ["."  *DIGIT]  [EXPONENT]
 INF            = ("i"  /  "I")  ("n"  /  "N")  ("f"  /  "F")
 NAN            = ("n"  /  "N")  ("a"  /  "A")  ("n"  /  "N")
 FLOAT          = [SIGN]  (NUMBER  /  INF  / NAN )
+INTEGER        = 1*DIGIT
 DATETIME       = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
-
+      
 TEXT           = %09 / %x20-FF        ; any OCTET except CTLs, including WS
-COMM           = COMM / ";"
+COMM           = "#" / ";"
 PROPERWORD     = ALPHA  *(ALPHA  /  DIGIT  /  "_" / "-")
-WORD           = 1*(ALPHA  /  DIGIT  /  "_")
-MATH           = ["ln"] *("-"  /  "+"  /  "*"  /  "$"  /  "/"  /  "("  /  ")"  DIGIT)
+WORD           = *(ALPHA  /  DIGIT  /  "_"  /  "-")
+SEPARATOR      = "."
+COLON          = ":"
+VALUE          = *VCHAR
+
+COLUMN-LABEL   = ( "k" / "r" / "i0" / "chi" /
+	           "itrans"    / "ifluor"    / "irefer"    / 
+		   "mutrans"   / "mufluor"   / "murefer"   / 
+		   "normtrans" / "normfluor" / "normrefer" / 
+		   "chi_mag"   / "chi_pha"   / "chi_re"    / "chi_im" /
+		   "chir_mag"  / "chir_pha"  / "chir_re"   / "chir_im" )
 
 FIELD-END      = COMM  2*"/"  EOL
 HEADER-END     = COMM  2*"-"  EOL
 
-;; Version Information
+;; Version Subsection
 XDI-VERSION    = "XDI/"  *DIGIT  ". " *DIGIT
-APPLICATIONS   = VCHAR
+APPLICATIONS   = VALUE
 VERSION        = COMM  XDI-VERSION  *APPLICATIONS  EOL
 
-;; Defined Fields
-ABSCISSA           = COMM  "Abscissa"           ": "  MATH
-BEAMLINE           = COMM  "Beamline"           ": "  *WORD
-DSPACING           = COMM  "D_spacing"          ": "  FLOAT
-EDGEENERGY         = COMM  "Edge_energy"        ": "  FLOAT
-ENDTIME            = COMM  "End_time"           ": "  DATETIME
-MUFLUOR            = COMM  "Mu_fluorescence"    ": "  MATH
-MUREF              = COMM  "Mu_reference"       ": "  MATH
-MUTRANS            = COMM  "Mu_transmission"    ": "  MATH
-STARTTIME          = COMM  "Start_time"         ": "  DATETIME
+;; Defined fields with specified content
+ENERGY         = COMM  "Column"   SEPARATOR INTEGER     COLON "energy" ("ev" / "kev" / "pixel")
+ANGLE          = COMM  "Column"   SEPARATOR INTEGER     COLON "angle"  ("degrees" / "radians" / "steps")
+OTHER-COLUMN   = COMM  "Column"   SEPARATOR INTEGER     COLON COLUMN-LABEL
+STARTTIME      = COMM  "Time"     SEPARATOR "start"     COLON DATETIME
+ENDTIME        = COMM  "Time"     SEPARATOR "end"       COLON DATETIME
+DSPACING       = COMM  "Beamline" SEPARATOR "d-spacing" COLON FLOAT
 
-DEFINEDFIELDS      = *( (   ABSCISSA     / BEAMLINE   
-                          / DSPACING     / EDGEENERGY
-                          / STARTTIME    / ENDTIME
-                          / MUFLUOR      / MUREF       / MUTRANS
-                          / EXT_FIELD    / FIELD_LINE
-                         ) EOL ) FIELD-END
+;; Generic fields
+FIELD-NAME     = PROPERWORD *(SEPARATOR WORD)
+FIELD-LINE     = COMM  FIELD-NAME  COLON  *VALUE
 
-;; Extension Fields
-FIELD-LINE     = DEFINEDFIELDS
-EXT-FIELD-NAME = PROPERWORD  *("-"  PROPERWORD)
+FIELDS         = *(  ( ENERGY / ANGLE / OTHER_COLUMN / STARTTIME / ENDTIME / DSPACING / FIELD-LINE ) EOL )
 
-FIELD-LINE     = COMM  FIELD-NAME      ": "  *WORD   EOL
-EXT-FIELD      = COMM  EXT-FIELD-NAME  ": "  *VCHAR  EOL
+;; Fields subsection
+FIELD-SUBSECTION  = FIELDS FIELD-END
 
-;; All Fields
-FIELDS         =  (FIELD-LINE / EXT-FIELD)(s) FIELD_END
-
-
-;; User Comments
-COMMENT-LINE   = COMM  *VCHAR  EOL
+;; User comments subsection
+COMMENT-LINE   = COMM  *VALUE  EOL
 COMMENTS       = *COMMENT-LINE  HEADER-END
 
 ;; Column Labels
-LABEL          = WORD
-LABELS         = COMM 1*LABEL  EOL
+LABELS         = COMM *WORD  EOL
 
 ;; Data Section
 DATA-LINE      = *FLOAT EOL
