@@ -2,7 +2,7 @@
    Xas Data Interchange Format
 
    Matthew Newville <newville@cars.uchicago.edu>
-   last update:  2001-March-06
+   last update:  2011-Dec-01 
       
 == License:
    To the extent possible, the authors have waived all rights
@@ -17,12 +17,7 @@
    XAS Data Interchange format
    
 """
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 from . import xdi
 XDIFile = xdi.XDIFile
-XDIFileException = xdi.XDIFileException
-
-DEFINED_FIELDS = tuple(sorted(xdi.DEFINED_FIELDS.keys()))
-COLUMN_NAMES = xdi.COLUMN_NAMES
-
