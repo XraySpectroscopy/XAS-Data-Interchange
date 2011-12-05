@@ -175,7 +175,7 @@ def validate(value, dtype, return_val=False):
         else:
             return value
     return isvalid
-              
+
 
 def strip_comment(txt):
     """remove leading comment character
@@ -265,15 +265,15 @@ class XDIFile(object):
 
 #         if self.columns['energy'] is None:
 #             self._error("cannot write datafile '%s': No data to write" % filename)
-# 
+#
 #         print self.app_attrs['pylib'].keys()
-# 
+#
 #         topline = "# XDI/1.0"
 #         if self.app_info is not None:
 #             app_strings = []
 #             for app, version in self.app_info.items():
 #                 app_strings.append("%s/%s" % (app.upper(), version))
-# 
+#
 #             topline = "%s %s" % (topline, ' '.join(app_strings))
 #         buff = [topline]
 #         labels = []
@@ -283,7 +283,7 @@ class XDIFile(object):
 #                 icol = icol + 1
 #                 buff.append('# Column_%s: %i' % (attrib, icol))
 #                 labels.append(attrib)
-# 
+#
 #         buff.append('# Abscissa: $1')
 #         for attrib in sorted(DEFINED_FIELDS):
 #             if attrib.startswith('abscissa'):
@@ -291,17 +291,17 @@ class XDIFile(object):
 #             if self.attrs.get(attrib, None) is not None:
 #                 buff.append("# %s: %s" % (attrib.title(),
 #                                           str(self.attrs[attrib])))
-# 
+#
 #         for app in sorted(self.app_attrs):
 #             for key in sorted(self.app_attrs[app]):
 #                 value = str(self.app_attrs[app][key])
 #                 label = '%s_%s' % (app, key)
 #                 buff.append("# %s: %s" % (label.title(), value))
-# 
+#
 #         buff.append('# ///')
 #         for cline in self.comments:
 #             buff.append("# %s" % cline)
-# 
+#
 #         buff.append('#----')
 #         buff.append('# %s' % ' '.join(labels))
 #         for idx in range(len(self.column_data['energy'])):
@@ -309,11 +309,11 @@ class XDIFile(object):
 #             for lab in labels:
 #                 dat.append(str(self.column_data[lab][idx]))
 #             buff.append("  %s" % '  '.join(dat))
-# 
+#
 #         fout = open(filename, 'w')
 #         fout.writelines(('%s\n' % l for l in buff))
 #         fout.close()
-# 
+#
     def read(self, filename=None):
         """read validate and parse an XDI datafile into python structures
         """
@@ -330,7 +330,7 @@ class XDIFile(object):
 
         ncols = -1
         state = 'HEADER'
-        self._lineno = 0     
+        self._lineno = 0
 
         for line in text[1:]:
             iscomm, line = strip_comment(line)
@@ -377,13 +377,13 @@ class XDIFile(object):
                 try:
                     field, value = [i.strip() for i in line.split(':', 1)]
                 except ValueError:
-                    self._warn("unknown header line")                
+                    self._warn("unknown header line")
                 field = field.lower().replace('-','_')
                 try:
                     family, member = field.split('.', 1)
                 except ValueError:
                     family, member = field, '_'
-                    
+
                 if family == 'column':
                     words = value.split(' ', 1)
                     if not (validate(member, 'int') and
@@ -404,9 +404,10 @@ class XDIFile(object):
                     words = value.split(' ', 1)
                     if not validate(words[0], validator):
                         msg = self._invalid_msg % ('%s.%s' % (family,member),
-                                                   validator, words[0])
+                                                   validator, value)
                         self._error(msg)
-                    value = validate(words[0], validator, return_val=True)
+                    if validator in ('<int>', '<float>', 'int', 'float'):
+                        value = validate(words[0], validator, return_val=True)
                     if member in self.attrs[family]:
                         value = "%s %s" % (self.attrs[family][member],value)
 
@@ -436,7 +437,7 @@ class XDIFile(object):
                 dat = self.rawdata[:,int(idx)-1]
             else:
                 dat = [d[idx-1] for d in self.rawdata]
-            setattr(self, name, dat)                
+            setattr(self, name, dat)
             if name in ('energy', 'angle'):
                 ix = idx
                 xname = name
@@ -448,7 +449,7 @@ class XDIFile(object):
             self._warn('not calculating derived values -- install numpy!',
                        with_line=False)
             return
-        
+
         # convert energy to angle, or vice versa
         if ix > 0 and 'd_spacing' in self.attrs['mono']:
             dspace = float(self.attrs['mono']['d_spacing'])
@@ -463,7 +464,7 @@ class XDIFile(object):
                 if xunits.lower() in ('deg', 'degrees'):
                     angle_rad = angle_rad / RAD2DEG
                 self.energy = omega/sin(angle_rad)
-                
+
         if hasattr(self, 'i0'):
             if hasattr(self, 'itrans') and not hasattr(self, 'mutrans'):
                 self.mutrans = -log(self.itrans / (self.i0+1.e-12))
