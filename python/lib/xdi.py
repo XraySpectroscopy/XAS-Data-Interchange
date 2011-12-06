@@ -325,8 +325,11 @@ class XDIFile(object):
         if not (iscomm and line0.startswith('XDI/')):
             self._error('is not a valid XDI File.', with_line=False)
 
-        self.file_version, other = line0[4:].split(' ', 1)
-        self.app_info.update(dict([o.split('/') for o in other.split()]))
+        vers_info = line0[4:].split(' ', 1)
+        self.file_version = vers_info[0]
+        if len(vers_info) > 1:
+            other = vers_info[1]
+            self.app_info.update(dict([o.split('/') for o in other.split()]))
 
         ncols = -1
         state = 'HEADER'
