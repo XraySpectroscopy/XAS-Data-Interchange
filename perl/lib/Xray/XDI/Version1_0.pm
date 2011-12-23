@@ -10,27 +10,119 @@ has 'version'	         => (is => 'rw', isa => 'Str', default => q{1.0});
 
 has 'applications'	 => (is => 'rw', isa => 'Str', default => q{});
 
-has 'abscissa'   	 => (is => 'rw', isa => 'Str', default => q{});
-has 'beamline'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'collimation'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'crystal'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'd_spacing'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'edge_energy'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'end_time'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'focusing'		 => (is => 'rw', isa => 'Str', default => q{});
-has 'harmonic_rejection' => (is => 'rw', isa => 'Str', default => q{},
-			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
-			     alias=>'rejection');
-has 'mu_fluorescence'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'mu_reference'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'mu_transmission'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'ring_current'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'ring_energy'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'start_time'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'source'		 => (is => 'rw', isa => 'Str', default => q{});
-#has 'step_offset'	 => (is => 'rw', isa => 'Str', default => q{});
-#has 'step_scale'	 => (is => 'rw', isa => 'Str', default => q{});
-has 'undulator_harmonic' => (is => 'rw', isa => 'Str', default => q{});
+has 'column'    => (metaclass => 'Collection::Hash',
+		    is        => 'rw',
+		    isa       => 'HashRef[Str]',
+		    default   => sub { {} },
+		    provides  => {
+				  exists    => 'exists_in_column',
+				  keys      => 'keys_in_column',
+				  get       => 'get_column',
+				  set       => 'set_column',
+				 }
+		   );
+has 'scan'      => (metaclass => 'Collection::Hash',
+		    is        => 'rw',
+		    isa       => 'HashRef[Str]',
+		    default   => sub { {} },
+		    provides  => {
+				  exists    => 'exists_in_scan',
+				  keys      => 'keys_in_scan',
+				  get       => 'get_scan',
+				  set       => 'set_scan',
+				 }
+		   );
+has 'mono'     => (metaclass => 'Collection::Hash',
+		   is        => 'rw',
+		   isa       => 'HashRef[Str]',
+		   default   => sub { {} },
+		   provides  => {
+				 exists    => 'exists_in_mono',
+				 keys      => 'keys_in_mono',
+				 get       => 'get_mono',
+				 set       => 'set_mono',
+				}
+		  );
+has 'beamline' => (metaclass => 'Collection::Hash',
+		   is        => 'rw',
+		   isa       => 'HashRef[Str]',
+		   default   => sub { {} },
+		   provides  => {
+				 exists    => 'exists_in_beamline',
+				 keys      => 'keys_in_beamline',
+				 get       => 'get_beamline',
+				 set       => 'set_beamline',
+				}
+		  );
+has 'facility' => (metaclass => 'Collection::Hash',
+		   is        => 'rw',
+		   isa       => 'HashRef[Str]',
+		   default   => sub { {} },
+		   provides  => {
+				 exists    => 'exists_in_facility',
+				 keys      => 'keys_in_facility',
+				 get       => 'get_facility',
+				 set       => 'set_facility',
+				}
+		  );
+has 'detector' => (metaclass => 'Collection::Hash',
+		   is        => 'rw',
+		   isa       => 'HashRef[Str]',
+		   default   => sub { {} },
+		   provides  => {
+				 exists    => 'exists_in_detector',
+				 keys      => 'keys_in_detector',
+				 get       => 'get_detector',
+				 set       => 'set_detector',
+				}
+		  );
+has 'sample'   => (metaclass => 'Collection::Hash',
+		   is        => 'rw',
+		   isa       => 'HashRef[Str]',
+		   default   => sub { {} },
+		   provides  => {
+				 exists    => 'exists_in_sample',
+				 keys      => 'keys_in_sample',
+				 get       => 'get_sample',
+				 set       => 'set_sample',
+				}
+		  );
+
+
+has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
+		       default => sub{ ['column',
+					'scan',
+					'mono',
+					'beamline',
+					'facility',
+					'detector',
+					'sample',]
+				     });
+
+
+
+
+# has 'abscissa'   	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'beamline'		 => (is => 'rw', isa => 'Str', default => q{});
+# has 'collimation'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'crystal'		 => (is => 'rw', isa => 'Str', default => q{});
+# has 'd_spacing'		 => (is => 'rw', isa => 'Str', default => q{});
+# has 'edge_energy'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'end_time'		 => (is => 'rw', isa => 'Str', default => q{});
+# has 'focusing'		 => (is => 'rw', isa => 'Str', default => q{});
+# has 'harmonic_rejection' => (is => 'rw', isa => 'Str', default => q{},
+# 			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
+# 			     alias=>'rejection');
+# has 'mu_fluorescence'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'mu_reference'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'mu_transmission'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'ring_current'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'ring_energy'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'start_time'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'source'		 => (is => 'rw', isa => 'Str', default => q{});
+# #has 'step_offset'	 => (is => 'rw', isa => 'Str', default => q{});
+# #has 'step_scale'	 => (is => 'rw', isa => 'Str', default => q{});
+# has 'undulator_harmonic' => (is => 'rw', isa => 'Str', default => q{});
 
 ## note that the MooseX::Aliases 0.08 pod is incorrect in how to get
 ## an alias applied in a role.  the following works, but was a bit
@@ -50,25 +142,25 @@ has 'record_separator'   => (is => 'rw', isa => 'Str', default => "\t",
 			     alias=>'rs');
 
 
-has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
-		       default => sub{ ['beamline',
-					'source',
-					'undulator_harmonic',
-					'ring_energy',
-					'ring_current',
-					'collimation',
-					'crystal',
-					'd_spacing',
-					'focusing',
-					'harmonic_rejection',
-					'edge_energy',
-					'start_time',
-					'end_time',
-					'abscissa',
-					'mu_transmission',
-					'mu_fluorescence',
-					'mu_reference',
-				       ] });
+# has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
+# 		       default => sub{ ['beamline',
+# 					'source',
+# 					'undulator_harmonic',
+# 					'ring_energy',
+# 					'ring_current',
+# 					'collimation',
+# 					'crystal',
+# 					'd_spacing',
+# 					'focusing',
+# 					'harmonic_rejection',
+# 					'edge_energy',
+# 					'start_time',
+# 					'end_time',
+# 					'abscissa',
+# 					'mu_transmission',
+# 					'mu_fluorescence',
+# 					'mu_reference',
+# 				       ] });
 
 
 sub define_grammar {
@@ -124,90 +216,42 @@ MATERIAL:       ("Si" | "Ge" | "Diamond" | "YB66" | "InSb" | "Beryl" | "Multilay
 DATETIME:       /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
 HARMONIC_VALUE: /\d{1,2}/
 
-ABSCISSA:    COMM  "Abscissa"    ":"  MATH {
+BEAMLINE:    COMM  "Beamline" "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->abscissa(join(" ", $item[4]));
+	     $Xray::XDI::object->beamline(join(" ", @{$item[6]}));
             }
 
-BEAMLINE:    COMM  "Beamline"           ":"  TEXT(s) {
+COLUMN:      COMM  "Column" "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->beamline(join(" ", @{$item[4]}));
+	     $Xray::XDI::object->set_column(join(" ", @{$item[6]}));
             }
 
-COLLIMATION: COMM  "Collimation"        ":"  TEXT(s) {
+DETECTOR:    COMM  "Detector" "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->collimation(join(" ", @{$item[4]}));
+	     $Xray::XDI::object->set_detector(join(" ", @{$item[6]}));
             }
 
-CRYSTAL:     COMM  "Crystal"            ":"  MATERIAL REFLECTION {
+FACILITY:    COMM  "Facility" "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->crystal(join(" ", $item[4], $item[5]));
+	     $Xray::XDI::object->set_facility(join(" ", @{$item[6]}));
             }
 
-DSPACING:    COMM  "D_spacing"          ":"  FLOAT {
+MONO:        COMM  "Mono"     "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->d_spacing(join(" ", @{$item[4]}));
+	     $Xray::XDI::object->set_mono(join(" ", @{$item[6]}));
             }
 
-EDGEENERGY:  COMM  "Edge_energy"        ":"  FLOAT {
+SAMPLE:      COMM  "Sample"   "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->edge_energy(join(" ", $item[4]));
+	     $Xray::XDI::object->set_sample(join(" ", @{$item[6]}));
             }
 
-ENDTIME:     COMM  "End_time"           ":"  DATETIME {
+SCAN:        COMM  "Scan"     "." PROPERWORD ":"  TEXT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->end_time(join(" ", $item[4]));
+	     $Xray::XDI::object->set_scan(join(" ", @{$item[6]}));
             }
 
-FOCUSING:    COMM  "Focusing"           ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->focusing(join(" ", @{$item[4]}));
-            }
 
-HARMONIC:    COMM  "Undulator_harmonic" ":"  HARMONIC_VALUE {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->undulator_harmonic(join(" ", $item[4]));
-            }
-
-MUFLUOR:     COMM  "Mu_fluorescence"    ":"  MATH {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->mu_fluorescence(join(" ", $item[4]));
-            }
-
-MUREF:       COMM  "Mu_reference"       ":"  MATH {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->mu_reference(join(" ", $item[4]));
-            }
-
-MUTRANS:     COMM  "Mu_transmission"    ":"  MATH {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->mu_transmission(join(" ", $item[4]));
-            }
-
-REJECTION:   COMM  "Harmonic_rejection" ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->harmonic_rejection(join(" ", @{$item[4]}));
-            }
-
-RINGCURRENT: COMM  "Ring_current"       ":"  FLOAT {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->ring_current(join(" ", $item[4]));
-            }
-
-RINGENERGY:  COMM  "Ring_energy"        ":"  FLOAT {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->ring_energy(join(" ", $item[4]));
-            }
-
-STARTTIME:   COMM  "Start_time"         ":"  DATETIME {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->start_time(join(" ", $item[4]));
-            }
-
-SOURCE:      COMM  "Source"             ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->source(join(" ", @{$item[4]}));
-            }
 
 
 EXT_FIELD_NAME:  PROPERWORD
@@ -217,13 +261,7 @@ EXT_FIELD:  COMM  EXT_FIELD_NAME  ":"  ANY(s?)  EOL {
             }
 
 FIELD_LINE: DEFINEDFIELDS
-DEFINEDFIELDS: (  ABSCISSA      | BEAMLINE    | CRYSTAL
-                | COLLIMATION   | DSPACING    | EDGEENERGY
-                | ENDTIME       | FOCUSING    | HARMONIC
-                | REJECTION     | MUFLUOR     | MUREF
-                | MUTRANS       | RINGCURRENT | RINGENERGY
-                | STARTTIME     | SOURCE
-               ) EOL
+DEFINEDFIELDS: (  BEAMLINE | COLUMN | DETECTOR | FACILITY | MONO | SAMPLE | SCAN ) EOL
 
 FIELDS:  (FIELD_LINE | EXT_FIELD)(s) FIELD_END
 

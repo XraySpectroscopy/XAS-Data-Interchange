@@ -7,6 +7,9 @@ use version;
 use Moose;
 use Moose::Util qw(apply_all_roles);
 use MooseX::AttributeHelpers;
+use MooseX::Aliases;
+
+use Config::IniFiles;
 use Parse::RecDescent;
 use Scalar::Util qw(looks_like_number);
 
@@ -19,9 +22,11 @@ has 'is_xdi'       => (is => 'rw', isa => 'Bool', default => 0,);
 has 'file'	   => (is => 'rw', isa => 'Str', default => q{},
 		       trigger => sub{my ($self, $new) = @_; $self->parse;});
 has 'out'	   => (is => 'rw', isa => 'Str', default => q{});
+has 'ini'	   => (is => 'rw', isa => 'Str', default => q{},
+		       trigger => sub{my ($self, $new) = @_; $self->configure_from_ini($new)});
 has 'xdi_version'  => (is => 'rw', isa => 'Str', default => sub{sprintf "%s", $VERSION},
 		       trigger => sub{my ($self, $new) = @_; $self->get_grammar });
-has 'grammar'      => (is => 'rw', isa => 'Str', default => q{});
+has 'grammar'      => (is => 'rw', isa => 'Str', default => q{}, alias => 'grammer');
 
 has 'extensions'   => (metaclass => 'Collection::Array',
 		       is => 'rw', isa => 'ArrayRef[Str]',
@@ -55,17 +60,17 @@ has 'labels'     => (
                                      'clear' => 'clear_labels',
                                     }
                       );
-has 'data'     => (
-		   metaclass => 'Collection::Array',
-		   is        => 'rw',
-		   isa       => 'ArrayRef[ArrayRef]',
-		   default   => sub { [] },
-		   provides  => {
-				 'push'  => 'push_data',
-				 'pop'   => 'pop_data',
-				 'clear' => 'clear_data',
-				}
-		  );
+has 'data'       => (
+		     metaclass => 'Collection::Array',
+		     is        => 'rw',
+		     isa       => 'ArrayRef[ArrayRef]',
+		     default   => sub { [] },
+		     provides  => {
+				   'push'  => 'push_data',
+				   'pop'   => 'pop_data',
+				   'clear' => 'clear_data',
+				  }
+		    );
 
 sub BUILD {
   my ($self) = @_;
@@ -75,7 +80,7 @@ sub BUILD {
 sub get_grammar {
   my ($self) = @_;
   my $version = $self->xdi_version;
-  #print $version, $/;
+  local $|=1;
   if (looks_like_number($version)) {
     $version =~ s{\.}{_}g;
     eval {apply_all_roles($self, 'Xray::XDI::Version'.$version)};
@@ -135,7 +140,7 @@ sub parse {
 sub clear {
   my ($self) = @_;
   foreach my $p (@{$self->order}) {
-    $self->$p(q{});
+    $self->$p({});
   };
   $self->applications(q{});
   $self->grammar(q{});
@@ -171,7 +176,10 @@ sub export {
   # print list of defined fields in the order specified from the role
   foreach my $f (@{$self->order}) {
     next if ($self->$f =~ m{\A\s*\z});
-    print $OUT $self->cc, ' ', ucfirst($f), ': ', $self->$f, $/;
+    foreach my $k (sort keys %{$self->$f}) {
+      printf $OUT "%s %s.%s: %s$/", $self->cc, ucfirst($f), $k, $self->$f->{$k};
+    };
+    ##print $OUT $self->cc, ' ', ucfirst($f), ': ', $self->$f, $/;
   };
 
   # print extension fields
@@ -204,6 +212,21 @@ sub export {
 
   close $OUT;
   return $self;
+};
+
+sub configure_from_ini {
+  my ($self, $inifile) = @_;
+  return if not -e $inifile;
+  return if not -r $inifile;
+  tie my %ini, 'Config::IniFiles', ( -file => $inifile );
+  foreach my $namespace (keys %ini) {
+    next if ($namespace eq 'labels');
+    foreach my $parameter (keys(%{$ini{$namespace}})) {
+      my $method = "set_$namespace";
+      $self->$method($parameter, $ini{$namespace}{$parameter});
+    };
+  };
+  $self->labels([split(" ", $ini{labels}{labels})]);
 };
 
 1;
@@ -270,6 +293,12 @@ this:
 =item C<out>
 
 The name of the exported data file.
+
+=item C<ini>
+
+The name of an ini-style configuration file containing a collection of
+metadata.  Setting this triggers the reading of the ini file and the
+setting of the metadata contained therein.
 
 =item C<xdi_version>
 
