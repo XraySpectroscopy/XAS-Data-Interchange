@@ -17,6 +17,6 @@ my $build = Module::Build
 			       'MooseX::Aliases'          => 0.08,
 			      },
 	recommends         => {},
-	sign               => 0,
+	sign               => 1,
 );
 $build->create_build_script;

@@ -9,23 +9,23 @@ $debug = 0;
 
 sub id {
   my ($self) = @_;
-  $self->source('APS undulator A');
-  $self->focusing('none (possibly KB mirrors)');
-  $self->harmonic_rejection('flat, cylindrically bent mirror with Pt or Rh coating');
+  $self->set_facility('xray_source', 'APS undulator A');
+  $self->set_beamline('focusing', 'none (possibly KB mirrors)');
+  $self->set_beamline('harmonic_rejection', 'flat, cylindrically bent mirror with Pt or Rh coating');
   return $self;
 };
 
 sub bm {
   my ($self) = @_;
-  $self->source('bending magnet');
-  $self->focusing('none');
-  $self->harmonic_rejection('none');
+  $self->set_facility('xray_source', 'bending magnet');
+  $self->set_beamline('focusing', 'none');
+  $self->set_beamline('harmonic_rejection', 'none');
   return $self;
 };
 
 sub define_grammar  {
   return <<'_EOGRAMMAR_';
-XDI: <skip: qr/[ \t]*/> COMMENTS LABELS(1) DATA
+XDI: <skip: qr/[ \t]*/> COMMENTS LABELS(1)
 
 
 UPALPHA:    /[A-Z]+/
@@ -72,57 +72,57 @@ FILE:       QUOTE /[^\"]*/ QUOTE "created at APS" ("Sector 10-ID" | WORD) "on" W
                my $hour  = $item[10];
                my $min   = $item[12];
                my $sec   = $item[14];
-	       $Xray::XDI::object->start_time(sprintf("%d-%2.2d-%2.2d%s%2.2d:%2.2d:%2.2d", $year, $month, $day, 'T', $hour, $min, $sec));
+	       $Xray::XDI::object->set_scan('start_time', sprintf("%d-%2.2d-%2.2d%s%2.2d:%2.2d:%2.2d", $year, $month, $day, 'T', $hour, $min, $sec));
                my $beamline = (lc($item[5]) =~ m{bm}) ? 'bm' : 'id';
-	       $Xray::XDI::object->beamline("APS 10".uc($beamline));
-	       $Xray::XDI::object->collimation('none');
+	       $Xray::XDI::object->set_beamline('name', "APS 10".uc($beamline));
+	       $Xray::XDI::object->set_beamline('collimation', 'none');
                $Xray::XDI::object->$beamline;
             }
 
 RINGENERGY: "Ring energy=" FLOAT "GeV" {
                my $energy = ($item[2] > 100) ? $item[2]/1000 : $item[2];
-               $Xray::XDI::object->ring_energy($energy);
+               $Xray::XDI::object->set_facility('energy', $energy);
             }
 
 ENOT:       "E0=" FLOAT {
                print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-               $Xray::XDI::object->edge_energy($item[2]);
-	       ($item[2] < 10000) ? $Xray::XDI::object->undulator_harmonic('1') : $Xray::XDI::object->undulator_harmonic('3');
+               $Xray::XDI::object->set_scan('edge_energy', $item[2]);
+	       #($item[2] < 10000) ? $Xray::XDI::object->undulator_harmonic('1') : $Xray::XDI::object->undulator_harmonic('3');
             }
 
 REGIONS:    "NUM_REGIONS=" INTEGER {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-NUM_REGIONS" . ': '. $item[2]);
+             $Xray::XDI::object->push_extension("MX.NUM_REGIONS" . ': '. $item[2]);
             }
 
 SRB:        "SRB=" EORK(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-SRB" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("MX.SRB" . ': '. join(" ", @{$item[2]}));
             }
 
 SRSS:       "SRSS=" EORK(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-SRSS" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("MX.SRSS" . ': '. join(" ", @{$item[2]}));
             }
 
 SPP:        "SPP=" EORK(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-SPP" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("MX.SPP" . ': '. join(" ", @{$item[2]}));
             }
 
 SETTLE:     "Settling time=" FLOAT {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-Settling_time" . ': '. join(" ", $item[2]));
+             $Xray::XDI::object->push_extension("MX.Settling_time" . ': '. join(" ", $item[2]));
             }
 
 OFFSETS:    "Offsets=" FLOAT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-Offsets" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("MX.Offsets" . ': '. join(" ", @{$item[2]}));
             }
 
 GAINS:      "Gains=" FLOAT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
-             $Xray::XDI::object->push_extension("MX-Gains" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("MX.Gains" . ': '. join(" ", @{$item[2]}));
             }
 
 COMMLINE:   ANY(s) {
@@ -143,7 +143,7 @@ LABELS:   LABEL(s) EOL {
             }
 
 DATA_LINE: FLOAT(s) EOL {
-             print(join("~", @item), $/) if $Xray::XDI::Alien::MX::debug;
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Alien::MX::debug > 1;
              $Xray::XDI::object->add_data_point(@{$item[1]})  if $#{$item[1]}>-1;
              #print join("~", "DATA_LINE", @{$item[2]}), $/;
             }

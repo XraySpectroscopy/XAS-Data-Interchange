@@ -2,9 +2,10 @@ package Xray::XDI::Version1_0;
 
 use Moose::Role;
 use MooseX::Aliases;
+use Data::Dumper;
 
 use vars qw($debug);
-$debug = 0;
+$debug = 0;  # 0 = no debug messages, 1 = debug headers, 2 = headers & data
 
 has 'version'	         => (is => 'rw', isa => 'Str', default => q{1.0});
 
@@ -88,6 +89,17 @@ has 'sample'   => (metaclass => 'Collection::Hash',
 				}
 		  );
 
+# has 'extensions' => (metaclass => 'Collection::Array',
+# 		     is        => 'rw',
+# 		     isa       => 'ArrayRef[Str]',
+# 		     default   => sub { [] },
+# 		     provides  => {
+# 				   'push'  => 'push_extension',
+# 				   'pop'   => 'pop_extension',
+# 				   'clear' => 'clear_extensions',
+# 				  }
+# 		    );
+
 
 has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
 		       default => sub{ ['column',
@@ -102,27 +114,6 @@ has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
 
 
 
-# has 'abscissa'   	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'beamline'		 => (is => 'rw', isa => 'Str', default => q{});
-# has 'collimation'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'crystal'		 => (is => 'rw', isa => 'Str', default => q{});
-# has 'd_spacing'		 => (is => 'rw', isa => 'Str', default => q{});
-# has 'edge_energy'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'end_time'		 => (is => 'rw', isa => 'Str', default => q{});
-# has 'focusing'		 => (is => 'rw', isa => 'Str', default => q{});
-# has 'harmonic_rejection' => (is => 'rw', isa => 'Str', default => q{},
-# 			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
-# 			     alias=>'rejection');
-# has 'mu_fluorescence'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'mu_reference'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'mu_transmission'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'ring_current'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'ring_energy'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'start_time'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'source'		 => (is => 'rw', isa => 'Str', default => q{});
-# #has 'step_offset'	 => (is => 'rw', isa => 'Str', default => q{});
-# #has 'step_scale'	 => (is => 'rw', isa => 'Str', default => q{});
-# has 'undulator_harmonic' => (is => 'rw', isa => 'Str', default => q{});
 
 ## note that the MooseX::Aliases 0.08 pod is incorrect in how to get
 ## an alias applied in a role.  the following works, but was a bit
@@ -140,27 +131,6 @@ has 'header_end'         => (is => 'rw', isa => 'Str', default => q{#}.'-' x 60,
 has 'record_separator'   => (is => 'rw', isa => 'Str', default => "\t",
 			     traits => ['MooseX::Aliases::Meta::Trait::Attribute'],
 			     alias=>'rs');
-
-
-# has 'order' 	   => (is => 'rw', isa => 'ArrayRef',
-# 		       default => sub{ ['beamline',
-# 					'source',
-# 					'undulator_harmonic',
-# 					'ring_energy',
-# 					'ring_current',
-# 					'collimation',
-# 					'crystal',
-# 					'd_spacing',
-# 					'focusing',
-# 					'harmonic_rejection',
-# 					'edge_energy',
-# 					'start_time',
-# 					'end_time',
-# 					'abscissa',
-# 					'mu_transmission',
-# 					'mu_fluorescence',
-# 					'mu_reference',
-# 				       ] });
 
 
 sub define_grammar {
@@ -216,48 +186,48 @@ MATERIAL:       ("Si" | "Ge" | "Diamond" | "YB66" | "InSb" | "Beryl" | "Multilay
 DATETIME:       /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
 HARMONIC_VALUE: /\d{1,2}/
 
-BEAMLINE:    COMM  "Beamline" "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->beamline(join(" ", @{$item[6]}));
+BEAMLINE:    COMM  "Beamline" "." PROPERWORD ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_beamline($item[4], join(" ", @{$item[6]}));
             }
 
-COLUMN:      COMM  "Column" "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->set_column(join(" ", @{$item[6]}));
+COLUMN:      COMM  "Column" "." INTEGER(s) ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_column(join("", @{$item[4]}), join(" ", @{$item[6]}));
             }
 
-DETECTOR:    COMM  "Detector" "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->set_detector(join(" ", @{$item[6]}));
+DETECTOR:    COMM  "Detector" "." PROPERWORD ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_detector($item[4], join(" ", @{$item[6]}));
             }
 
-FACILITY:    COMM  "Facility" "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->set_facility(join(" ", @{$item[6]}));
+FACILITY:    COMM  "Facility" "." PROPERWORD ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_facility($item[4], join(" ", @{$item[6]}));
             }
 
-MONO:        COMM  "Mono"     "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->set_mono(join(" ", @{$item[6]}));
+MONO:        COMM  "Mono"     "." PROPERWORD ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_mono($item[4], join(" ", @{$item[6]}));
             }
 
-SAMPLE:      COMM  "Sample"   "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->set_sample(join(" ", @{$item[6]}));
+SAMPLE:      COMM  "Sample"   "." PROPERWORD ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_sample($item[4], join(" ", @{$item[6]}));
             }
 
-SCAN:        COMM  "Scan"     "." PROPERWORD ":"  TEXT(s) {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-	     $Xray::XDI::object->set_scan(join(" ", @{$item[6]}));
+SCAN:        COMM  "Scan"     "." PROPERWORD ":"  ANY(s) {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
+	     $Xray::XDI::object->set_scan($item[4], join(" ", @{$item[6]}));
             }
 
 
 
 
 EXT_FIELD_NAME:  PROPERWORD
-EXT_FIELD:  COMM  EXT_FIELD_NAME  ":"  ANY(s?)  EOL {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
-             $Xray::XDI::object->push_extension($item[2] . ': '. join(" ", @{$item[4]}));
+EXT_FIELD:  COMM  EXT_FIELD_NAME '.' PROPERWORD ":"  ANY(s?)  EOL {
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug; 
+             $Xray::XDI::object->push_extension(join("", @item[2..4]) . ': ' . join(" ", @{$item[6]}));
             }
 
 FIELD_LINE: DEFINEDFIELDS
@@ -266,26 +236,34 @@ DEFINEDFIELDS: (  BEAMLINE | COLUMN | DETECTOR | FACILITY | MONO | SAMPLE | SCAN
 FIELDS:  (FIELD_LINE | EXT_FIELD)(s) FIELD_END
 
 COMMENT_LINE: NOTDASH  ANY(s?) EOL {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
              $Xray::XDI::object->push_comment(join(" ", @{$item[2]}));
             }
 COMMENTS:     COMMENT_LINE(s?)  HEADER_END
 
 LABEL:    ANY
 LABELS:   COMM  LABEL(s) EOL {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug;
              $Xray::XDI::object->push_label(@{$item[2]});
             }
 
 DATA_LINE: FLOAT(s) EOL {
-             print(join("~", @item), $/) if $Xray::XDI::Version1_0::debug;
+             Xray::XDI::Version1_0::dumpit(\@item) if $Xray::XDI::Version1_0::debug > 1;
              $Xray::XDI::object->add_data_point(@{$item[1]})  if $#{$item[1]}>-1;
-             #print join("~", "DATA_LINE", @{$item[2]}), $/;
             }
 DATA:      DATA_LINE(s?)
 
 _EOGRAMMAR_
 }
+
+sub dumpit {
+  local $Data::Dumper::Indent = 0;
+  my $line = Data::Dumper->Dump($_[0]);
+  $line =~ s{\$VAR\d+ =}{}g;
+  $line =~ s{;}{}g;
+  $line =~ s{\n}{\\n}g;
+  print $line, $/;
+};
 
 1;
 
@@ -308,27 +286,16 @@ capitalized while attribute names are all lower case.
 
 =head2 Attribute order
 
-The C<order> attribute defines the recommended order of attributes in
+The C<order> attribute defines the recommended order of namespaces in
 an exported XDI file:
 
-   applications
-   beamline
-   source
-   undulator_harmonic
-   ring_energy
-   ring_current
-   collimation
-   crystal
-   d_spacing
-   focusing
-   harmonic_rejection
-   edge_energy
-   start_time
-   end_time
-   abscissa
-   mu_transmission
-   mu_fluorescence
-   mu_reference
+    column
+    scan
+    mono
+    beamline
+    facility
+    detector
+    sample
 
 =head2 Structural elements
 
@@ -416,38 +383,19 @@ This grammar is expressed in BNF form as:
    DATETIME       = 4DIGIT  "-"  2DIGIT  "-"  2DIGIT "T" 2DIGIT  ":"  2DIGIT  ":"  2DIGIT
    HARMONIC-VALUE = 1*2DIGIT
 
-   ABSCISSA           = "#"  "Abscissa"           ": "  MATH
-   BEAMLINE           = "#"  "Beamline"           ": "  *WORD
-   COLLIMATION        = "#"  "Collimation"        ": "  *WORD
-   CRYSTAL            = "#"  "Crystal"            ": "  MATERIAL  REFLECTION
-   DSPACING           = "#"  "D_spacing"          ": "  FLOAT
-   EDGEENERGY         = "#"  "Edge_energy"        ": "  FLOAT
-   ENDTIME            = "#"  "End_time"           ": "  DATETIME
-   FOCUSING           = "#"  "Focusing"           ": "  *WORD
-   HARMONIC-REJECTION = "#"  "Harmonic_rejection" ": "  *VCHAR
-   MUFLUOR            = "#"  "Mu_fluorescence"    ": "  MATH
-   MUREF              = "#"  "Mu_reference"       ": "  MATH
-   MUTRANS            = "#"  "Mu_transmission"    ": "  MATH
-   RINGCURRENT        = "#"  "Ring_current"       ": "  FLOAT
-   RINGENERGY         = "#"  "Ring_energy"        ": "  FLOAT
-   STARTTIME          = "#"  "Start_time"         ": "  DATETIME
-   SOURCE             = "#"  "Source"             ": "  *WORD
-   UNDULATOR-HARMONIC = "#"  "Undulator-harmonic" ": "  HARMONIC-VALUE
+   BEAMLINE       =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
+   COLUMN         =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
+   DETECTOR       =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
+   FACILITY       =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
+   MONO           =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
+   SAMPMLE        =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
+   SCAN           =    COMM  "Beamline" "." PROPERWORD ":"  ANY(s)
 
-   DEFINEDFIELDS      = *( (  ABSCISSA     / BEAMLINE    / CRYSTAL
-                             / COLLIMATION  / DSPACING    / EDGEENERGY
-                             / ENDTIME      / FOCUSING    / HARMONIC_REJECTION
-                             / MUFLUOR      / MUREF       / MUTRANS
-                             / RINGCURRENT  / RINGENERGY  / STARTTIME 
-                             / SOURCE       / UNDULATOR_HARMONIC
-                             / EXT_FIELD    / FIELD_LINE
-                            ) EOL ) FIELD-END
+   DEFINEDFIELDS  = (  BEAMLINE / COLUMN / DETECTOR / FACILITY / MONO / SAMPLE / SCAN ) EOL
+   FIELD-LINE     = DEFINEDFIELDS
 
    ;; Extension Fields
-   FIELD-LINE     = DEFINEDFIELDS
-   EXT-FIELD-NAME = WORD  *("-"  WORD)
-
-   FIELD-LINE     = "#"  FIELD-NAME      ": "  *WORD   EOL
+   EXT-FIELD-NAME = PROPERWORD  "."  WORD
    EXT-FIELD      = "#"  EXT-FIELD-NAME  ": "  *VCHAR  EOL
 
    ;; All Fields

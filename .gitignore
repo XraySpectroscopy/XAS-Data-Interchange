@@ -3,4 +3,8 @@
 *.a
 *~
 *#
-
+perl/_build
+perl/blib
+perl/Build
+perl/META.yml
+perl/MYMETA.yml

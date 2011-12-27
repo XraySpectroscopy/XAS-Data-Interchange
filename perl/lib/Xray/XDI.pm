@@ -80,17 +80,10 @@ sub BUILD {
 sub get_grammar {
   my ($self) = @_;
   my $version = $self->xdi_version;
-  local $|=1;
   if (looks_like_number($version)) {
     $version =~ s{\.}{_}g;
     eval {apply_all_roles($self, 'Xray::XDI::Version'.$version)};
     $@ and croak("Grammar version Xray::XDI::Version$version does not exist");
-  } elsif ($version eq 'xdac') {
-    eval {apply_all_roles($self, 'Xray::XDI::Alien::XDAC')};
-    $@ and croak("Grammar version Xray::XDI::Alien::XDAC does not exist");
-  } elsif ($version eq 'mx') {
-    eval {apply_all_roles($self, 'Xray::XDI::Alien::MX')};
-    $@ and croak("Grammar version Xray::XDI::Alien::MX does not exist");
   };
   $self->grammar($self->define_grammar);
   return $self;
@@ -112,14 +105,6 @@ sub parse {
   };
   if ($data =~ m{\A[\#;][ \t]*XDI/(\d+\.\d+)}) {
     $self->xdi_version($1);
-    $self->is_xdi(1);
-
-  # handle known alien grammers
-  } elsif ($data =~ m{\AXDAC}) {
-    $self->xdi_version('xdac');
-    $self->is_xdi(1);
-  } elsif ($data =~ m{\AMRCAT_XAFS}) {
-    $self->xdi_version('mx');
     $self->is_xdi(1);
 
   # not intepretable as an XDI file
@@ -179,7 +164,6 @@ sub export {
     foreach my $k (sort keys %{$self->$f}) {
       printf $OUT "%s %s.%s: %s$/", $self->cc, ucfirst($f), $k, $self->$f->{$k};
     };
-    ##print $OUT $self->cc, ' ', ucfirst($f), ': ', $self->$f, $/;
   };
 
   # print extension fields

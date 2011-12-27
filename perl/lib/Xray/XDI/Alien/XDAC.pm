@@ -9,89 +9,98 @@ $debug = 0;
 
 sub x3a {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{sagittally bent second crystal});
-  $self->harmonic_rejection(q{flat cylindrically bent mirror});
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'sagittally bent second crystal');
+  $self->set_beamline('harmonic_rejection', 'flat cylindrically bent mirror');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x3b {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{sagittally bent second crystal});
-  $self->harmonic_rejection(q{Nickel coated cylindrically bent mirror });
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'sagittally bent second crystal');
+  $self->set_beamline('harmonic_rejection', 'Nickel coated cylindrically bent mirror ');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x11a {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{none});
-  $self->harmonic_rejection(q{detuned mono});
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'none');
+  $self->set_beamline('harmonic_rejection', 'detuned mono');
   return $self;
 };
 
 sub x11b {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{none});
-  $self->harmonic_rejection(q{bent second surface of channel-cut mono});
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'none');
+  $self->set_beamline('harmonic_rejection', 'bent second surface of channel-cut mono');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x18a {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{Cylindrical, rhodium-coated aluminum 1:1 focusing mirror});
-  $self->harmonic_rejection(q{detuned mono});
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'Cylindrical, rhodium-coated aluminum 1:1 focusing mirror');
+  $self->set_beamline('harmonic_rejection', 'detuned mono');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x18b {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{none});
-  $self->harmonic_rejection(q{detuned mono});
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'none');
+  $self->set_beamline('harmonic_rejection', 'detuned mono');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x19a {
   my ($self) = @_;
-  $self->collimation(q{Rh-coated spherical mirror, 3 mrad incident angle});
-  $self->focusing(q{Rh-coated toroidal mirror});
-  $self->harmonic_rejection(q{detuned mono});
+  $self->set_beamline('collimation', 'Rh-coated spherical mirror, 3 mrad incident angle');
+  $self->set_beamline('focusing', 'Rh-coated toroidal mirror');
+  $self->set_beamline('harmonic_rejection', 'detuned mono');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x23a2 {
   my ($self) = @_;
-  $self->collimation('none');
-  $self->focusing('none');
-  $self->harmonic_rejection('flat Rh coated mirror');
+  $self->set_beamline('collimation', 'one');
+  $self->set_beamline('focusing', 'none');
+  $self->set_beamline('harmonic_rejection', 'flat Rh coated mirror');
+  $self->set_mono('name', 'Si 311');
   return $self;
 };
 
 sub x23b {
   my ($self) = @_;
-  $self->collimation(q{Pt-coated flat silicon mirror with 4-point bender});
-  $self->focusing(q{Nii-coated quartz toroidal mirror});
-  $self->harmonic_rejection(q{upstream mirrors});
+  $self->set_beamline('collimation', 'Pt-coated flat silicon mirror with 4-point bender');
+  $self->set_beamline('focusing', 'Nii-coated quartz toroidal mirror');
+  $self->set_beamline('harmonic_rejection', 'upstream mirrors');
+  $self->set_mono('name', 'Si 111');
   return $self;
 };
 
 sub x24a {
   my ($self) = @_;
-  $self->collimation(q{Ni-coated graphite spherical mirror});
-  $self->focusing(q{Pt-coated quartz toroidal mirror});
-  $self->harmonic_rejection(q{upstream mirrors});
+  $self->set_beamline('collimation', 'Ni-coated graphite spherical mirror');
+  $self->set_beamline('focusing', 'Pt-coated quartz toroidal mirror');
+  $self->set_beamline('harmonic_rejection', 'upstream mirrors');
   return $self;
 };
 
 sub u7a {
   my ($self) = @_;
-  $self->collimation(q{none});
-  $self->focusing(q{Au-coated ULE toroidal mirror with Au-coated ULE toroidal refocusuing mirror});
-  $self->harmonic_rejection(q{none});
+  $self->set_beamline('collimation', 'none');
+  $self->set_beamline('focusing', 'Au-coated ULE toroidal mirror with Au-coated ULE toroidal refocusuing mirror');
+  $self->set_beamline('harmonic_rejection', 'none');
+  $self->set_mono('name', 'Toroidal Spherical Grating Monochromator', '600 or 1200 lines/mm');
   return $self;
 };
 
@@ -144,11 +153,11 @@ FILE:       QUOTE /[^\"]*/ QUOTE "created on" INTEGER "/" INTEGER "/" INTEGER "a
                my $hour  = (lc($item[16]) eq 'am') ? $item[11] : $item[11]+12;
                my $min   = $item[13];
                my $sec   = $item[15];
-	       $Xray::XDI::object->start_time(sprintf("%d-%2.2d-%2.2d%s%2.2d:%2.2d:%2.2d", $year, $month, $day, 'T', $hour, $min, $sec));
+	       $Xray::XDI::object->set_scan('start_time', sprintf("%d-%2.2d-%2.2d%s%2.2d:%2.2d:%2.2d", $year, $month, $day, 'T', $hour, $min, $sec));
                (my $beamline = lc($item[18])) =~ s{-}{};
-	       $Xray::XDI::object->beamline("NSLS ".uc($beamline));
+	       $Xray::XDI::object->set_beamline('name', "NSLS ".uc($beamline));
                $Xray::XDI::object->$beamline;
-	       $Xray::XDI::object->source('bend magnet');
+	       $Xray::XDI::object->set_facility('xray_source', 'bend magnet');
             }
 
 REFLECTION: /\(\d{3}\)/
@@ -156,58 +165,58 @@ MATERIAL:   ("Si" | "Ge" | "Diamond" | "YB66" | "InSb" | "Beryl" | "Multilayer")
 CRYSTAL:    "Diffraction element=" (MATERIAL | INTEGER) (REFLECTION | "l/mm") "." "Ring energy=" FLOAT "GeV" {
                print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
                if ($item[2] =~ m{\A\d+\z}) {
-                 $Xray::XDI::object->crystal(join(" ", "Grating", $item[2], $item[3]));
+                 $Xray::XDI::object->set_mono('name', join(" ", "Grating", $item[2], $item[3]));
                } else {
-                 $Xray::XDI::object->crystal(join(" ", $item[2], substr($item[3], 1, -1)));
+                 $Xray::XDI::object->set_mono('name', join(" ", $item[2], substr($item[3], 1, -1)));
                };
                my $energy = ($item[6] > 100) ? $item[6]/1000 : $item[6];
-               $Xray::XDI::object->ring_energy($energy);
+               $Xray::XDI::object->set_facility('energy', $energy);
             }
 
 ## XDAC V1.2 files do not report the diffracting element on the ring energy line
 RINGENERGY: "Ring energy=" FLOAT "GeV" {
                my $energy = ($item[2] > 100) ? $item[2]/1000 : $item[2];
-               $Xray::XDI::object->ring_energy($energy);
+               $Xray::XDI::object->set_facility('energy', $energy);
             }
 
 ENOT:       "E0=" FLOAT {
                print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-               $Xray::XDI::object->edge_energy($item[2]);
+               $Xray::XDI::object->set_scan('edge_energy', $item[2]);
             }
 
 REGIONS:    "NUM_REGIONS=" INTEGER {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-NUM_REGIONS" . ': '. $item[2]);
+             $Xray::XDI::object->push_extension("XDAC.NUM_REGIONS" . ': '. $item[2]);
             }
 
 SRB:        "SRB=" EORK(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-SRB" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("XDAC.SRB" . ': '. join(" ", @{$item[2]}));
             }
 
 SRSS:       "SRSS=" EORK(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-SRSS" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("XDAC.SRSS" . ': '. join(" ", @{$item[2]}));
             }
 
 SPP:        "SPP=" EORK(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-SPP" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("XDAC.SPP" . ': '. join(" ", @{$item[2]}));
             }
 
 SETTLE:     "Settling time=" FLOAT {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-Settling_time" . ': '. join(" ", $item[2]));
+             $Xray::XDI::object->push_extension("XDAC.Settling_time" . ': '. join(" ", $item[2]));
             }
 
 OFFSETS:    "Offsets=" FLOAT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-Offsets" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("XDAC.Offsets" . ': '. join(" ", @{$item[2]}));
             }
 
 GAINS:      "Gains=" FLOAT(s) {
              print(join("~", @item), $/) if $Xray::XDI::Alien::XDAC::debug;
-             $Xray::XDI::object->push_extension("XDAC-Gains" . ': '. join(" ", @{$item[2]}));
+             $Xray::XDI::object->push_extension("XDAC.Gains" . ': '. join(" ", @{$item[2]}));
             }
 
 COMMLINE:   ANY(s) {
