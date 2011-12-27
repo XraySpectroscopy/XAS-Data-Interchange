@@ -149,6 +149,18 @@ sub add_data_arrays {
   return $self;
 };
 
+sub header {
+  my ($self) = @_;
+  my $text = q{};
+  foreach my $f (@{$self->order}) {
+    next if ($self->$f =~ m{\A\s*\z});
+    foreach my $k (sort keys %{$self->$f}) {
+      $text .= sprintf "%s %s.%s: %s$/", $self->cc, ucfirst($f), $k, $self->$f->{$k};
+    };
+  };
+  return $text;
+};
+
 sub export {
   my ($self, $fname) = @_;
   $self->out($fname) if ($fname);
@@ -159,12 +171,7 @@ sub export {
   print $OUT $self->cc, ' XDI/', $self->xdi_version, ' ', $self->applications, $/;
 
   # print list of defined fields in the order specified from the role
-  foreach my $f (@{$self->order}) {
-    next if ($self->$f =~ m{\A\s*\z});
-    foreach my $k (sort keys %{$self->$f}) {
-      printf $OUT "%s %s.%s: %s$/", $self->cc, ucfirst($f), $k, $self->$f->{$k};
-    };
-  };
+  print $OUT $self->header;
 
   # print extension fields
   foreach my $e (@{$self->extensions}) {
