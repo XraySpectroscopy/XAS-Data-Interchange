@@ -11,9 +11,9 @@
 
 #define MAX_LINE_LENGTH 8192 /* Max chars in a line */
 #define MAX_LINES 16384      /* Max number of lines */
-
+#define MAX_WORDS 128
 /* Read function */
-int readlines(FILE *input, char **lines); 
+int readlines(char *filename, char **lines); 
 /* Output functions */
 void show_syntax(void);
 
@@ -28,24 +28,40 @@ void show_syntax(void) {
 
 /*-------------------------------------------------------*/
 /* read array of text lines from an open data file  */
-int readlines(FILE *input, char **textlines) {
-  /* returns number of lines read, textlines should be pre-declared as char *text[MAX] */
+int readlines(char *filename, char **textlines) {
+  /* returns number of lines read, textlines should be pre-declared
+      as char *text[MAX] */
+
+  FILE *inpFile;
   char  thisline[MAX_LINE_LENGTH]; 
   char *file_text, *c;
   long file_length, index, i, ilen;
   int  is_newline;
 
-  fseek(input, 0L, SEEK_END); 
-  file_length = ftell(input);   
-  rewind(input);
+
+  inpFile = fopen(filename, "r"); 
+  if (inpFile == NULL) {
+    printf("Error opening %s: %s\n", filename, strerror(errno));
+    return -2;
+  }
+
+
+
+
+  fseek(inpFile, 0L, SEEK_END); 
+  file_length = ftell(inpFile);   
+  rewind(inpFile);
 
   file_text = calloc(file_length + 1, sizeof(char));
+
   if(file_text == NULL ) {
     printf("\nnot enough memory to read file.\n");
     return -1;
   }
 
-  fread(file_text, file_length, 1, input);
+  fread(file_text, file_length, 1, inpFile);
+  fclose(inpFile);
+
   ilen = 0;
   
   c = file_text;
@@ -80,46 +96,112 @@ int readlines(FILE *input, char **textlines) {
 /*-------------------------------------------------------*/
 int main(int argc, char **argv) {
 
-  int   ret;              /* Result of read function */
-  int   isFilePosErr;            /* Boolean indicating file offset error */
-  long  lLastFilePos;            /* Byte offset of end of previous line */
-  long  lLineCount;              /* Line count accumulator */
-  long  lLineLen;                /* Length of current line */
-  long  lThisFilePos;            /* Byte offset of start of current line */
-
-  char  *textlines[MAX_LINES]; 
+  char *textlines[MAX_LINES];
+  char *header[MAX_LINES];
+  char *words[MAX_WORDS];
 
   FILE *inpFile;  
   long  file_length, ilen, index, i;
-  int is_newline;
+  long  ncol, nrows, nheader, nwords;
+  int   is_newline;
 
+  double **array;
+    
   /* require 2 arguments! */
   if (argc < 2) {
     show_syntax();
     return 1;
   }
   
-  inpFile = fopen(argv[1], "r"); 
-
-  if (inpFile == NULL) {
-    printf("Error opening %s: %s\n", argv[1], strerror(errno));
-    return 1;
-  }
-
-  ilen = readlines(inpFile, textlines);
-  fclose(inpFile);
-
+  /* read file to text lines */
+  ilen = readlines(argv[1], textlines);
   if (ilen < 0) {
-    printf("Error reading %s\n", argv[1]);
     return 1;
   }
   
-  printf("#== read %ld lines from %s\n#-------\n", ilen, argv[1]);
+  printf("#== read %ld lines from %s\n", ilen, argv[1]);
+  nheader=0;
   for (i = 0; i < ilen ; i++) {
-    printf(" line %ld, %s", i, textlines[i]);
+    if (strncmp(textlines[i], "#", 1) == 0)  { 
+	printf("  :: %s",  textlines[i]);
+	nheader++;
+    } else {
+      break;
+    }
   }
+  ncol = ilen - nheader + 1;
+  printf(" %ld header lines  / %ld data lines\n", nheader, ncol);
+  printf(" Last header: %s", textlines[nheader-1]);
+  printf(" First data: %s", textlines[nheader]);
   
+  nrows = make_words(textlines[nheader], words, MAX_WORDS);
+
+  array = (double **)calloc(nrows, sizeof(double*));
+  for(i = 0; i < nrows; i++) { 
+    array[i] = (double*)calloc(ncol, sizeof(double)); 
+  }
+
+  
+
+  printf(" allocated %ld x %ld array elements \n", nrows, ncol);
+
+
+
   return 0;
 } 
 /*-------------------------------------------------------*/
 
+
+int make_words(char *input, char *out[], int maxwords) {
+  char *p = input;
+  int  i, nwords;
+  nwords = 0;
+  for(i = 0; i < maxwords; i++) {
+    /* skip leading whitespace */
+    while(isspace(*p))
+      p++;
+    
+    if(*p != '\0')
+      out[nwords++] = p;
+    else {
+      out[nwords] = 0;
+      break;
+    }
+    while(*p != '\0' && !isspace(*p))
+      p++;
+    /* terminate arg: */
+    if(*p != '\0' && i < maxwords-1)
+      *p++ = '\0';
+  }
+  return nwords;
+}
+
+
+
+/*  return nrow*ncol;
+
+  printf(" ...read to tear down\n");
+*/
+/* free((double *)array); */
+/*i = destroy_array(20, **array);*/
+  
+
+int build_array(int nrow, int ncol, double **array) {
+  int i;
+  array = (double **)calloc(nrow, sizeof(double*));
+  for(i = 0; i < nrow; i++) {
+    array[i] = (double*)calloc(ncol, sizeof(double));
+  }
+  return nrow*ncol;
+}  
+
+int destroy_array(int nrows, double **array) { 
+  int i;
+  for(i = 0; i < nrows; i++) {
+    printf(" free i %ld \n ", i);
+    free(array[i]);
+  }
+
+  free(array);
+  return 0;
+}
