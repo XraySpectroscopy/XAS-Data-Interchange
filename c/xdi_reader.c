@@ -7,6 +7,7 @@
 
 #define LF 10            /* Line Feed */
 #define CR 13            /* Carriage Return */
+#define CRLF "\n\r"
 #define EOF_WIN 26       /* End of File, Win */
 
 #define MAX_LINE_LENGTH 8192 /* Max chars in a line */
@@ -21,6 +22,21 @@ typedef struct {
   char *key;
   char *val;
 } mapping;
+
+typedef struct {
+  char *xdi_version;
+  char *filename;
+  char element[2];
+  char edge[2];
+  double dspacing;
+  mapping *metadata;
+  long nmetadata;
+  long nrows;
+  long npts;
+  char *comments;
+  char *array_names;
+  double **data;
+} XDIFile;
 
 /*-------------------------------------------------------*/
 /* show syntax */
@@ -125,13 +141,15 @@ int main(int argc, char **argv) {
   char *header[MAX_LINES];
   char *words[MAX_WORDS];
   char *c, *val, *key;
-
+  char *filename;
   FILE *inpFile;
   mapping *dict, *map;
 
+  XDIFile *xdifile;
+
   long  file_length, ilen, index, i, j;
   long  ncol, nrows, nheader, nwords, ndict;
-  int   is_newline;
+  int   is_newline, fn_len;
   double **array;
 
   /* require 2 arguments! */
@@ -141,7 +159,10 @@ int main(int argc, char **argv) {
   }
 
   /* read file to text lines */
-  ilen = readlines(argv[1], textlines);
+  filename = calloc(strlen(argv[1]) +1, sizeof(char));
+  strcpy(filename, argv[1]);
+
+  ilen = readlines(filename, textlines);
   if (ilen < 0) {
     return 1;
   }
@@ -156,15 +177,15 @@ int main(int argc, char **argv) {
       break;
     }
   }
-  
+
   dict = (mapping *)calloc(nheader+1, sizeof(mapping));
   ndict = 0;
   for (i = 0; i < nheader; i++) {
     if (strncmp(textlines[i], "#", 1) == 0)  {
       val = calloc(strlen(textlines[i])+1, sizeof(char));
-      strcpy(val, textlines[i]); 
+      strcpy(val, textlines[i]);
       val++;
-      val[strcspn(val, "\n\r")] = '\0'; 
+      val[strcspn(val, CRLF)] = '\0';
       while (isspace(*val)) {val++;}
       key = strsep(&val, ":");
       if (val != NULL) {
@@ -181,38 +202,57 @@ int main(int argc, char **argv) {
       }
     }
   }
-  
-  printf("header metadata %ld %ld :: \n", ndict, nheader);
-  for (i=0; i < ndict ;  i++) {
-    printf(" %ld ->:  %s: %s\n" , i, dict[i].key,dict[i].val ); 
-  }
+
 
   ncol = ilen - nheader + 1;
   printf(" %ld header lines  / %ld data lines\n", nheader, ncol);
-  
+
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
 
   printf(" %ld %ld words / cols\n", nrows, ncol);
-  
-  array = (double **)calloc(nrows, sizeof(double *));
-  for (i = 0; i < nrows; i++) {
-    array[i] = (double *)calloc(ncol, sizeof(double));  
-    array[i][0] = strtod(words[i], NULL);
+
+  xdifile = (XDIFile *)calloc(1, sizeof(XDIFile));
+
+  array = (double **) calloc(nrows, sizeof(double *));
+  printf( " calloc 1 \n");
+  for (j = 0; j < nrows; j++) {
+    array[j] = (double *)calloc(ncol, sizeof(double));
+    array[j][0] = strtod(words[j], NULL);
   }
-  
   for (i = 1; i < ncol; i++ ) {
     nrows = make_words(textlines[nheader+i], words, MAX_WORDS);
     for (j = 0; j < nrows; j++) {
       array[j][i] = strtod(words[j], NULL);
     }
   }
+
+  fn_len  = strlen(argv[1]);
+  printf ( " F N Len = %d \n " , fn_len);
+
+  xdifile->filename = calloc(fn_len+1, sizeof(char));
+  strncpy(xdifile->filename, argv[1], fn_len);
+  xdifile->filename[fn_len] = '\0';
+
+  xdifile->nrows = nrows;
+  xdifile->npts = ncol;
+  xdifile->metadata = dict;
+  xdifile->nmetadata = ndict;
+
+  printf("END: %s | nmetadata %ld \n",xdifile->filename, xdifile->nmetadata);
+  for (i=0; i < ndict ;  i++) {
+    printf(" %ld ->:  %s: %s\n" , i, xdifile->metadata[i].key, xdifile->metadata[i].val );
+  }
+
+  printf(" Arrays \n");
   for (j = 0; j < nrows ; j++ ) {
     printf(" J=%ld :", j);
     for (i = 0; i < 5; i++) {
-       printf(" %f,", array[j][i]); 
+       printf(" %f,", array[j][i]);
     }
     printf("... \n");
-}
+  }
+
+
   return 0;
 }
 
