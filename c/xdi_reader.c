@@ -7,11 +7,10 @@
 
 #define LF 10            /* Line Feed */
 #define CR 13            /* Carriage Return */
-#define CRLF "\n\r"
 #define EOF_WIN 26       /* End of File, Win */
 
-#define MAX_LINE_LENGTH 2048 /* Max chars in a line */
-#define MAX_LINES 16384      /* Max number of lines in file*/
+#define MAX_LINE_LENGTH 8192 /* Max chars in a line */
+#define MAX_LINES 16384      /* Max number of lines */
 #define MAX_WORDS 128
 
 /* Read function */
@@ -20,22 +19,8 @@ void show_syntax(void);
 
 typedef struct {
   char *key;
-  char *value;
+  char *val;
 } mapping;
-
-typedef struct {
-  char *filename;
-  char element[2];
-  char edge[2];
-  double *dspacing;
-  double **array;
-  long *nrow;
-  long *npts;
-  mapping *metadata;
-  long *n_metadata;
-  char *comments;
-  char *array_names;
-} XDI_File;
 
 /*-------------------------------------------------------*/
 /* show syntax */
@@ -94,10 +79,8 @@ int readlines(char *filename, char **textlines) {
     }
     thisline[index] = '\0';
     ++ilen;
-    textlines[ilen] = calloc(index, sizeof(char));
-    /* remove end-of-line chars*/
-    thisline[strcspn(thisline, CRLF)] = '\0';
-    strncpy(textlines[ilen], thisline, index);
+    textlines[ilen] = calloc(index+1, sizeof(char));
+    strcpy(textlines[ilen], thisline);
     if (ilen >= MAX_LINES-1) {
       printf("\nfile has too many lines.  Limit is %d \n " , MAX_LINES);
       return -2;
@@ -144,7 +127,6 @@ int main(int argc, char **argv) {
   char *c, *val, *key;
 
   FILE *inpFile;
-  XDI_File *xdifile;
   mapping *dict, *map;
 
   long  file_length, ilen, index, i, j;
@@ -164,56 +146,60 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  xdifile = (XDI_File *)calloc(1, sizeof(XDI_File*));
 
   printf("#== read %ld lines from %s\n", ilen, argv[1]);
   nheader=0;
   for (i = 0; i < ilen ; i++) {
     if (strncmp(textlines[i], "#", 1) == 0)  {
-      nheader++;
+	nheader++;
     } else {
       break;
     }
   }
-
-  dict = (mapping *)calloc(nheader, sizeof(mapping*));
+  
+  dict = (mapping *)calloc(nheader+1, sizeof(mapping));
   ndict = 0;
-  for (i = 0; i < ilen ; i++) {
+  for (i = 0; i < nheader; i++) {
     if (strncmp(textlines[i], "#", 1) == 0)  {
-      val = textlines[i]; val++;
+      val = calloc(strlen(textlines[i])+1, sizeof(char));
+      strcpy(val, textlines[i]); 
+      val++;
+      val[strcspn(val, "\n\r")] = '\0'; 
       while (isspace(*val)) {val++;}
       key = strsep(&val, ":");
       if (val != NULL) {
 	while (isspace(*val)) {val++;}
 	while (isspace(*key)) {key++;}
 	key[strcspn(key, " ")] = '\0';
-	dict[ndict].key = key;
-	dict[ndict].value = val;
+	dict[ndict].key = calloc(strlen(key) + 1, sizeof(char));
+	dict[ndict].val = calloc(strlen(val) + 1, sizeof(char));
+	strcpy(dict[ndict].key, key);
+	strcpy(dict[ndict].val, val);
 	ndict++;
       } else {
-	printf("word = |%s|\n", key);
+	printf("Other word = |%s|\n", key);
       }
     }
   }
-  xdifile->metadata = dict;
-  xdifile->n_metadata = &ndict;
-
-  for (i=0; i< ndict ;  i++) {
-    printf(" %s: %s\n" , xdifile->metadata[i].key, xdifile->metadata[i].value );
+  
+  printf("header metadata %ld %ld :: \n", ndict, nheader);
+  for (i=0; i < ndict ;  i++) {
+    printf(" %ld ->:  %s: %s\n" , i, dict[i].key,dict[i].val ); 
   }
 
   ncol = ilen - nheader + 1;
   printf(" %ld header lines  / %ld data lines\n", nheader, ncol);
+  
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
-  array = (double **)calloc(nrows, sizeof(double*));
+
+  printf(" %ld %ld words / cols\n", nrows, ncol);
+  
+  array = (double **)calloc(nrows, sizeof(double *));
   for (i = 0; i < nrows; i++) {
-    array[i] = (double*)calloc(ncol, sizeof(double));
+    array[i] = (double *)calloc(ncol, sizeof(double));  
     array[i][0] = strtod(words[i], NULL);
   }
-  xdifile->array = array;
-  xdifile->nrow = &nrows;
-  xdifile->npts = &ncol;
-
+  
   for (i = 1; i < ncol; i++ ) {
     nrows = make_words(textlines[nheader+i], words, MAX_WORDS);
     for (j = 0; j < nrows; j++) {
@@ -223,30 +209,10 @@ int main(int argc, char **argv) {
   for (j = 0; j < nrows ; j++ ) {
     printf(" J=%ld :", j);
     for (i = 0; i < 5; i++) {
-	 printf(" %f,", xdifile->array[j][i]);
+       printf(" %f,", array[j][i]); 
     }
     printf("... \n");
 }
   return 0;
 }
 
-
-int build_array(int nrow, int ncol, double **array) {
-  int i;
-  array = (double **)calloc(nrow, sizeof(double*));
-  for(i = 0; i < nrow; i++) {
-    array[i] = (double*)calloc(ncol, sizeof(double));
-  }
-  return nrow*ncol;
-}
-
-int destroy_array(int nrows, double **array) {
-  int i;
-  for(i = 0; i < nrows; i++) {
-    printf(" free i %d \n ", i);
-    free(array[i]);
-  }
-
-  free(array);
-  return 0;
-}
