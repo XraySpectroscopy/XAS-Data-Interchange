@@ -10,8 +10,8 @@
 #define CRLF "\n\r"
 #define EOF_WIN 26       /* End of File, Win */
 
-#define MAX_LINE_LENGTH 8192 /* Max chars in a line */
-#define MAX_LINES 16384      /* Max number of lines */
+#define MAX_LINE_LENGTH 2048 /* Max chars in a line */
+#define MAX_LINES 16384      /* Max number of lines in file*/
 #define MAX_WORDS 128
 
 /* Read function */
@@ -28,8 +28,11 @@ typedef struct {
   char element[2];
   char edge[2];
   double *dspacing;
-  double **arrays;
-  mapping *header;
+  double **array;
+  long *nrow;
+  long *npts;
+  mapping *metadata;
+  long *n_metadata;
   char *comments;
   char *array_names;
 } XDI_File;
@@ -155,7 +158,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-
   /* read file to text lines */
   ilen = readlines(argv[1], textlines);
   if (ilen < 0) {
@@ -193,8 +195,11 @@ int main(int argc, char **argv) {
       }
     }
   }
+  xdifile->metadata = dict;
+  xdifile->n_metadata = &ndict;
+
   for (i=0; i< ndict ;  i++) {
-    printf(" %s: %s\n" , dict[i].key, dict[i].value );
+    printf(" %s: %s\n" , xdifile->metadata[i].key, xdifile->metadata[i].value );
   }
 
   ncol = ilen - nheader + 1;
@@ -205,6 +210,9 @@ int main(int argc, char **argv) {
     array[i] = (double*)calloc(ncol, sizeof(double));
     array[i][0] = strtod(words[i], NULL);
   }
+  xdifile->array = array;
+  xdifile->nrow = &nrows;
+  xdifile->npts = &ncol;
 
   for (i = 1; i < ncol; i++ ) {
     nrows = make_words(textlines[nheader+i], words, MAX_WORDS);
@@ -215,7 +223,7 @@ int main(int argc, char **argv) {
   for (j = 0; j < nrows ; j++ ) {
     printf(" J=%ld :", j);
     for (i = 0; i < 5; i++) {
-	 printf(" %f,", array[j][i]);
+	 printf(" %f,", xdifile->array[j][i]);
     }
     printf("... \n");
 }
