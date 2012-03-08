@@ -7,16 +7,32 @@
 
 #define LF 10            /* Line Feed */
 #define CR 13            /* Carriage Return */
+#define CRLF "\n\r"
 #define EOF_WIN 26       /* End of File, Win */
 
 #define MAX_LINE_LENGTH 8192 /* Max chars in a line */
 #define MAX_LINES 16384      /* Max number of lines */
 #define MAX_WORDS 128
+
 /* Read function */
 int readlines(char *filename, char **lines);
-/* Output functions */
 void show_syntax(void);
 
+typedef struct {
+  char *key;
+  char *value;
+} mapping;
+
+typedef struct {
+  char *filename;
+  char element[2];
+  char edge[2];
+  double *dspacing;
+  double **arrays;
+  mapping *header;
+  char *comments;
+  char *array_names;
+} XDI_File;
 
 /*-------------------------------------------------------*/
 /* show syntax */
@@ -24,7 +40,6 @@ void show_syntax(void) {
   /* show command line syntax */
   printf("\nSyntax: xdi_reader filename\n");
 }
-/*-------------------------------------------------------*/
 
 /*-------------------------------------------------------*/
 /* read array of text lines from an open data file  */
@@ -76,8 +91,10 @@ int readlines(char *filename, char **textlines) {
     }
     thisline[index] = '\0';
     ++ilen;
-    textlines[ilen] = calloc(index+1, sizeof(char));
-    strcpy(textlines[ilen], thisline);
+    textlines[ilen] = calloc(index, sizeof(char));
+    /* remove end-of-line chars*/
+    thisline[strcspn(thisline, CRLF)] = '\0';
+    strncpy(textlines[ilen], thisline, index);
     if (ilen >= MAX_LINES-1) {
       printf("\nfile has too many lines.  Limit is %d \n " , MAX_LINES);
       return -2;
@@ -115,17 +132,20 @@ int make_words(char *input, char *out[], int maxwords) {
 }
 
 
-
 /*-------------------------------------------------------*/
 int main(int argc, char **argv) {
 
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
   char *words[MAX_WORDS];
+  char *c, *val, *key;
 
   FILE *inpFile;
+  XDI_File *xdifile;
+  mapping *dict, *map;
+
   long  file_length, ilen, index, i, j;
-  long  ncol, nrows, nheader, nwords;
+  long  ncol, nrows, nheader, nwords, ndict;
   int   is_newline;
   double **array;
 
@@ -135,27 +155,50 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+
   /* read file to text lines */
   ilen = readlines(argv[1], textlines);
   if (ilen < 0) {
     return 1;
   }
 
+  xdifile = (XDI_File *)calloc(1, sizeof(XDI_File*));
+
   printf("#== read %ld lines from %s\n", ilen, argv[1]);
   nheader=0;
   for (i = 0; i < ilen ; i++) {
     if (strncmp(textlines[i], "#", 1) == 0)  {
-	printf("  :: %s",  textlines[i]);
-	nheader++;
+      nheader++;
     } else {
       break;
     }
   }
+
+  dict = (mapping *)calloc(nheader, sizeof(mapping*));
+  ndict = 0;
+  for (i = 0; i < ilen ; i++) {
+    if (strncmp(textlines[i], "#", 1) == 0)  {
+      val = textlines[i]; val++;
+      while (isspace(*val)) {val++;}
+      key = strsep(&val, ":");
+      if (val != NULL) {
+	while (isspace(*val)) {val++;}
+	while (isspace(*key)) {key++;}
+	key[strcspn(key, " ")] = '\0';
+	dict[ndict].key = key;
+	dict[ndict].value = val;
+	ndict++;
+      } else {
+	printf("word = |%s|\n", key);
+      }
+    }
+  }
+  for (i=0; i< ndict ;  i++) {
+    printf(" %s: %s\n" , dict[i].key, dict[i].value );
+  }
+
   ncol = ilen - nheader + 1;
   printf(" %ld header lines  / %ld data lines\n", nheader, ncol);
-  printf(" Last header: %s", textlines[nheader-1]);
-  printf(" First data: %s", textlines[nheader]);
-
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
   array = (double **)calloc(nrows, sizeof(double*));
   for (i = 0; i < nrows; i++) {
