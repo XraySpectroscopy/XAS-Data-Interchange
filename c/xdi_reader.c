@@ -46,6 +46,12 @@ void show_syntax(void) {
   printf("\nSyntax: xdi_reader filename\n");
 }
 
+int copy_string(char *dest, char *src) {
+  /* calloc and copy */
+  dest = calloc(strlen(src) + 1, sizeof(char));
+  return strcpy(dest, src);
+}
+
 /*-------------------------------------------------------*/
 /* read array of text lines from an open data file  */
 int readlines(char *filename, char **textlines) {
@@ -96,7 +102,7 @@ int readlines(char *filename, char **textlines) {
     }
     thisline[index] = '\0';
     ++ilen;
-    textlines[ilen] = calloc(index+1, sizeof(char));
+    textlines[ilen]= calloc(strlen(thisline) + 1, sizeof(char));
     strcpy(textlines[ilen], thisline);
     if (ilen >= MAX_LINES-1) {
       printf("\nfile has too many lines.  Limit is %d \n " , MAX_LINES);
@@ -107,6 +113,7 @@ int readlines(char *filename, char **textlines) {
   return ilen;
 
 }
+
 /*-------------------------------------------------------*/
 int make_words(char *input, char *out[], int maxwords) {
   char *p = input;
@@ -128,6 +135,33 @@ int make_words(char *input, char *out[], int maxwords) {
     }
     /* terminate arg: */
     if (*p != '\0' && i < maxwords-1){
+      *p++ = '\0';
+    }
+  }
+  return nwords;
+}
+
+int split_on(char *input, char *delim, char *out[]) {
+  char *p = input;
+  int  i, nwords;
+  nwords = 0;
+  input[strcspn(input, CRLF)] = '\0';
+  for (i = 0; i < 2; i++) {
+    /* skip leading whitespace */
+    while (isspace(*p)) {
+      p++;
+    }
+    if (*p != '\0') {
+      out[nwords++] = p;
+    } else {
+      out[nwords] = 0;
+      break;
+    }
+    while (*p != '\0' && *p != *delim) {
+      p++;
+    }
+    /* terminate arg: */
+    if (*p != '\0' && i < 1){
       *p++ = '\0';
     }
   }
@@ -159,7 +193,7 @@ int main(int argc, char **argv) {
   }
 
   /* read file to text lines */
-  filename = calloc(strlen(argv[1]) +1, sizeof(char));
+  filename = calloc(strlen(argv[1]) + 1, sizeof(char));
   strcpy(filename, argv[1]);
 
   ilen = readlines(argv[1], textlines);
@@ -173,25 +207,19 @@ int main(int argc, char **argv) {
   if (strncmp(textlines[0], "#", 1) == 0)  {
     val = textlines[0]; val++;
     val[strcspn(val, CRLF)] = '\0';
-    while (isspace(*val)) {val++;}
-    if (strncmp(val, "XDI/", 4) != 0)  {
+    nwords = make_words(val, words, 2);
+    if (strncmp(words[0], "XDI/", 4) != 0)  {
       printf(" Not an XDI File!\n");
       return -2;
-    }
-    val = val+4;
-    key = strsep(&val, " ");
-    if (val != NULL) {
-      while (isspace(*val)) {val++;}
-      while (isspace(*key)) {key++;}
-      key[strcspn(key, " ")] = '\0';
-      version_extra = calloc(strlen(val) + 1, sizeof(char));
-      strcpy(version_extra, val);
     } else {
-      version_extra = calloc(1, sizeof(char));
-      strcpy(version_extra, "");
+      val = val+5;
+      version_xdi = calloc(strlen(val) + 1, sizeof(char));
+      strcpy(version_xdi, val);
     }
-    version_xdi = calloc(strlen(key) + 1, sizeof(char));
-    strcpy(version_xdi, key);
+    if (nwords > 1) { /* extra version tags */
+      version_extra = calloc(strlen(words[1]) + 1, sizeof(char));
+      strcpy(version_extra, words[1]);
+    }
   }
   xdifile = (XDIFile *)calloc(1, sizeof(XDIFile));
 
@@ -215,10 +243,23 @@ int main(int argc, char **argv) {
   mode = 0; /*  metadata (Family.Member: Value) mode */
   for (i = 1; i < nheader; i++) {
     if (strncmp(textlines[i], "#", 1) == 0)  {
-      val = calloc(strlen(textlines[i])+1, sizeof(char));
+      val = calloc(strlen(textlines[i]) + 1, sizeof(char));
       strcpy(val, textlines[i]);
       val++;
-      val[strcspn(val, CRLF)] = '\0';
+      nwords = split_on(val, ":", words);
+      if (nwords == 2) {
+
+	xdifile->metadata[ndict].key = 	calloc(strlen(words[0]) + 1, sizeof(char));
+	strcpy(xdifile->metadata[ndict].key, words[0]);
+	xdifile->metadata[ndict].val = 	calloc(strlen(words[1]) + 1, sizeof(char));
+	strcpy(xdifile->metadata[ndict].val, words[1]);
+	ndict++;
+
+      } else {
+	printf(" BARE: |%s|\n", words[0]);
+      }
+
+      /*
       while (isspace(*val)) {val++;}
       key = strsep(&val, ":");
       if (val != NULL) {
@@ -233,6 +274,8 @@ int main(int argc, char **argv) {
       } else {
 	printf("Other word = |%s|\n", key);
       }
+      */
+
     }
   }
 
@@ -256,10 +299,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  fnlen  = strlen(argv[1]);
-  xdifile->filename = calloc(fnlen+1, sizeof(char));
+  xdifile->filename = calloc(strlen(argv[1]) + 1, sizeof(char));
   strcpy(xdifile->filename, argv[1]);
-  /*xdifile->filename[fnlen] = '\0';*/
 
   xdifile->nrows = nrows;
   xdifile->npts = ncol;
