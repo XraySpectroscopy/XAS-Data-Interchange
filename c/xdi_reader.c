@@ -46,11 +46,8 @@ void show_syntax(void) {
   printf("\nSyntax: xdi_reader filename\n");
 }
 
-int copy_string(char *dest, char *src) {
-  /* calloc and copy */
-  dest = calloc(strlen(src) + 1, sizeof(char));
-  return strcpy(dest, src);
-}
+#define COPY_STRING(dest,src)  dest = calloc(strlen(src)+1, sizeof(char)); strcpy(dest, src);
+
 
 /*-------------------------------------------------------*/
 /* read array of text lines from an open data file  */
@@ -75,7 +72,6 @@ int readlines(char *filename, char **textlines) {
   rewind(inpFile);
 
   file_text = calloc(file_length + 1, sizeof(char));
-
   if(file_text == NULL ) {
     printf("\nnot enough memory to read file.\n");
     return -1;
@@ -102,8 +98,7 @@ int readlines(char *filename, char **textlines) {
     }
     thisline[index] = '\0';
     ++ilen;
-    textlines[ilen]= calloc(strlen(thisline) + 1, sizeof(char));
-    strcpy(textlines[ilen], thisline);
+    COPY_STRING(textlines[ilen], thisline);
     if (ilen >= MAX_LINES-1) {
       printf("\nfile has too many lines.  Limit is %d \n " , MAX_LINES);
       return -2;
@@ -193,9 +188,6 @@ int main(int argc, char **argv) {
   }
 
   /* read file to text lines */
-  filename = calloc(strlen(argv[1]) + 1, sizeof(char));
-  strcpy(filename, argv[1]);
-
   ilen = readlines(argv[1], textlines);
   if (ilen < 0) {
     return 1;
@@ -213,12 +205,11 @@ int main(int argc, char **argv) {
       return -2;
     } else {
       val = val+5;
-      version_xdi = calloc(strlen(val) + 1, sizeof(char));
-      strcpy(version_xdi, val);
+      COPY_STRING(version_xdi, val)
+
     }
     if (nwords > 1) { /* extra version tags */
-      version_extra = calloc(strlen(words[1]) + 1, sizeof(char));
-      strcpy(version_extra, words[1]);
+      COPY_STRING(version_extra, words[1]);
     }
   }
   xdifile = (XDIFile *)calloc(1, sizeof(XDIFile));
@@ -243,51 +234,27 @@ int main(int argc, char **argv) {
   mode = 0; /*  metadata (Family.Member: Value) mode */
   for (i = 1; i < nheader; i++) {
     if (strncmp(textlines[i], "#", 1) == 0)  {
-      val = calloc(strlen(textlines[i]) + 1, sizeof(char));
-      strcpy(val, textlines[i]);
+      COPY_STRING(val, textlines[i]);
       val++;
       nwords = split_on(val, ":", words);
       if (nwords == 2) {
-
-	xdifile->metadata[ndict].key = 	calloc(strlen(words[0]) + 1, sizeof(char));
-	strcpy(xdifile->metadata[ndict].key, words[0]);
-	xdifile->metadata[ndict].val = 	calloc(strlen(words[1]) + 1, sizeof(char));
-	strcpy(xdifile->metadata[ndict].val, words[1]);
+	COPY_STRING(xdifile->metadata[ndict].key, words[0]);
+	COPY_STRING(xdifile->metadata[ndict].val, words[1]);
 	ndict++;
 
       } else {
 	printf(" BARE: |%s|\n", words[0]);
       }
-
-      /*
-      while (isspace(*val)) {val++;}
-      key = strsep(&val, ":");
-      if (val != NULL) {
-	while (isspace(*val)) {val++;}
-	while (isspace(*key)) {key++;}
-	key[strcspn(key, " ")] = '\0';
-	xdifile->metadata[ndict].key = calloc(strlen(key) + 1, sizeof(char));
-	xdifile->metadata[ndict].val = calloc(strlen(val) + 1, sizeof(char));
-	strcpy(xdifile->metadata[ndict].key, key);
-	strcpy(xdifile->metadata[ndict].val, val);
-	ndict++;
-      } else {
-	printf("Other word = |%s|\n", key);
-      }
-      */
-
     }
   }
 
   ncol = ilen - nheader + 1;
-  printf(" %ld header lines  / %ld data lines\n", nheader, ncol);
 
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
 
   printf(" %ld %ld words / cols\n", nrows, ncol);
 
   xdifile->array = (double **) calloc(nrows, sizeof(double *));
-  printf( " calloc 1 \n");
   for (j = 0; j < nrows; j++) {
     xdifile->array[j] = (double *)calloc(ncol, sizeof(double));
     xdifile->array[j][0] = strtod(words[j], NULL);
@@ -299,9 +266,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  xdifile->filename = calloc(strlen(argv[1]) + 1, sizeof(char));
-  strcpy(xdifile->filename, argv[1]);
-
+  COPY_STRING(xdifile->filename, argv[1]); 
   xdifile->nrows = nrows;
   xdifile->npts = ncol;
   xdifile->nmetadata = ndict;
