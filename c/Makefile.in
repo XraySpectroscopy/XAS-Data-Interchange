@@ -1,17 +1,15 @@
 #
-# Makefile for XDI Fortran code
+# Makefile for XDIFile C library
 #
-# you may want to customize these two items:
 #
-AR      = ar
-
+AR = ar
 CC = @CC@
 CPP = @CPP@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
 SHELL = @SHELL@
-
+LINK = @CC@
 srcdir = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -23,27 +21,27 @@ libdir = @libdir@
 #---------------------------------
 EXAMPLE1 = xdi_example1
 LIBXDIF   = libxdifile.a
+XDIF_OBJ = xdifile.o strutil.o
+
 LINKXDIF = -L$(libdir) -L. -lxdifile
 all: $(EXAMPLE1)
 
-$(EXAMPLE1).o: $(EXAMPLE1).f
+$(EXAMPLE1).o: $(EXAMPLE1).c
 
 .PHONY: clean install default
 
 default: $(EXAMPLE1)
 
-XDI_OBJ = xdifile.o strutil.o
-
-$(LIBXDIF): $(XDI_OBJ)
+$(LIBXDIF): $(XDIF_OBJ)
 	@rm -f $@
-	$(AR) cru $(LIBXDIF) $(XDI_OBJ)
+	$(AR) cru $(LIBXDIF) $(XDIF_OBJ)
 	$(RANLIB) $(LIBXDIF)
 
-$(EXAMPLE1): $(LIBXDIF) $(EXAMPLE1).o 
-	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LINKXDIF)  $(FLIBS)
+$(EXAMPLE1): $(LIBXDIF) $(EXAMPLE1).o
+	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LINKXDIF)
 
 clean :
-	rm -f $(XDI_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF)
+	rm -f $(XDIF_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF)
 
 install: $(LIBXDIF)
 	cp -pr $(LIBXDIF) $(libdir)/$(LIBXDIF)
