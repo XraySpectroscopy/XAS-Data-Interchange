@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
   for (i=0; i < xdifile->nmetadata;  i++) {
     printf(" %ld ->:  %s: %s\n" , i, xdifile->metadata[i].key, xdifile->metadata[i].val );
   }
-  printf(" Arrays \n");
+  printf(" Array Data: \n");
   for (j = 0; j < xdifile->nrows ; j++ ) {
     printf(" J=%ld :", j);
     for (i = 0; i < 5; i++) {
@@ -49,6 +49,5 @@ int main(int argc, char **argv) {
     printf("... \n");
   }
   free(xdifile);
-  printf(" Done!! \n");
   return 0;
 }

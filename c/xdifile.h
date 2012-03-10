@@ -1,8 +1,10 @@
+#define MAX_COLUMNS 64
 
 typedef struct {
   char *key;
   char *val;
 } mapping;
+
 
 typedef struct {
   char *xdi_version;
