@@ -43,10 +43,10 @@ int readlines(char *filename, char **textlines) {
     is_newline = 0;
     while (*text) {
       if (!is_newline) {
-	if (*text == CR || *text == LF) {
+	if (*text == 13 || *text == 10) {
 	  is_newline = 1;
 	}
-      } else if (*text != CR  && *text != LF) {
+      } else if (*text != 13 && *text != 10) {
 	break;
       }
       thisline[index++] = *text++;

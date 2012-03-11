@@ -46,8 +46,12 @@ int main(int argc, char **argv) {
   for (i=0; i < xdifile->nmetadata; i++) {
     printf("  %s -> %s\n", xdifile->metadata[i].key, xdifile->metadata[i].val);
   }
-  printf("Array Data: \n");
-  for (j = 0; j < xdifile->nrows ; j++ ) {
+  printf("#Arrays: ");
+  for (j = 0; j < xdifile->ncolumn_labels; j++ ) {
+    printf(" %s, ", xdifile->column_labels[j]);
+  }
+  printf("\nArray Data: %ld\n", xdifile->narrays);
+  for (j = 0; j < xdifile->narrays; j++ ) {
     printf(" J=%ld :", j);
     for (i = 0; i < 5; i++) {
        printf(" %f,", xdifile->array[j][i]);

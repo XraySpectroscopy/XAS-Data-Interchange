@@ -1,5 +1,4 @@
-#define LF 10            /* Line Feed */
-#define CR 13            /* Carriage Return */
+#define CR "\n"
 #define CRLF "\n\r"
 
 #define MAX_LINE_LENGTH 8192 /* Max chars in a line */

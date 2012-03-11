@@ -11,6 +11,7 @@
 #endif
 
 #include "strutil.h"
+#include "xdi_tokens.h"
 #include "xdifile.h"
 /*-------------------------------------------------------*/
 
@@ -28,6 +29,9 @@ int readxdi(char *filename, XDIFile *xdifile) {
   long  ncol, nrows, nheader, nwords, ndict;
   int   is_newline, fnlen, mode;
 
+  int n_edges = sizeof(ValidEdges)/sizeof(char*);
+  int n_elems = sizeof(ValidElems)/sizeof(char*);
+
   /* read file to text lines */
   ilen = readlines(filename, textlines);
   if (ilen < 0) {
@@ -35,11 +39,11 @@ int readxdi(char *filename, XDIFile *xdifile) {
   }
   nheader=0;
   /* check fist line for XDI header, get version info */
-  if (strncmp(textlines[0], "#", 1) == 0)  {
+  if (strncmp(textlines[0], TOK_COMM, 1) == 0)  {
     val = textlines[0]; val++;
     val[strcspn(val, CRLF)] = '\0';
     nwords = make_words(val, cwords, 2);
-    if (strncasecmp(cwords[0], "xdi/", 4) != 0)  {
+    if (strncasecmp(cwords[0], TOK_VERS, strlen(TOK_VERS)) != 0)  {
       return -2;
     } else {
       val = val+5;
@@ -52,27 +56,28 @@ int readxdi(char *filename, XDIFile *xdifile) {
 
   nheader = 1;
   for (i = 1; i < ilen ; i++) {
-    if (strncmp(textlines[i], "#", 1) == 0)  {
+    if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
 	nheader++;
     } else {
       break;
     }
   }
+  printf(" N VALID EDGES %ld, \n",  sizeof(ValidEdges)/sizeof(char*));
 
   xdifile->metadata = calloc(nheader, sizeof(mapping));
   ndict = 0;
   maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
   for (i = 1; i < nheader; i++) {
-    if (strncmp(textlines[i], "#", 1) == 0)  {
+    if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
       COPY_STRING(val, textlines[i]);
       val++;
-      nwords = split_on(val, ":", words);
+      nwords = split_on(val, TOK_DELIM, words);
       if ((mode==0) && (nwords == 2)) {
 	COPY_STRING(xdifile->metadata[ndict].key, words[0]);
 	COPY_STRING(xdifile->metadata[ndict].val, words[1]);
 	ndict++;
-	if (strncasecmp(words[0], "column.", 7) == 0) {
+	if (strncasecmp(words[0], TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(words[0]+7)-1;
 	  if (j < MAX_COLUMNS) {
 	    nrows = make_words(words[1], cwords, 2);
@@ -84,29 +89,28 @@ int readxdi(char *filename, XDIFile *xdifile) {
 	    }
 	    maxcol =  max(maxcol, j);
 	  }
-	} else if (strcasecmp(words[0], "scan.edge") == 0) {
-	  for (j = 0; j < N_VALID_EDGES; j++) {
+	} else if (strcasecmp(words[0], TOK_EDGE) == 0) {
+	  for (j = 0; j < n_edges; j++) {
 	    if (strcasecmp(ValidEdges[j], words[1]) == 0) {
 	      COPY_STRING(xdifile->edge, words[1]);
 	      break;
 	    }
 	  }
-	} else if (strcasecmp(words[0], "scan.element") == 0) {
-	  for (j = 0; j < N_VALID_ELEMS; j++) {
+	} else if (strcasecmp(words[0], TOK_ELEM) == 0) {
+	  for (j = 0; j < n_elems; j++) {
 	    if (strcasecmp(ValidElems[j], words[1]) == 0) {
 	      COPY_STRING(xdifile->element, words[1]);
 	      break;
 	    }
 	  }
-	} else if (strcasecmp(words[0], "mono.d_spacing") == 0) {
+	} else if (strcasecmp(words[0], TOK_DSPACE) == 0) {
 	  xdifile->dspacing = strtod(words[1], NULL);
 	}
-      } else if (strncasecmp(words[0], "///", 3) == 0) {
+      } else if (strncasecmp(words[0], TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
 	mode = 1;
-      } else if (strncasecmp(words[0], "---", 3) == 0) {
+      } else if (strncasecmp(words[0], TOK_USERCOM_1, strlen(TOK_USERCOM_1)) == 0) {
 	mode = 2;
       } else if (mode==1) {
-	printf(" Comment ... %s (%ld)\n", val, strlen(comments));
 	if ((strlen(comments) > 0) && strlen(comments) < sizeof(comments)) {
 	  strncat(comments, "\n", sizeof(comments)-strlen(comments) - 1);
 	}
@@ -120,14 +124,13 @@ int readxdi(char *filename, XDIFile *xdifile) {
 
   COPY_STRING(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
-
+  maxcol++;
   xdifile->column_labels = calloc(maxcol, sizeof(char *));
   xdifile->column_units = calloc(maxcol, sizeof(char *));
   for (j=0; j<maxcol; j++) {
     COPY_STRING(xdifile->column_labels[j], column_labels[j]);
     COPY_STRING(xdifile->column_units[j], column_units[j]);
   }
-
 
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
@@ -144,8 +147,9 @@ int readxdi(char *filename, XDIFile *xdifile) {
     }
   }
 
-  xdifile->nrows = nrows;
   xdifile->npts = ncol;
+  xdifile->narrays = nrows;
+  xdifile->ncolumn_labels = maxcol;
   xdifile->nmetadata = ndict;
 
   return 0;
