@@ -27,20 +27,26 @@ int main(int argc, char **argv) {
   }
 
   /* read xdifile */
-  printf("->readxdi  %s\n", argv[1]);
-  xdifile = (XDIFile *)calloc(1, sizeof(XDIFile));
+  xdifile = malloc(sizeof(XDIFile));
   i = readxdi(argv[1], xdifile);
-  if (i != 0) {
-    printf(" error reading xdifile!\n");
+  if (i == 1) {
+    printf("Error reading XDI file %s!\n", argv[1]);
+    return 1;
+  } else if (i == -2) {
+    printf("%s is not a valid XFI file!\n", argv[1]);
+    return 1;
   }
 
-  printf(" READ XDIFILE!!\n VERSIONS: %s|%s|\n" , xdifile->xdi_version, xdifile->extra_version);
+  printf("#-----\nXDI FILE Read\nVERSIONS: %s|%s|\n" , xdifile->xdi_version, xdifile->extra_version);
 
-  printf(" Filename: %s | nmetadata %ld \n",xdifile->filename, xdifile->nmetadata);
-  for (i=0; i < xdifile->nmetadata;  i++) {
-    printf(" %ld ->:  %s: %s\n" , i, xdifile->metadata[i].key, xdifile->metadata[i].val );
+  printf("Elem/Edge: %s|%s|\n",xdifile->element, xdifile->edge);
+  printf("Filename: %s\n",xdifile->filename);
+  printf("User Comments:\n%s\n====\n",xdifile->comments);
+  printf("Metadata (%ld): \n", xdifile->nmetadata);
+  for (i=0; i < xdifile->nmetadata; i++) {
+    printf("  %s -> %s\n", xdifile->metadata[i].key, xdifile->metadata[i].val);
   }
-  printf(" Array Data: \n");
+  printf("Array Data: \n");
   for (j = 0; j < xdifile->nrows ; j++ ) {
     printf(" J=%ld :", j);
     for (i = 0; i < 5; i++) {

@@ -13,13 +13,14 @@
 #include "strutil.h"
 #include "xdifile.h"
 /*-------------------------------------------------------*/
+
 int readxdi(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
-  char *words[MAX_WORDS];
-  char *column_labels[MAX_COLUMNS];
+  char *words[MAX_WORDS], *cwords[2];
+  char *column_labels[MAX_COLUMNS], *column_units[MAX_COLUMNS];
   char *c, *val, *key, *version_xdi, *version_extra;
-  char comment[1024] = "";
+  char comments[1024] = "";
   FILE *inpFile;
   mapping *dict, *map;
 
@@ -32,28 +33,22 @@ int readxdi(char *filename, XDIFile *xdifile) {
   if (ilen < 0) {
     return 1;
   }
-  printf("#== read %ld lines from %s\n", ilen, filename);
   nheader=0;
-  /* check fist line for XDI header, version info */
+  /* check fist line for XDI header, get version info */
   if (strncmp(textlines[0], "#", 1) == 0)  {
     val = textlines[0]; val++;
     val[strcspn(val, CRLF)] = '\0';
-    nwords = make_words(val, words, 2);
-    if (strncasecmp(words[0], "xdi/", 4) != 0)  {
-      printf(" Not an XDI File!\n");
+    nwords = make_words(val, cwords, 2);
+    if (strncasecmp(cwords[0], "xdi/", 4) != 0)  {
       return -2;
     } else {
       val = val+5;
-      COPY_STRING(version_xdi, val)
+      COPY_STRING(xdifile->xdi_version, val)
     }
     if (nwords > 1) { /* extra version tags */
-      COPY_STRING(version_extra, words[1]);
+      COPY_STRING(xdifile->extra_version, cwords[1]);
     }
   }
-  xdifile->xdi_version = version_xdi;
-  xdifile->extra_version = version_extra;
-
-  printf( " VERSIONS: %s|%s|\n" , xdifile->xdi_version, xdifile->extra_version);
 
   nheader = 1;
   for (i = 1; i < ilen ; i++) {
@@ -64,7 +59,7 @@ int readxdi(char *filename, XDIFile *xdifile) {
     }
   }
 
-  xdifile->metadata = (mapping *)calloc(nheader+1, sizeof(mapping));
+  xdifile->metadata = calloc(nheader, sizeof(mapping));
   ndict = 0;
   maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
@@ -79,40 +74,67 @@ int readxdi(char *filename, XDIFile *xdifile) {
 	ndict++;
 	if (strncasecmp(words[0], "column.", 7) == 0) {
 	  j = atoi(words[0]+7)-1;
-	  column_labels[j] = words[1];
-	  maxcol =  max(maxcol, j);
-	  printf("see column: %ld: %s\n" , j, column_labels[j]);
+	  if (j < MAX_COLUMNS) {
+	    nrows = make_words(words[1], cwords, 2);
+	    column_labels[j] = cwords[0];
+	    if (nrows == 2) {
+	      column_units[j] = cwords[1];
+	    } else {
+	      column_units[j] = "";
+	    }
+	    maxcol =  max(maxcol, j);
+	  }
 	} else if (strcasecmp(words[0], "scan.edge") == 0) {
-	  printf("see edge: %s\n" , words[1]);
+	  for (j = 0; j < N_VALID_EDGES; j++) {
+	    if (strcasecmp(ValidEdges[j], words[1]) == 0) {
+	      COPY_STRING(xdifile->edge, words[1]);
+	      break;
+	    }
+	  }
 	} else if (strcasecmp(words[0], "scan.element") == 0) {
-	  printf("see elem: %s\n" , words[1]);
+	  for (j = 0; j < N_VALID_ELEMS; j++) {
+	    if (strcasecmp(ValidElems[j], words[1]) == 0) {
+	      COPY_STRING(xdifile->element, words[1]);
+	      break;
+	    }
+	  }
 	} else if (strcasecmp(words[0], "mono.d_spacing") == 0) {
-	  printf("see dspace: %s\n" , words[1]);
+	  xdifile->dspacing = strtod(words[1], NULL);
 	}
       } else if (strncasecmp(words[0], "///", 3) == 0) {
 	mode = 1;
       } else if (strncasecmp(words[0], "---", 3) == 0) {
 	mode = 2;
       } else if (mode==1) {
-	if ((strlen(comment) > 0) && strlen(comment) < sizeof(comment)) {
-	  strncat(comment, "\n", sizeof(comment)-strlen(comment) - 1);
+	printf(" Comment ... %s (%ld)\n", val, strlen(comments));
+	if ((strlen(comments) > 0) && strlen(comments) < sizeof(comments)) {
+	  strncat(comments, "\n", sizeof(comments)-strlen(comments) - 1);
 	}
-	if (strlen(val) + 1 > sizeof(comment) - strlen(comment)) {
+	if (strlen(val) + 1 > sizeof(comments) - strlen(comments)) {
 	  printf("Warning.... user comment may be truncated!\n");
 	}
-	strncat(comment, val, sizeof(comment) - strlen(comment) - 1);
+	strncat(comments, val, sizeof(comments) - strlen(comments) - 1);
       }
     }
   }
 
-  COPY_STRING(xdifile->comments, comment);
+  COPY_STRING(xdifile->comments, comments);
+  COPY_STRING(xdifile->filename, filename);
+
+  xdifile->column_labels = calloc(maxcol, sizeof(char *));
+  xdifile->column_units = calloc(maxcol, sizeof(char *));
+  for (j=0; j<maxcol; j++) {
+    COPY_STRING(xdifile->column_labels[j], column_labels[j]);
+    COPY_STRING(xdifile->column_units[j], column_units[j]);
+  }
+
 
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
 
-  xdifile->array = (double **) calloc(nrows, sizeof(double *));
+  xdifile->array = calloc(nrows, sizeof(double *));
   for (j = 0; j < nrows; j++) {
-    xdifile->array[j] = (double *)calloc(ncol, sizeof(double));
+    xdifile->array[j] = calloc(ncol, sizeof(double));
     xdifile->array[j][0] = strtod(words[j], NULL);
   }
   for (i = 1; i < ncol; i++ ) {
@@ -122,7 +144,6 @@ int readxdi(char *filename, XDIFile *xdifile) {
     }
   }
 
-  COPY_STRING(xdifile->filename, filename);
   xdifile->nrows = nrows;
   xdifile->npts = ncol;
   xdifile->nmetadata = ndict;

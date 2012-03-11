@@ -24,6 +24,7 @@ LIBXDIF   = libxdifile.a
 XDIF_OBJ = xdifile.o strutil.o
 
 LINKXDIF = -L$(libdir) -L. -lxdifile
+
 all: $(EXAMPLE1)
 
 $(EXAMPLE1).o: $(EXAMPLE1).c
@@ -31,6 +32,10 @@ $(EXAMPLE1).o: $(EXAMPLE1).c
 .PHONY: clean install default
 
 default: $(EXAMPLE1)
+
+strutil.o: strutil.h
+xdifile.o: xdifile.h strutil.h
+
 
 $(LIBXDIF): $(XDIF_OBJ)
 	@rm -f $@
