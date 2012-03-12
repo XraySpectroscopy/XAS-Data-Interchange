@@ -21,7 +21,7 @@ int readlines(char *filename, char **textlines) {
   finp = fopen(filename, "r");
   if (finp == NULL) {
     printf("Error opening %s: %s\n", filename, strerror(errno));
-    return -2;
+    return -7;
   }
 
   fseek(finp, 0L, SEEK_END);
@@ -31,7 +31,7 @@ int readlines(char *filename, char **textlines) {
   text = calloc(file_length + 1, sizeof(char));
   if (text == NULL ) {
     printf("\nnot enough memory to read file.\n");
-    return -1;
+    return -6;
   }
 
   fread(text, file_length, 1, finp);
@@ -57,7 +57,7 @@ int readlines(char *filename, char **textlines) {
     strcpy(textlines[ilen], thisline);
     if (ilen >= MAX_LINES-1) {
       printf("\nfile has too many lines.  Limit is %d \n " , MAX_LINES);
-      return -2;
+      return -5;
     }
   }
   return ilen;

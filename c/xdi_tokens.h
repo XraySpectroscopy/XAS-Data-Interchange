@@ -17,7 +17,7 @@
    2. The element symbol must be one of those listed in ValidElems below
 */
 static char *ValidEdges[] =
-  {"K", "L1", "L2", "L3", "L",
+  {"K", "L", "L1", "L2", "L3",
    "M", "M1", "M2", "M3", "M4", "M5",
    "N", "N1", "N2", "N3", "N4", "N5", "N6", "N7",
    "O", "O1", "O2", "O3", "O4", "O5", "O6", "O7",
@@ -38,4 +38,9 @@ static char *ValidElems[] =
    "Ac", "Th", "Pa", "U",  "Np", "Pu", "Am", "Cm",
    "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf",
    "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn"};
+
+/* 
+   could add these additional elements:
+   "UUt","Fl", "Uup", "Lv", "Uus", "Uuo" 
+*/
 

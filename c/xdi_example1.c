@@ -16,7 +16,7 @@ void show_syntax(void) {
 /*-------------------------------------------------------*/
 int main(int argc, char **argv) {
   XDIFile *xdifile;
-  long  file_length, ilen, index, i, j;
+  long  file_length, ilen, index, i, j, ret;
   long  ncol, nrows, nheader, nwords, ndict;
   int   is_newline, fnlen, mode;
 
@@ -28,16 +28,14 @@ int main(int argc, char **argv) {
 
   /* read xdifile */
   xdifile = malloc(sizeof(XDIFile));
-  i = readxdi(argv[1], xdifile);
-  if (i == 1) {
-    printf("Error reading XDI file %s!\n", argv[1]);
-    return 1;
-  } else if (i == -2) {
-    printf("%s is not a valid XFI file!\n", argv[1]);
+  ret = readxdi(argv[1], xdifile);
+  if (ret < 0) {
+    printf("Error reading XDI file %s!\n", argv[1], ret);
     return 1;
   }
 
-  printf("#-----\nXDI FILE Read\nVERSIONS: %s|%s|\n" , xdifile->xdi_version, xdifile->extra_version);
+  printf("#-----\nXDI FILE Read\nVERSIONS: %s|%s|\n" , 
+	 xdifile->xdi_version, xdifile->extra_version);
 
   printf("Elem/Edge: %s|%s|\n",xdifile->element, xdifile->edge);
   printf("Filename: %s\n",xdifile->filename);
@@ -47,8 +45,8 @@ int main(int argc, char **argv) {
     printf("  %s -> %s\n", xdifile->metadata[i].key, xdifile->metadata[i].val);
   }
   printf("#Arrays: ");
-  for (j = 0; j < xdifile->ncolumn_labels; j++ ) {
-    printf(" %s, ", xdifile->column_labels[j]);
+  for (j = 0; j < xdifile->narray_labels; j++ ) {
+    printf(" %s, ", xdifile->array_labels[j]);
   }
   printf("\nArray Data: %ld\n", xdifile->narrays);
   for (j = 0; j < xdifile->narrays; j++ ) {
