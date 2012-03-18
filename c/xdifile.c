@@ -15,7 +15,7 @@
 #include "xdifile.h"
 /*-------------------------------------------------------*/
 
-int readxdi(char *filename, XDIFile *xdifile) {
+int XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
   char *words[MAX_WORDS], *cwords[2];
@@ -62,7 +62,6 @@ int readxdi(char *filename, XDIFile *xdifile) {
       break;
     }
   }
-  printf(" N VALID EDGES %ld, \n",  sizeof(ValidEdges)/sizeof(char*));
 
   xdifile->metadata = calloc(nheader, sizeof(mapping));
   ndict = 0;
@@ -153,5 +152,28 @@ int readxdi(char *filename, XDIFile *xdifile) {
   xdifile->nmetadata = ndict;
 
   return 0;
+}
+
+int XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
+  /* get array by index (starting at 0) from an XDIFile structure */
+  long j;
+  if (n < xdifile->narrays) {
+    for (j=0; j < xdifile->npts ; j++) {
+      out[j] = xdifile->array[n][j] ;
+    }
+    return 0;
+  } 
+  return -1;
+}
+
+int XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
+  /* get array by name from an XDIFile structure */
+  long i;
+  for (i = 0; i < xdifile->narray_labels; i++) {
+    if (strcasecmp(name, xdifile->array_labels[i]) == 0) {
+      return XDI_get_array_index(xdifile, i, out);
+    }
+  }
+  return -2;
 }
 

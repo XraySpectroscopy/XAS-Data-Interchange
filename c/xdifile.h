@@ -24,5 +24,7 @@ typedef struct {
 } XDIFile;
 
 
-int readxdi(char *filename, XDIFile *xdifile) ;
+int XDI_readfile(char *filename, XDIFile *xdifile) ;
+int XDI_get_array_index(XDIFile *xdifile, long n, double *out);
+int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 

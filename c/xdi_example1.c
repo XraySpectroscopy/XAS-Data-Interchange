@@ -18,7 +18,9 @@ int main(int argc, char **argv) {
   XDIFile *xdifile;
   long  file_length, ilen, index, i, j, ret;
   long  ncol, nrows, nheader, nwords, ndict;
-  int   is_newline, fnlen, mode;
+  int   is_newline, fnlen, k;
+  double *tdat;
+
 
   /* require 2 arguments! */
   if (argc < 2) {
@@ -28,7 +30,7 @@ int main(int argc, char **argv) {
 
   /* read xdifile */
   xdifile = malloc(sizeof(XDIFile));
-  ret = readxdi(argv[1], xdifile);
+  ret = XDI_readfile(argv[1], xdifile);
   if (ret < 0) {
     printf("Error reading XDI file %s!\n", argv[1], ret);
     return 1;
@@ -48,6 +50,7 @@ int main(int argc, char **argv) {
   for (j = 0; j < xdifile->narray_labels; j++ ) {
     printf(" %s, ", xdifile->array_labels[j]);
   }
+  
   printf("\nArray Data: %ld\n", xdifile->narrays);
   for (j = 0; j < xdifile->narrays; j++ ) {
     printf(" J=%ld :", j);
@@ -56,6 +59,22 @@ int main(int argc, char **argv) {
     }
     printf("... \n");
   }
+  
+  printf("\nArray Data #2: %ld\n", xdifile->npts);
+  tdat = (double *)calloc(xdifile->npts, sizeof(double)); 
+
+  for (j = 0; j < xdifile->narray_labels; j++ ) {
+    printf(" Array=%s :", xdifile->array_labels[j]);
+    ret = XDI_get_array_name(xdifile, 
+			     xdifile->array_labels[j], 
+			     tdat);
+    for (k=0; k< 3; k++) {
+      printf(" %f", tdat[k]);
+    }
+    printf("... \n");
+  }
+
+
   free(xdifile);
   return 0;
 }
