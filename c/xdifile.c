@@ -27,7 +27,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   long  file_length, ilen, index, i, j, maxcol;
   long  ncol, nrows, nheader, nwords, ndict;
-  int   is_newline, fnlen, mode;
+  int   is_newline, fnlen, mode, valid;
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
@@ -43,7 +43,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     val = textlines[0]; val++;
     val[strcspn(val, CRLF)] = '\0';
     nwords = make_words(val, cwords, 2);
-    if (strncasecmp(cwords[0], TOK_VERS, strlen(TOK_VERS)) != 0)  {
+    if (strncasecmp(cwords[0], TOK_VERSION, strlen(TOK_VERSION)) != 0)  {
       return -1;
     } else {
       val = val+5;
@@ -62,6 +62,10 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       break;
     }
   }
+
+  xdifile->dspacing = 0;
+  COPY_STRING(xdifile->element, "__");
+  COPY_STRING(xdifile->edge, "__");
 
   xdifile->metadata = calloc(nheader, sizeof(mapping));
   ndict = 0;
@@ -121,6 +125,26 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     }
   }
 
+  /* check edge, element, return error code if invalid */
+  valid = 0;
+  for (j = 0; j < n_edges; j++) {
+    if (strcasecmp(ValidEdges[j], xdifile->edge) == 0) {
+      valid = 1;
+      break;
+    }
+  }
+  if (valid == 0) { return ERR_NOEDGE;}
+
+  valid = 0;
+  for (j = 0; j < n_elems; j++) {
+    if (strcasecmp(ValidElems[j], xdifile->element) == 0) {
+      valid = 1;
+      break;
+    }
+  }
+  if (valid == 0) { return ERR_NOELEM;}
+
+
   COPY_STRING(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
   maxcol++;
@@ -162,8 +186,8 @@ int XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
       out[j] = xdifile->array[n][j] ;
     }
     return 0;
-  } 
-  return -1;
+  }
+  return ERR_NOARR_INDEX;
 }
 
 int XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
@@ -174,6 +198,6 @@ int XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
       return XDI_get_array_index(xdifile, i, out);
     }
   }
-  return -2;
+  return ERR_NOARR_NAME;
 }
 

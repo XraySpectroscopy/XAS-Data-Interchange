@@ -2,15 +2,20 @@
    Tokens used in XDI File
 */
 
-#define TOK_VERS    "XDI/"           /* XDI version marker -- required on line 1 */
-#define TOK_COMM   "#"               /* comment character, at start of line */
-#define TOK_DELIM  ":"               /* delimeter between metdata key and value */
-#define TOK_EDGE   "scan.edge"       /* absorbption edge name */
-#define TOK_ELEM   "scan.element"    /* atomic symbol of absorbing element */
-#define TOK_COLUMN "column."         /* column label (followed by integer < 64) */
-#define TOK_DSPACE "mono.d_spacing"  /* mono d_spacing, in Angstroms */
-#define TOK_USERCOM_0 "///"          /* start multi-line user comment */
-#define TOK_USERCOM_1 "---"          /* end multi-line user comment */
+#define TOK_VERSION  "XDI/"           /* XDI version marker -- required on line 1 */
+#define TOK_COMM     "#"              /* comment character, at start of line */
+#define TOK_DELIM    ":"              /* delimeter between metdata key and value */
+#define TOK_EDGE     "element.edge"   /* absorbption edge name */
+#define TOK_ELEM     "element.symbol" /* atomic symbol of absorbing element */
+#define TOK_COLUMN   "column."        /* column label (followed by integer <= 64) */
+#define TOK_DSPACE   "mono.d_spacing" /* mono d_spacing, in Angstroms */
+#define TOK_USERCOM_0 "///"           /* start multi-line user comment */
+#define TOK_USERCOM_1 "---"           /* end multi-line user comment */
+
+#define ERR_NOEDGE -32
+#define ERR_NOELEM -31
+#define ERR_NOARR_INDEX -22
+#define ERR_NOARR_NAME  -21
 
 /* Notes:
    1. The absorption edge must be one of those listed in ValidEdges below
@@ -20,8 +25,9 @@ static char *ValidEdges[] =
   {"K", "L", "L1", "L2", "L3",
    "M", "M1", "M2", "M3", "M4", "M5",
    "N", "N1", "N2", "N3", "N4", "N5", "N6", "N7",
-   "O", "O1", "O2", "O3", "O4", "O5", "O6", "O7",
-   "P", "P1", "P2", "P3", "P4", "P5", "P6", "P7"};
+   "O", "O1", "O2", "O3", "O4", "O5", "O6", "O7"};
+
+/*  "P", "P1", "P2", "P3", "P4", "P5", "P6", "P7"}; */
 
 static char *ValidElems[] =
   {"H",  "He", "Li", "Be", "B",  "C",  "N",  "O",
@@ -39,8 +45,8 @@ static char *ValidElems[] =
    "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf",
    "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn"};
 
-/* 
+/*
    could add these additional elements:
-   "UUt","Fl", "Uup", "Lv", "Uus", "Uuo" 
+   "UUt","Fl", "Uup", "Lv", "Uus", "Uuo"
 */
 

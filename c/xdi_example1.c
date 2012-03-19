@@ -32,11 +32,11 @@ int main(int argc, char **argv) {
   xdifile = malloc(sizeof(XDIFile));
   ret = XDI_readfile(argv[1], xdifile);
   if (ret < 0) {
-    printf("Error reading XDI file %s!\n", argv[1], ret);
+    printf("Error reading XDI file %s! Error Code=%ld\n", argv[1], ret);
     return 1;
   }
 
-  printf("#-----\nXDI FILE Read\nVERSIONS: %s|%s|\n" , 
+  printf("#-----\nXDI FILE Read\nVERSIONS: %s|%s|\n" ,
 	 xdifile->xdi_version, xdifile->extra_version);
 
   printf("Elem/Edge: %s|%s|\n",xdifile->element, xdifile->edge);
@@ -46,29 +46,29 @@ int main(int argc, char **argv) {
   for (i=0; i < xdifile->nmetadata; i++) {
     printf("  %s -> %s\n", xdifile->metadata[i].key, xdifile->metadata[i].val);
   }
-  printf("#Arrays: ");
+  printf("#Array labels: ");
   for (j = 0; j < xdifile->narray_labels; j++ ) {
     printf(" %s, ", xdifile->array_labels[j]);
   }
-  
-  printf("\nArray Data: %ld\n", xdifile->narrays);
+
+  printf("\nArray Data by index: %ld\n", xdifile->narrays);
   for (j = 0; j < xdifile->narrays; j++ ) {
-    printf(" J=%ld :", j);
+    printf("  Array %ld:", j);
     for (i = 0; i < 5; i++) {
        printf(" %f,", xdifile->array[j][i]);
     }
     printf("... \n");
   }
-  
-  printf("\nArray Data #2: %ld\n", xdifile->npts);
-  tdat = (double *)calloc(xdifile->npts, sizeof(double)); 
+
+  printf("\nArray Data by name:\n");
+  tdat = (double *)calloc(xdifile->npts, sizeof(double));
 
   for (j = 0; j < xdifile->narray_labels; j++ ) {
-    printf(" Array=%s :", xdifile->array_labels[j]);
-    ret = XDI_get_array_name(xdifile, 
-			     xdifile->array_labels[j], 
+    printf(" Array '%s':", xdifile->array_labels[j]);
+    ret = XDI_get_array_name(xdifile,
+			     xdifile->array_labels[j],
 			     tdat);
-    for (k=0; k< 3; k++) {
+    for (k=0; k< 4; k++) {
       printf(" %f", tdat[k]);
     }
     printf("... \n");

@@ -12,7 +12,7 @@ typedef struct {
   long narray_labels;   /* number of labeled arrays (may be < narrays) */
   double dspacing;      /* monochromator d spacing */
   char *xdi_version;    /* XDI version string */
-  char *extra_version;  /* Extra version strings from first line of file */ 
+  char *extra_version;  /* Extra version strings from first line of file */
   char *filename;       /* name of file */
   char *element;        /* atomic symbol for element */
   char *edge;           /* name of absorption edge: "K", "L1", ... */
@@ -27,4 +27,6 @@ typedef struct {
 int XDI_readfile(char *filename, XDIFile *xdifile) ;
 int XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
+int XDI_get_metadata_keys(XDIFile *xdifile, char **keys);
+int XDI_get_metadata(XDIFile *xdifile, char *key, char *value);
 
