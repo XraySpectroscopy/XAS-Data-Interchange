@@ -20,13 +20,13 @@ libdir = @libdir@
 # you shouldn't have to alter anything below this line
 #---------------------------------
 EXAMPLE1  = xdi_example1
-LIBXDIF   = libxdifile.a
-LIBSHARED = libxdifile.so
+LIBXDIF_STATIC   = libxdifile.a
+LIBXDIF_SHARED = libxdifile.so
 XDIF_OBJ  = xdifile.o strutil.o
 
 LINKXDIF = -L$(libdir) -L. -lxdifile
 
-all: $(EXAMPLE1)  $(LIBSHARED)
+all: $(EXAMPLE1) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
 
 $(EXAMPLE1).o: $(EXAMPLE1).c
 
@@ -37,21 +37,21 @@ default: $(EXAMPLE1)
 strutil.o: strutil.h
 xdifile.o: xdifile.h xdi_tokens.h strutil.h
 
-$(LIBXDIF): $(XDIF_OBJ)
+$(LIBXDIF_STATIC): $(XDIF_OBJ)
 	@rm -f $@
-	$(AR) cru $(LIBXDIF) $(XDIF_OBJ)
-	$(RANLIB) $(LIBXDIF)
+	$(AR) cru $(LIBXDIF_STATIC) $(XDIF_OBJ)
+	$(RANLIB) $(LIBXDIF_STATIC)
 
-$(LIBSHARED): $(XDIF_OBJ)
+$(LIBXDIF_SHARED): $(XDIF_OBJ)
 	@rm -f $@
 	$(LINK) -shared -o $@ $(XDIF_OBJ)
 
-$(EXAMPLE1): $(LIBSHARED) $(EXAMPLE1).o
-	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LIBSHARED)
-###	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LINKXDIF)
+$(EXAMPLE1): $(LIBXDIF_SHARED) $(EXAMPLE1).o
+	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LIBXDIF_SHARED)
 
 clean :
-	rm -f $(XDIF_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF)
+	rm -f $(XDIF_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF_STATIC)
 
-install: $(LIBXDIF)
-	cp -pr $(LIBXDIF) $(libdir)/$(LIBXDIF)
+install: $(LIBXDIF_STATIC)  $(LIBXDIF_SHARED)
+	cp -pr $(LIBXDIF_STATIC) $(libdir)/$(LIBXDIF_STATIC)
+	cp -pr $(LIBXDIF_SHARED) $(libdir)/$(LIBXDIF_SHARED)
