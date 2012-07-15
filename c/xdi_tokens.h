@@ -12,11 +12,6 @@
 #define TOK_USERCOM_0 "///"           /* start multi-line user comment */
 #define TOK_USERCOM_1 "---"           /* end multi-line user comment */
 
-#define ERR_NOEDGE -32
-#define ERR_NOELEM -31
-#define ERR_NOARR_INDEX -22
-#define ERR_NOARR_NAME  -21
-
 /* Notes:
    1. The absorption edge must be one of those listed in ValidEdges below
    2. The element symbol must be one of those listed in ValidElems below
@@ -27,7 +22,10 @@ static char *ValidEdges[] =
    "N", "N1", "N2", "N3", "N4", "N5", "N6", "N7",
    "O", "O1", "O2", "O3", "O4", "O5", "O6", "O7"};
 
-/*  "P", "P1", "P2", "P3", "P4", "P5", "P6", "P7"}; */
+/* 
+   could add these additional edges:
+   "P", "P1", "P2", "P3", "P4", "P5", "P6", "P7" 
+*/
 
 static char *ValidElems[] =
   {"H",  "He", "Li", "Be", "B",  "C",  "N",  "O",
