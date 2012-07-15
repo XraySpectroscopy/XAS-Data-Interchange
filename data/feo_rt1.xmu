@@ -2,8 +2,8 @@
 # Column.1: energy eV
 # Column.2: mutrans
 # Column.3: i0
-# Scan.element: Fe
-# Scan.edge: K
+# Element.edge: K
+# Element.symbol: Fe
 # Scan.start_time: 2001-08-10T11:10:00
 # Mono.name: Si 111
 # Mono.dspacing: 3.13553
