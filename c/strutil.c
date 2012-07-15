@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include "strutil.h"
+#include "errors.h"
 /*-------------------------------------------------------*/
 /* read array of text lines from an open data file  */
 int readlines(char *filename, char **textlines) {
@@ -21,7 +22,7 @@ int readlines(char *filename, char **textlines) {
   finp = fopen(filename, "r");
   if (finp == NULL) {
     printf("Error opening %s: %s\n", filename, strerror(errno));
-    return -7;
+    return -errno;
   }
 
   fseek(finp, 0L, SEEK_END);
@@ -31,7 +32,7 @@ int readlines(char *filename, char **textlines) {
   text = calloc(file_length + 1, sizeof(char));
   if (text == NULL ) {
     printf("\nnot enough memory to read file.\n");
-    return -6;
+    return -errno;
   }
 
   fread(text, file_length, 1, finp);
@@ -55,9 +56,9 @@ int readlines(char *filename, char **textlines) {
     ++ilen;
     textlines[ilen]= calloc(strlen(thisline) + 1, sizeof(char));
     strcpy(textlines[ilen], thisline);
-    if (ilen >= MAX_LINES-1) {
-      printf("\nfile has too many lines.  Limit is %d \n " , MAX_LINES);
-      return -5;
+    if (ilen >= MAX_LINES) {
+      printf("\nfile has too many lines.  Limit is %d %d\n " , MAX_LINES, EFBIG);
+      return -EFBIG;
     }
   }
   return ilen;
