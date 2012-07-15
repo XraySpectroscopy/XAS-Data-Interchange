@@ -11,6 +11,7 @@
 #endif
 
 #include "strutil.h"
+#include "errors.h"
 #include "xdi_tokens.h"
 #include "xdifile.h"
 /*-------------------------------------------------------*/
@@ -35,6 +36,10 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   /* read file to text lines */
   ilen = readlines(filename, textlines);
   if (ilen < 0) {
+    if (errno == 0) {
+      errno = -ilen;
+    }
+    printf("%s\n", strerror(errno));
     return ilen;
   }
   nheader=0;
