@@ -16,6 +16,9 @@
 #include "xdifile.h"
 /*-------------------------------------------------------*/
 
+int XDI_hasfile(char *filename) {
+  return 1;
+}
 int XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
@@ -24,7 +27,6 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   char *c, *val, *key, *version_xdi, *version_extra;
   char comments[1024] = "";
   FILE *inpFile;
-  mapping *dict, *map;
 
   long  file_length, ilen, index, i, j, maxcol;
   long  ncol, nrows, nheader, nwords, ndict;
@@ -72,7 +74,8 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   COPY_STRING(xdifile->element, "__");
   COPY_STRING(xdifile->edge, "__");
 
-  xdifile->metadata = calloc(nheader, sizeof(mapping));
+  xdifile->metadata_keys = calloc(nheader, sizeof(char *));
+  xdifile->metadata_vals = calloc(nheader, sizeof(char *));
   ndict = 0;
   maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
@@ -82,8 +85,8 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       val++;
       nwords = split_on(val, TOK_DELIM, words);
       if ((mode==0) && (nwords == 2)) {
-	COPY_STRING(xdifile->metadata[ndict].key, words[0]);
-	COPY_STRING(xdifile->metadata[ndict].val, words[1]);
+	COPY_STRING(xdifile->metadata_keys[ndict], words[0]);
+	COPY_STRING(xdifile->metadata_vals[ndict], words[1]);
 	ndict++;
 	if (strncasecmp(words[0], TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(words[0]+7)-1;

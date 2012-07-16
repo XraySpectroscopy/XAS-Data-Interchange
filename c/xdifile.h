@@ -1,11 +1,6 @@
 #define MAX_COLUMNS 64
 
 typedef struct {
-  char *key;
-  char *val;
-} mapping;
-
-typedef struct {
   long nmetadata;       /* number of metadata key/val pairs */
   long narrays;         /* number of arrays */
   long npts;            /* number of data points for all arrays */
@@ -17,13 +12,14 @@ typedef struct {
   char *element;        /* atomic symbol for element */
   char *edge;           /* name of absorption edge: "K", "L1", ... */
   char *comments;       /* multi-line, user-supplied comment */
-  mapping *metadata;    /* key/value pairs for metadata from file header */
-  double **array;       /* 2D array of all array data */
   char **array_labels;  /* labels for arrays */
   char **array_units;   /* units for arrays */
+  char **metadata_keys; /* keys for metadata from file header */
+  char **metadata_vals; /* value for metadata from file header */
+  double **array;       /* 2D array of all array data */
 } XDIFile;
 
-
+int XDI_hasfile(char *filename);
 int XDI_readfile(char *filename, XDIFile *xdifile) ;
 int XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
