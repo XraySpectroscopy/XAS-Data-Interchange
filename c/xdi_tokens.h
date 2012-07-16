@@ -4,7 +4,8 @@
 
 #define TOK_VERSION  "XDI/"           /* XDI version marker -- required on line 1 */
 #define TOK_COMM     "#"              /* comment character, at start of line */
-#define TOK_DELIM    ":"              /* delimeter between metdata key and value */
+#define TOK_DELIM    ":"              /* delimiter between metadata name and value */
+#define TOK_DOT      "."              /* delimiter between metadata family and key */
 #define TOK_EDGE     "element.edge"   /* absorbption edge name */
 #define TOK_ELEM     "element.symbol" /* atomic symbol of absorbing element */
 #define TOK_COLUMN   "column."        /* column label (followed by integer <= 64) */
