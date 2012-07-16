@@ -3,6 +3,7 @@
 Read/Write XAS Data Interchange Format for Python
 """
 import re
+import os
 import ctypes
 import ctypes.util
 import math
@@ -50,7 +51,7 @@ ATOM_SYMS = ('H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne',
              'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds',
              'Rg', 'Cn', 'Uut', 'Fl', 'Uup', 'Lv', 'Uus', 'Uuo')
 
-class XDIFile(ctypes.Structure):
+class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
     _fields_ = [('nmetadata',     ctypes.c_ulong),
                 ('narrays',       ctypes.c_ulong),
@@ -299,30 +300,38 @@ class XDIFile(object):
         if filename is None and self.filename is not None:
             filename = self.filename
         XDILIB = get_xdilib()
-        pxdi = ctypes.pointer(XDIFile())
-        print xdilib.XDI_readfile('cu_metal_rt.xdi', pxdi)
+        pxdi = ctypes.pointer(XDIFileStruct())
+        out = XDILIB.XDI_readfile(filename, pxdi)
+        if out != 0:
+            print 'Error reading XDIFile %s ' % filename
+            return
         xdi = pxdi.contents
-
         for attr in dict(xdi._fields_):
             setattr(self, attr, getattr(xdi, attr))
 
         pchar = ctypes.c_char_p
-        self.array_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
-        self.array_units = (self.narrays*pchar).from_address(xdi.array_units)[:]
+        self.column_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
+        self.column_units = (self.narrays*pchar).from_address(xdi.array_units)[:]
 
         mkeys = (self.nmetadata*pchar).from_address(xdi.metadata_keys)[:]
         mvals = (self.nmetadata*pchar).from_address(xdi.metadata_vals)[:]
-        self.metadata = {}
+        self.attrs = {}
         for key, val in zip(mkeys, mvals):
-            self.metadata[key] = val
+            parent, child = key.lower().split('.')
+            if parent not in self.attrs:
+                self.attrs[parent] = {}
+            self.attrs[parent][child] = val
 
         parrays  = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
         arrays  = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
 
         if HAS_NUMPY:
-            arrays = numpy.array(arrays)
+            arrays = np.array(arrays)
             arrays.shape = (self.narrays, self.npts)
-        self.arrays = arrays
+        self.rawdata = arrays
+        print 'Before Assign Arrays ', self.rawdata[:, :5]
+        self._assign_arrays()
+
         # now do error checking....
 #
 #         text  = self._text = open(filename, 'r').readlines()
@@ -430,6 +439,8 @@ class XDIFile(object):
            energy, angle, i0, itrans, ifluor, irefer,
            mutrans, mufluor, murefer, etc.
         """
+        print 'assign arrays ' , self.column_labels
+        print 'Facility ' , self.attrs['facility']
         xunits = 'eV'
         xname = None
         ix = -1
@@ -440,7 +451,7 @@ class XDIFile(object):
             sin = np.log
             asin = np.arcsin
 
-        for idx, name in self.column_labels.items():
+        for idx, name in enumerate(self.column_labels):
             if HAS_NUMPY:
                 dat = self.rawdata[:,int(idx)-1]
             else:
@@ -500,7 +511,7 @@ if __name__ == '__main__':
     print 'Scan     ' , x.attrs['scan']
     print 'columns   ' , x.column_labels
     print x.comments
-    print x.energy[:5]
+    print 'Energy: ', x.energy[:5]
     try:
         print x.angle[:5]
     except AttributeError:
