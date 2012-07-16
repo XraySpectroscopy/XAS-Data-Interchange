@@ -22,9 +22,9 @@ static char *ValidEdges[] =
    "N", "N1", "N2", "N3", "N4", "N5", "N6", "N7",
    "O", "O1", "O2", "O3", "O4", "O5", "O6", "O7"};
 
-/* 
+/*
    could add these additional edges:
-   "P", "P1", "P2", "P3", "P4", "P5", "P6", "P7" 
+   "P", "P1", "P2", "P3", "P4", "P5", "P6", "P7"
 */
 
 static char *ValidElems[] =
@@ -41,10 +41,7 @@ static char *ValidElems[] =
    "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra",
    "Ac", "Th", "Pa", "U",  "Np", "Pu", "Am", "Cm",
    "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf",
-   "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn"};
+   "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn",
+   "Uut", "Fl", "Uup", "Lv", "Uus", "Uuo")};
 
-/*
-   could add these additional elements:
-   "UUt","Fl", "Uup", "Lv", "Uus", "Uuo"
-*/
 
