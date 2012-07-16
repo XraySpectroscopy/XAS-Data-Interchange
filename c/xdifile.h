@@ -1,6 +1,13 @@
 #define MAX_COLUMNS 64
 
 typedef struct {
+  char *family;
+  char *key;
+  char *value;
+} metadata;
+
+
+typedef struct {
   long nmetadata;       /* number of metadata key/val pairs */
   long narrays;         /* number of arrays */
   long npts;            /* number of data points for all arrays */
@@ -14,15 +21,14 @@ typedef struct {
   char *comments;       /* multi-line, user-supplied comment */
   char **array_labels;  /* labels for arrays */
   char **array_units;   /* units for arrays */
-  char **metadata_keys; /* keys for metadata from file header */
-  char **metadata_vals; /* value for metadata from file header */
+  metadata *metadata;    /* family/key/value for metadata from file header */
   double **array;       /* 2D array of all array data */
 } XDIFile;
 
-int XDI_hasfile(char *filename);
 int XDI_readfile(char *filename, XDIFile *xdifile) ;
 int XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
-int XDI_get_metadata_keys(XDIFile *xdifile, char **keys);
-int XDI_get_metadata(XDIFile *xdifile, char *key, char *value);
+/* 
+   int XDI_get_metadata(XDIFile *xdifile, char *family, char *key, char *value);
+*/
 

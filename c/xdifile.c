@@ -19,15 +19,12 @@
 #include "xdifile.h"
 /*-------------------------------------------------------*/
 
-int XDI_hasfile(char *filename) {
-  return 1;
-}
 int XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
   char *words[MAX_WORDS], *cwords[2];
   char *col_labels[MAX_COLUMNS], *col_units[MAX_COLUMNS];
-  char *c, *val, *key, *version_xdi, *version_extra;
+  char *c, *line, *mkey,  *mval, *version_xdi, *version_extra;
   char comments[1024] = "";
   FILE *inpFile;
 
@@ -43,6 +40,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     COPY_STRING(col_units[i], "");
   }
 
+
   /* read file to text lines */
   ilen = readlines(filename, textlines);
   if (ilen < 0) {
@@ -55,14 +53,14 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   nheader=0;
   /* check fist line for XDI header, get version info */
   if (strncmp(textlines[0], TOK_COMM, 1) == 0)  {
-    val = textlines[0]; val++;
-    val[strcspn(val, CRLF)] = '\0';
-    nwords = make_words(val, cwords, 2);
+    line = textlines[0]; line++;
+    line[strcspn(line, CRLF)] = '\0';
+    nwords = make_words(line, cwords, 2);
     if (strncasecmp(cwords[0], TOK_VERSION, strlen(TOK_VERSION)) != 0)  {
       return -1;
     } else {
-      val = val+5;
-      COPY_STRING(xdifile->xdi_version, val)
+      line = line+5;
+      COPY_STRING(xdifile->xdi_version, line)
     }
     if (nwords > 1) { /* extra version tags */
       COPY_STRING(xdifile->extra_version, cwords[1]);
@@ -82,59 +80,65 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   COPY_STRING(xdifile->element, "__");
   COPY_STRING(xdifile->edge, "__");
 
-  xdifile->metadata_keys = calloc(nheader, sizeof(char *));
-  xdifile->metadata_vals = calloc(nheader, sizeof(char *));
+  xdifile->metadata = calloc(nheader, sizeof(metadata));
   ndict = 0;
   maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
   for (i = 1; i < nheader; i++) {
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
-      COPY_STRING(val, textlines[i]);
-      val++;
-      nwords = split_on(val, TOK_DELIM, words);
+      COPY_STRING(line, textlines[i]);
+      line++;
+      nwords = split_on(line, TOK_DELIM, words);
+      COPY_STRING(mkey, words[0]);
       if ((mode==0) && (nwords == 2)) {
-	COPY_STRING(xdifile->metadata_keys[ndict], words[0]);
-	COPY_STRING(xdifile->metadata_vals[ndict], words[1]);
+	COPY_STRING(mval, words[1]);
+	COPY_STRING(xdifile->metadata[ndict].value, mval);
+	nwords = split_on(words[0], TOK_DOT, words);
+	COPY_STRING(xdifile->metadata[ndict].family, words[0]);
+	COPY_STRING(xdifile->metadata[ndict].key,    words[1]);
+	/* printf(" metadata:  %d %s %s\n", ndict, mkey, mval);   */
+	/* ndict,  words[0], words[1],  xdifile->metadata[ndict].value);*/
+
 	ndict++;
-	if (strncasecmp(words[0], TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
-	  j = atoi(words[0]+7)-1;
+	if (strncasecmp(mkey, TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
+	  j = atoi(mkey+7)-1;
 	  if ((j > -1) && (j < MAX_COLUMNS)) {
-	    nrows = make_words(words[1], cwords, 2);
+	    nrows = make_words(mval, cwords, 2);
 	    col_labels[j] = cwords[0];
 	    if (nrows == 2) {
 	      col_units[j] = cwords[1];
 	    }
 	    maxcol =  max(maxcol, j);
 	  }
-	} else if (strcasecmp(words[0], TOK_EDGE) == 0) {
+	} else if (strcasecmp(mkey, TOK_EDGE) == 0) {
 	  for (j = 0; j < n_edges; j++) {
-	    if (strcasecmp(ValidEdges[j], words[1]) == 0) {
-	      COPY_STRING(xdifile->edge, words[1]);
+	    if (strcasecmp(ValidEdges[j], mval) == 0) {
+	      COPY_STRING(xdifile->edge, mval);
 	      break;
 	    }
 	  }
-	} else if (strcasecmp(words[0], TOK_ELEM) == 0) {
+	} else if (strcasecmp(mkey, TOK_ELEM) == 0) {
 	  for (j = 0; j < n_elems; j++) {
-	    if (strcasecmp(ValidElems[j], words[1]) == 0) {
-	      COPY_STRING(xdifile->element, words[1]);
+	    if (strcasecmp(ValidElems[j], mval) == 0) {
+	      COPY_STRING(xdifile->element, mval);
 	      break;
 	    }
 	  }
-	} else if (strcasecmp(words[0], TOK_DSPACE) == 0) {
-	  xdifile->dspacing = strtod(words[1], NULL);
+	} else if (strcasecmp(mkey, TOK_DSPACE) == 0) {
+	  xdifile->dspacing = strtod(mval, NULL);
 	}
-      } else if (strncasecmp(words[0], TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
+      } else if (strncasecmp(mkey, TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
 	mode = 1;
-      } else if (strncasecmp(words[0], TOK_USERCOM_1, strlen(TOK_USERCOM_1)) == 0) {
+      } else if (strncasecmp(mkey, TOK_USERCOM_1, strlen(TOK_USERCOM_1)) == 0) {
 	mode = 2;
       } else if (mode==1) {
 	if ((strlen(comments) > 0) && strlen(comments) < sizeof(comments)) {
 	  strncat(comments, "\n", sizeof(comments)-strlen(comments) - 1);
 	}
-	if (strlen(val) + 1 > sizeof(comments) - strlen(comments)) {
+	if (strlen(line) + 1 > sizeof(comments) - strlen(comments)) {
 	  printf("Warning.... user comment may be truncated!\n");
 	}
-	strncat(comments, val, sizeof(comments) - strlen(comments) - 1);
+	strncat(comments, line, sizeof(comments) - strlen(comments) - 1);
       }
     }
   }
@@ -159,6 +163,8 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
+
+  printf(" XXX COMM %s\n", comments);
 
   COPY_STRING(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);

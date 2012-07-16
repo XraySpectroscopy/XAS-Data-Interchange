@@ -44,7 +44,10 @@ int main(int argc, char **argv) {
   printf("User Comments:\n%s\n====\n",xdifile->comments);
   printf("Metadata (%ld): \n", xdifile->nmetadata);
   for (i=0; i < xdifile->nmetadata; i++) {
-    printf("  %s -> %s\n", xdifile->metadata_keys[i], xdifile->metadata_vals[i]);
+    printf(" %s / %s => %s\n", 
+	   xdifile->metadata[i].family, 
+	   xdifile->metadata[i].key,
+	   xdifile->metadata[i].value);
   }
   printf("#Array labels: ");
   for (j = 0; j < xdifile->narray_labels; j++ ) {
