@@ -51,6 +51,13 @@ ATOM_SYMS = ('H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne',
              'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds',
              'Rg', 'Cn', 'Uut', 'Fl', 'Uup', 'Lv', 'Uus', 'Uuo')
 
+class XDIMetadata(ctypes.Structure):
+    "emulate XDI Metadata structure"
+    _fields_ = [('family',  ctypes.c_char_p),
+                ('key',     ctypes.c_char_p),
+                ('value',   ctypes.c_char_p)]
+
+    
 class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
     _fields_ = [('nmetadata',     ctypes.c_ulong),
@@ -66,8 +73,8 @@ class XDIFileStruct(ctypes.Structure):
                 ('comments',      ctypes.c_char_p),
                 ('array_labels',  ctypes.c_void_p),
                 ('array_units',   ctypes.c_void_p),
-                ('metadata_keys', ctypes.c_void_p),
-                ('metadata_vals', ctypes.c_void_p),
+                #('metadata_keys', ctypes.c_void_p),
+                ('metadata', ctypes.c_void_p),
                 ('array',         ctypes.c_void_p)]
 
 
@@ -313,15 +320,28 @@ class XDIFile(object):
         self.column_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
         self.column_units = (self.narrays*pchar).from_address(xdi.array_units)[:]
 
-        mkeys = (self.nmetadata*pchar).from_address(xdi.metadata_keys)[:]
-        mvals = (self.nmetadata*pchar).from_address(xdi.metadata_vals)[:]
-        self.attrs = {}
-        for key, val in zip(mkeys, mvals):
-            parent, child = key.lower().split('.')
-            if parent not in self.attrs:
-                self.attrs[parent] = {}
-            self.attrs[parent][child] = val
 
+        pmeta  = (self.nmetadata*ctypes.c_void_p).from_address(xdi.metadata)[:]
+
+        print 'metadata '
+        for pm in pmeta:
+            print   pm
+            mdata  = (XDIMetadata).from_address(pm)
+            print mdata
+            print dir(mdata)
+            
+            print getattr(mdata, 'family')
+            # ctypes.cast(pm, ctypes.pointer(XDIMetadata()))
+            # print pm
+            # print dir(mdata[0])
+
+#         self.attrs = {}
+#         for key, val in zip(mkeys, mvals):
+#             parent, child = key.lower().split('.')
+#             if parent not in self.attrs:
+#                 self.attrs[parent] = {}
+#             self.attrs[parent][child] = val
+# ;
         parrays  = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
         arrays  = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
 
@@ -330,7 +350,7 @@ class XDIFile(object):
             arrays.shape = (self.narrays, self.npts)
         self.rawdata = arrays
         print 'Before Assign Arrays ', self.rawdata[:, :5]
-        self._assign_arrays()
+        # self._assign_arrays()
 
         # now do error checking....
 #
