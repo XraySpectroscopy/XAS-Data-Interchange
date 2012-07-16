@@ -38,7 +38,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
 
-  for (i==0; i < MAX_COLUMNS; i++) {
+  for (i=0; i < MAX_COLUMNS; i++) {
     COPY_STRING(col_labels[i], "unknown");
     COPY_STRING(col_units[i], "");
   }
@@ -138,7 +138,6 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       }
     }
   }
-
   /* check edge, element, return error code if invalid */
   valid = 0;
   for (j = 0; j < n_edges; j++) {
@@ -168,11 +167,10 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   maxcol = min(nrows, maxcol);
   xdifile->array_labels = calloc(maxcol, sizeof(char *));
   xdifile->array_units  = calloc(maxcol, sizeof(char *));
-  for (j=0; j<maxcol; j++) {
+  for (j=0; j < maxcol; j++) {
     COPY_STRING(xdifile->array_labels[j], col_labels[j]);
     COPY_STRING(xdifile->array_units[j], col_units[j]);
   }
-
   /* printf(" XDFILE maxcol, ncol, nrows %ld, %ld, %ld\n", maxcol, ncol, nrows);*/
   xdifile->array = calloc(nrows, sizeof(double *));
   for (j = 0; j < nrows; j++) {
@@ -185,7 +183,6 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       xdifile->array[j][i] = strtod(words[j], NULL);
     }
   }
-
   xdifile->npts = ncol;
   xdifile->narrays = nrows;
   xdifile->narray_labels = maxcol;
