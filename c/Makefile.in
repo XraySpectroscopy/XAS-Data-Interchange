@@ -23,7 +23,7 @@ EXAMPLE1  = xdi_example1
 LIBXDIF_STATIC   = libxdifile.a
 LIBXDIF_SHARED = libxdifile.so
 XDIF_OBJ  = xdifile.o strutil.o
-CCOPTS = -arch i386 -arch x86_64
+CCOPTS = ##  -arch i386 -arch x86_64
 SHARED = $(CCOPTS) -shared
 CC = gcc $(CCOPTS)
 LINKXDIF = -L$(libdir) -L. -lxdifile
@@ -48,8 +48,8 @@ $(LIBXDIF_SHARED): $(XDIF_OBJ)
 	@rm -f $@
 	$(LINK) $(SHARED) -o $@ $(XDIF_OBJ)
 
-$(EXAMPLE1): $(LIBXDIF_SHARED) $(EXAMPLE1).o
-	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LIBXDIF_SHARED)
+$(EXAMPLE1): $(LIBXDIF_STATIC) $(EXAMPLE1).o
+	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LIBXDIF_STATIC)
 
 clean :
 	rm -f $(XDIF_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
