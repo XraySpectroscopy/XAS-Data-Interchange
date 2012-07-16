@@ -9,6 +9,9 @@
 #ifndef max
 #define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #endif
+#ifndef min
+#define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#endif
 
 #include "strutil.h"
 #include "errors.h"
@@ -34,6 +37,11 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
+
+  for (i==0; i < MAX_COLUMNS; i++) {
+    COPY_STRING(col_labels[i], "unknown");
+    COPY_STRING(col_units[i], "");
+  }
 
   /* read file to text lines */
   ilen = readlines(filename, textlines);
@@ -90,13 +98,11 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 	ndict++;
 	if (strncasecmp(words[0], TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(words[0]+7)-1;
-	  if (j < MAX_COLUMNS) {
+	  if ((j > -1) && (j < MAX_COLUMNS)) {
 	    nrows = make_words(words[1], cwords, 2);
 	    col_labels[j] = cwords[0];
 	    if (nrows == 2) {
 	      col_units[j] = cwords[1];
-	    } else {
-	      col_units[j] = "";
 	    }
 	    maxcol =  max(maxcol, j);
 	  }
@@ -152,10 +158,14 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   }
   if (valid == 0) { return ERR_NOELEM;}
 
+  ncol = ilen - nheader + 1;
+  nrows = make_words(textlines[nheader], words, MAX_WORDS);
 
   COPY_STRING(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
+
   maxcol++;
+  maxcol = min(nrows, maxcol);
   xdifile->array_labels = calloc(maxcol, sizeof(char *));
   xdifile->array_units  = calloc(maxcol, sizeof(char *));
   for (j=0; j<maxcol; j++) {
@@ -163,9 +173,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     COPY_STRING(xdifile->array_units[j], col_units[j]);
   }
 
-  ncol = ilen - nheader + 1;
-  nrows = make_words(textlines[nheader], words, MAX_WORDS);
-
+  /* printf(" XDFILE maxcol, ncol, nrows %ld, %ld, %ld\n", maxcol, ncol, nrows);*/
   xdifile->array = calloc(nrows, sizeof(double *));
   for (j = 0; j < nrows; j++) {
     xdifile->array[j] = calloc(ncol, sizeof(double));
@@ -182,7 +190,6 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   xdifile->narrays = nrows;
   xdifile->narray_labels = maxcol;
   xdifile->nmetadata = ndict;
-
   return 0;
 }
 
@@ -208,4 +215,3 @@ int XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   }
   return ERR_NOARR_NAME;
 }
-
