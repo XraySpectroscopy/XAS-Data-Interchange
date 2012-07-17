@@ -10,17 +10,17 @@ passes     bad_03.xdi          No element.symbol
 passes     bad_04.xdi          Invalid element.edge
 passes     bad_05.xdi          Invalid element.symbol
 passes     bad_06.xdi          No '------'
-note1      bad_07.xdi          No Column labels
+passes     bad_07.xdi          No Column labels
 passes     bad_08.xdi          Too few Column labels
 passes     bad_09.xdi          Too many Column labels
 passes     bad_10.xdi          Column indices not continuous
 passes     bad_11.xdi          Unsupported comment character
-note2      bad_12.xdi          angle given without mono.d_spacing
-note3      bad_13.xdi          inconsistent number of rows in data table -- too few
+passes     bad_12.xdi          angle given without mono.d_spacing
+note1      bad_13.xdi          inconsistent number of rows in data table -- too few
 passes     bad_14.xdi          inconsistent number of rows in data table -- too many
 passes     bad_15.xdi          NaN in data table
-note3      bad_16.xdi          string in data table
-note4      bad_17.xdi          bad number ('1.2.3') in data table
+note1      bad_16.xdi          string in data table
+note2      bad_17.xdi          bad number ('1.2.3') in data table
 passes     bad_18.xdi          Header violates 'Family.Key: Value' -- no value
 passes     bad_19.xdi          Header violates 'Family.Key: Value' -- no ':'
 passes     bad_20.xdi          Header violates 'Family.Key: Value' -- two ':'
@@ -30,9 +30,8 @@ passes     bad_23.xdi          Header violates 'Family.Key: Value' -- key starts
 passes     bad_24.xdi          Header violates 'Family.Key: Value' -- Family starts with number
 
 Notes:
-   note1     --  arrays available by index, but not by name.
-   note2     --  passes, should fail
-   note3     --  missing values or strings set to 0.  should fail.
-   note4     --  '1.2.3' -> '1.2'.  ??
-
+   note1 : missing values or strings set to 0.
+   note2 : '1.2.3' -> '1.2'.
+ These appear to be features of using calloc (missing values -> 0) and
+ strtod (strings ->0, delimiter behavior)
 
