@@ -39,7 +39,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   FILE *inpFile;
 
   long  file_length, ilen, index, i, j, maxcol;
-  long  ncol, nrows, nheader, nwords, ndict;
+  long  ncol, nrows, nxrows, nheader, nwords, ndict;
   int   is_newline, fnlen, mode, valid;
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
@@ -180,7 +180,6 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
-
   COPY_STRING(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
 
@@ -192,15 +191,16 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     COPY_STRING(xdifile->array_labels[j], col_labels[j]);
     COPY_STRING(xdifile->array_units[j], col_units[j]);
   }
-  /* printf(" XDFILE maxcol, ncol, nrows %ld, %ld, %ld\n", maxcol, ncol, nrows);*/
+  /* printf(" XDFILE maxcol, ncol, nrows %ld, %ld, %ld\n", maxcol, ncol, nrows); */
   xdifile->array = calloc(nrows, sizeof(double *));
   for (j = 0; j < nrows; j++) {
     xdifile->array[j] = calloc(ncol, sizeof(double));
     xdifile->array[j][0] = strtod(words[j], NULL);
   }
   for (i = 1; i < ncol; i++ ) {
-    nrows = make_words(textlines[nheader+i], words, MAX_WORDS);
-    for (j = 0; j < nrows; j++) {
+    nxrows = make_words(textlines[nheader+i], words, MAX_WORDS);
+    nxrows = min(nrows, nxrows);
+    for (j = 0; j < nxrows; j++) {
       xdifile->array[j][i] = strtod(words[j], NULL);
     }
   }
