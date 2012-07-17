@@ -1,5 +1,6 @@
 \documentclass[final]{beamer}
 \usepackage{grffile}
+\usepackage{ragged2e}
 \mode<presentation> {
 \usetheme{XDI}
 \setbeamercovered{transparent}
@@ -11,7 +12,7 @@
 \boldmath
 \usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
-\definecolor{Red}{rgb}{0.5,0,0}
+\definecolor{Red}{rgb}{0.75,0,0}
 \definecolor{Blue}{rgb}{0,0,0.75}
 \newcommand{\Color}[2]{{\textcolor{#1}{#2}}}
 \newcommand{\Red}[1]{{\Color{Red}{#1}}}
@@ -24,80 +25,87 @@
 \usepackage[orientation=portrait,size=a0,scale=1.4]{beamerposter}
 \graphicspath{{images/}}
 
-\title[XAFS Data Formats Poster]{Efforts toward Data Format Standardization for X-ray Absorption Spectra}
+\title[XAFS Data Formats Poster]{Towards Data Format Standardization for X-ray Absorption Spectra}
 \author[Newville, Sol\'e, Ravel, and Hester]{
 Matthew Newville${}^{a}$, V. Armando  Sol\'e${}^{b}$,  James R. Hester${}^{c}$, and Bruce Ravel${}^{d}$}
 \institute[]{ 
-  ${}^{a}$Center for Advanced Radiation Sources, University of  Chicago, USA, \par
+  ${}^{a}$Center for Advanced Radiation Sources, University of Chicago, USA, \par
   ${}^{b}$European Synchrotron Radiation Facility, Grenoble, France, \par
   ${}^{c}$Bragg Institute, Australian Nuclear Science and Technology Organization, Kirrawee, Australia, \par
-  ${}^{d}$National Institute  of Standards and Technology, Gaithersburg,
-  USA
+  ${}^{d}$National Institute  of Standards and Technology, Gaithersburg, MD USA
 }
 
   \date{23-July-2012}
   
   \begin{document}
   \begin{frame}{}
-    \vspace{2mm}
+%    \vspace{2mm}
     \begin{columns}[t]
-      \begin{column}{.52\linewidth}
+      \begin{column}{.55\linewidth}
         \begin{block}{\large Abstract}
+          \justifying
 
-          In order to address the need for easier exchange and archiving of
-          X-ray absorption data, we propose a data format for spectra of
-          $\mu(E)$ using a simple plaintext file, and invite comments and
-          discussion. The XAS Data Interchange (XDI) format uses
-          space-delimited columns for numerical absorption data, and so is
-          similar to that currently used at many facilities, but with a
-          well-defined structure for metadata in the file header.  Several
-          example XDI files and programming libraries for reading these
-          files are shown, and made publicly available.  Because this data
-          format can accommodate only single spectra, we also discuss
-          methods for combining multiple spectra into spectral libraries
-          using either hierarchical data format (HDF5) or using relational
-          databases based either on the CIF format or SQL-based database
-          engine.
+          To facilitate exchange and archiving of X-ray absorption
+          data, we propose a data format for $\mu(E)$ or $\chi(k)$
+          spectra using a simple, plain-text file. The XAS Data
+          Interchange (XDI) format uses space-delimited columns for
+          numerical absorption data.  As such, it is similar to raw
+          data formats currently used at many XAS beamlines.  XDI,
+          however offers a clearly defined structure for metadata in
+          the file header.  Several example XDI files and programming
+          libraries for reading these files are publicly available.
+          Because XDI accommodates only single spectra, we also
+          discuss methods for combining multiple spectra with other
+          data and metadata into multispectral libraries using either
+          the hierarchical data format (HDF5) or relational databases
+          based either on the CIF format or a SQL-based database engine.
 
         \end{block}
         
         \vspace{2mm}
         
         \begin{block}{\large X-ray Data Interchange Format}
+          \justifying
         
-          {\Red{Motivation here :   NEEDS WORK}}
-          
-          
-          Storing and Exchanging XAFS Data is a common need for everyone
-          using XAFS.  In particular, retrieving data on ''Standards'' or
-          ''Model Compounds'' is a continuing need for both XANES and EXAFS
-          analysis.  Additionally, data taken on samples at different
-          facilities and beamlines need to be compared and analyzed together.
-          At this point, there is no commonly accepted data format for XAFS
-          data.  There have been a few attempts to standardize the
-          traditional "ASCII Column File".  To be sure, ASCII Column Files
-          have some strong appeal. Most data collection software saves such
-          files, and most processing and analysis software use some variation
-          of this format.  In addition, such files may be easily read by
-          humans and used in a wide variety of third party
-          applications. Still, most ASCII Column Files need some intimate
-          knowledge of the data layout to use the data.  The lack of a
-          standard ASCII format is a serious problem. The work here is
-          parallel to the efforts to come up with a standard. and will be
-          able to convert data into such standard file formats.
+          The storage and exchange of XAFS data is a common need for
+          anyone using XAFS.  In particular, retrieving data on
+          \textit{standards} or \textit{model compounds} is a
+          continuing need for both XANES and EXAFS analysis.
+          Additionally, data taken on samples at different facilities
+          and beamlines need to be compared and analyzed together.  At
+          this point, there is no commonly accepted data format for
+          XAFS data.  Most data collection software saves ASCII files
+          and most processing and analysis software recognize some
+          variation of this format, In addition, ASCII files may be
+          read by humans and used in a wide variety of third party
+          applications.  Consequently, there have been prior attempts
+          to standardize the traditional ``ASCII Column File''.
+          Still, most existing data in some ASCII format require
+          intimate knowledge of the data layout to use the data.  The
+          lack of a standard ASCII format is a serious and
+          community-wide problem.  Our work presented here is an
+          effort to define standards for data interchange as well as
+          to provide software tools for converting data into the XDI
+          format.
           
 
-          \begin{center}
-            \begin{minipage}[t]{0.5\linewidth}
-              \large $\mu(E)$ is the basic spectra
-            \end{minipage}
-          \end{center}
+          \vspace{4mm}
 
-          More text
-
+          \begin{block}{\large Our principles}
+            \begin{enumerate}[I.] \normalsize
+            \item $\mu(E)$ (or possibly $\chi(k)$) is the spectral ``unit of currency''
+            \item The data interchange format must be fully specified
+              and the specification must be a public document
+            \item The data interchange format must support both data and
+              metadata in an extensible manner
+            \item Application/programming interfaces (APIs) for many
+              languages must be available
+            \end{enumerate}
+          \end{block}
         \end{block}
       \end{column}
-      \begin{column}{.45\linewidth}
+
+      \begin{column}{.42\linewidth}
         \begin{block}{Example XDI File}
           \begin{center}
             \begin{minipage}[t]{0.95\linewidth}
@@ -122,7 +130,6 @@ Matthew Newville${}^{a}$, V. Armando  Sol\'e${}^{b}$,  James R. Hester${}^{c}$, 
                   \hspace{3mm} 6899.9609 -1.3070486 149013.70\par
                   \hspace{3mm} 6900.1421 -1.3006104 144864.70\par
                   \hspace{3mm} 6900.5449 -1.3033816 132978.70\par
-                  \hspace{3mm} 6900.9678 -1.3059724 125444.70\par
                   \hspace{3mm} \ldots\par
                 }
               \end{alltt}
@@ -133,81 +140,138 @@ Matthew Newville${}^{a}$, V. Armando  Sol\'e${}^{b}$,  James R. Hester${}^{c}$, 
         \vspace{2mm}
         \begin{block}{\large XDI File description}
 
- 
-         Required metadata (case insensitive):
+          \justifying
+          Some metadata are \textbf{required} in all files (case insensitive):
 
-          \begin{itemize}
-            \item {\Blue{Element.symbol}}  Atomic symbol of absorbing element
-            \item {\Blue{Element.edge}}    K, L3, M4, etc
-            \item {\Blue{Mono.d\_spacing}}  Strongly encouraged for all data,
-              required if mono angle is given and mono energy is not.
-          \end{itemize}
+         \begin{center}
+           \begin{minipage}[t]{0.95\linewidth}
+             \begin{description}[Mono]
+             \item[\Blue{Element.symbol}]  Atomic symbol of absorbing element
+             \item[\Blue{Element.edge}]    K, L3, M4, etc
+             \item[\Blue{Mono.d\_spacing}]  Required if mono angle is given and mono energy is not.
+               Strongly encouraged for all data,
+             \end{description}
+           \end{minipage}
+         \end{center}
 
-          \vspace{3mm}
+         \vspace{3mm}
 
           \hrule
 
-          \vspace{3mm}
+          \vspace{3mm} {\ }
+          
+          Supported column labels.  
 
-          Supported column labels.  These labels for Columns should
-         be used, and may be required for certain data sets.
+         \begin{columns}[T]
+           \begin{column}{0.06\linewidth}
+           \end{column}
+           \begin{column}{0.41\linewidth}
+             \begin{itemize}
+             \item {\Blue{\tt{energy}}}  Mono Energy, in eV or keV.
+             \item {\Blue{\tt{angle}}}   Mono Angle, in degrees.
+             \item {\Blue{\tt{i0}}}      Monitor, $I_0$.
+             \item {\Blue{\tt{time}}}    Integration time.
+             \item {\Blue{\tt{itrans}}}  Transmitted intensity, $I_1$.
+             \item {\Blue{\tt{ifluor}}}  Fluorescecnce intensity, $I_f$.
+             \item {\Blue{\tt{irefer}}}  Reference signal, $I_2$.
+             \end{itemize} 
+           \end{column}
+           \begin{column}{0.06\linewidth}
+           \end{column}
+           \begin{column}{0.41\linewidth}
+               \begin{itemize}
+               \item {\Blue{\tt{mutrans}}}   $\mu(E) = -\ln(I_1/I_0)$.
+               \item {\Blue{\tt{mufluor}}}   $\mu_f(E) = I_f/I_0$
+               \item {\Blue{\tt{murefer}}}   $\mu_r(E) = -\ln(I_2/I_1)$.
+               \item {\Blue{\tt{normtrans}}} Normalized $\mu(E)$ 
+               \item {\Blue{\tt{normfluor}}} Normalized $\mu_f(E)$ 
+               \item {\Blue{\tt{normrefer}}} Normalized $\mu_r(E)$ 
+               \item {\Blue{\tt{k}}}         Wavenumber
+               \item {\Blue{\tt{chi}}}       $\chi(k)$
+               \end{itemize}
+           \end{column}
+           \begin{column}{0.06\linewidth}
+           \end{column}
+         \end{columns}
+
+         \vspace{3mm}
+
+         \hrule
+
+         \vspace{3mm} {\ }
+
+         \justifying
+         Other metadata describe additional information about the spectra, with 
+         entries arranged as {\BoldRed{\tt{Family.Keyword:  Value}}}, and
+         familis such as
+
+         \begin{columns}[T]
+           \begin{column}{0.03\linewidth}
+           \end{column}
+           \begin{column}{0.46\linewidth}
+             \begin{itemize}
+             \item {\Blue{\tt{Column}}}   labels for array columns
+             \item {\Blue{\tt{Element}}}  absorbing element (edge)
+             \item {\Blue{\tt{Mono}}}     monochromator (d-spacing)
+             \item {\Blue{\tt{Facility}}} facility  (name, x-ray source)
+           \end{itemize}
+           \end{column}
+           \begin{column}{0.02\linewidth}
+           \end{column}
+           \begin{column}{0.46\linewidth}
+             \begin{itemize}
+             \item {\Blue{\tt{Beamline}}} beamline  (name, optics)
+             \item {\Blue{\tt{Scan}}}     scan  (step size, date)
+             \item {\Blue{\tt{Detector}}} detector (ion chamber gases)
+             \item {\Blue{\tt{Sample}}}   sample (name, prep)
+           \end{itemize}
+
+           \end{column}
+           \begin{column}{0.03\linewidth}
+           \end{column}
+
+         \end{columns}
          
-         \begin{itemize}
-         \item {\Blue{\tt{energy}}}  Monochromator energy, in eV or keV.
-         \item {\Blue{\tt{angle}}}   Monochromator angle, in degrees.
-         \item {\Blue{\tt{i0}}}
-         \item {\Blue{\tt{time}}}
-         \item {\Blue{\tt{itrans}}}
-         \item {\Blue{\tt{ifluor}}}
-         \item {\Blue{\tt{irefer}}}
-         \item {\Blue{\tt{mutrans}}}
-         \item {\Blue{\tt{mufluor}}}
-         \item {\Blue{\tt{murefer}}}
-         \item {\Blue{\tt{normtrans}}}
-         \item {\Blue{\tt{normfluor}}}
-         \item {\Blue{\tt{normrefer}}}
-         \item {\Blue{\tt{k}}}
-         \item {\Blue{\tt{chi}}}
-         \end{itemize}
+         \hspace{3mm}
+       
+         This list is not exhaustive.  XDI is extensible, and adding new
+         metadata fields without affecting other applications is supported.
 
-          \vspace{6mm}
 
-          Table of metadata fields and meanings
- % ;
- 
-        \end{block}
-      \end{column}
-    \end{columns}
-    \vfill
+       \end{block}
+     \end{column}
+   \end{columns}
 
-    \begin{block}{Options for Storing and Managing Multiple XDI Spectra}
+   \begin{block}{\large Storing and Managing Multiple XDI Spectra}
+     
+     An XDI file contains exactly one $\mu(E)$ or $\chi(k)$ XAFS
+     spectrum.  To support libraries of spectra or multi-spectral data
+     sets, we propose some possible solutions for multiple spectra.
 
-      XDI describes exactly one XAFS $\mu(E)$ or $\chi(k)$ spectra.
-      Obviously, having a community standard for storing and managing
-      libraries of spectra would be useful.   
-
-      \vspace{5mm}
-
-      Below are three options that could be used to hold multiple spectra,
-      and be able to read / write to XDI files.
-
-      {\Red{ each needs more explanation!}}
-
-    \end{block}
+   \end{block}
 
     \begin{columns}[t]
+      \begin{column}{.01\linewidth}
+      \end{column}
       \begin{column}{.32\linewidth}
-        \begin{block}{HDF5 -- Heierarchical Data Format}
+        \begin{block}{HDF5 -- Hierarchical Data Format}
+          A sentence or two about HDF.
 
-        {\centering
-          \includegraphics[height=0.8\linewidth]{hdf5.png}
-        }
-        
+         \vspace{9mm}
+
+         \begin{center}
+           \includegraphics[width=0.5\linewidth]{hdf5.png}
+         \end{center}
         
         \end{block}
+      \end{column}
+      \begin{column}{.01\linewidth}
       \end{column}
       \begin{column}{.32\linewidth}
         \begin{block}{CIF -- Crystallographic Information File}
+          A sentence or two about CIF.
+
+         \vspace{9mm}
 
           {\centering \begin{minipage}{0.8\linewidth}
               \begin{alltt}
@@ -240,22 +304,24 @@ Matthew Newville${}^{a}$, V. Armando  Sol\'e${}^{b}$,  James R. Hester${}^{c}$, 
                   5248.52108 0.813707373\par
                   5258.29435 0.798733337\par
                   5268.26606 0.781069442\par
-                  5278.27878 0.764530778\par
-                  5288.28697 0.748170706\par
-                  5298.19834 0.731395959\par
                   \ldots\par
                 }
               \end{alltt}
               \end{minipage} }
         \end{block}
       \end{column}
+      \begin{column}{.01\linewidth}
+      \end{column}
 
       \begin{column}{.32\linewidth}
         \begin{block}{SQLite -- relational database in a file}
+          A sentence or two about SQL.
 
-        {\centering
-        \includegraphics[height=0.8\linewidth]{sqlite.png}
-      }
+         \vspace{9mm}
+
+         \begin{center}
+           \includegraphics[width=0.5\linewidth]{sqlite.png}
+         \end{center}
         \end{block}
       \end{column}
 
