@@ -6,7 +6,7 @@ import re
 import os
 import ctypes
 import ctypes.util
-import math
+from math import pi, exp, log, sin, asin
 import time
 import warnings
 from string import printable as PRINTABLE
@@ -17,10 +17,10 @@ try:
 except ImportError:
     HAS_NUMPY = False
 
-RAD2DEG  = 180.0/math.pi
+RAD2DEG  = 180.0/pi
 # from NIST.GOV CODATA:
 # Planck constant over 2 pi times c: 197.3269718 (0.0000044) MeV fm
-PLANCK_hc = 1973.269718 * 2 * math.pi # hc in eV * Ang = 12398.4193
+PLANCK_hc = 1973.269718 * 2 * pi # hc in eV * Ang = 12398.4193
 
 ##
 ## Dictionary of XDI terms -- Python Version
@@ -51,13 +51,7 @@ ATOM_SYMS = ('H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne',
              'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds',
              'Rg', 'Cn', 'Uut', 'Fl', 'Uup', 'Lv', 'Uus', 'Uuo')
 
-class XDIMetadata(ctypes.Structure):
-    "emulate XDI Metadata structure"
-    _fields_ = [('family',  ctypes.c_char_p),
-                ('key',     ctypes.c_char_p),
-                ('value',   ctypes.c_char_p)]
 
-    
 class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
     _fields_ = [('nmetadata',     ctypes.c_ulong),
@@ -73,8 +67,9 @@ class XDIFileStruct(ctypes.Structure):
                 ('comments',      ctypes.c_char_p),
                 ('array_labels',  ctypes.c_void_p),
                 ('array_units',   ctypes.c_void_p),
-                #('metadata_keys', ctypes.c_void_p),
-                ('metadata', ctypes.c_void_p),
+                ('meta_families', ctypes.c_void_p),
+                ('meta_keywords', ctypes.c_void_p),
+                ('meta_values',   ctypes.c_void_p),
                 ('array',         ctypes.c_void_p)]
 
 
@@ -270,8 +265,8 @@ class XDIFile(object):
         self.app_info =  {'pylib': '1.0.0'}
         self.comments = []
         self.rawdata = []
-        self.column_labels = {}
-        self.column_attrs = {}
+        # self.column_labels = {}
+        # self.column_attrs = {}
         self.file_version = None
         self._lineno  = 0
         self._text = ''
@@ -301,6 +296,19 @@ class XDIFile(object):
         "write out an XDI File"
         print 'Writing XDI file not currently supported'
 
+    def open(self, filename=None):
+        """read validate and parse an XDI datafile into python structures
+        """
+        if filename is None and self.filename is not None:
+            filename = self.filename
+        XDILIB = get_xdilib()
+        pxdi = ctypes.pointer(XDIFileStruct())
+        out = XDILIB.XDI_readfile(filename, pxdi)
+        if out != 0:
+            print 'Error reading XDIFile %s ' % filename
+            return
+        return pxdi
+
     def read(self, filename=None):
         """read validate and parse an XDI datafile into python structures
         """
@@ -317,31 +325,22 @@ class XDIFile(object):
             setattr(self, attr, getattr(xdi, attr))
 
         pchar = ctypes.c_char_p
-        self.column_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
-        self.column_units = (self.narrays*pchar).from_address(xdi.array_units)[:]
+        self.array_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
+        self.array_units = (self.narrays*pchar).from_address(xdi.array_units)[:]
 
 
-        pmeta  = (self.nmetadata*ctypes.c_void_p).from_address(xdi.metadata)[:]
+        mfams = (self.nmetadata*pchar).from_address(xdi.meta_families)[:]
+        mkeys = (self.nmetadata*pchar).from_address(xdi.meta_keywords)[:]
+        mvals = (self.nmetadata*pchar).from_address(xdi.meta_values)[:]
 
-        print 'metadata '
-        for pm in pmeta:
-            print   pm
-            mdata  = (XDIMetadata).from_address(pm)
-            print mdata
-            print dir(mdata)
-            
-            print getattr(mdata, 'family')
-            # ctypes.cast(pm, ctypes.pointer(XDIMetadata()))
-            # print pm
-            # print dir(mdata[0])
+        self.attrs = {}
+        for fam, key, val in zip(mfams, mkeys, mvals):
+            fam = fam.lower()
+            key = key.lower()
+            if fam not in self.attrs:
+                self.attrs[fam] = {}
+            self.attrs[fam][key] = val
 
-#         self.attrs = {}
-#         for key, val in zip(mkeys, mvals):
-#             parent, child = key.lower().split('.')
-#             if parent not in self.attrs:
-#                 self.attrs[parent] = {}
-#             self.attrs[parent][child] = val
-# ;
         parrays  = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
         arrays  = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
 
@@ -349,8 +348,8 @@ class XDIFile(object):
             arrays = np.array(arrays)
             arrays.shape = (self.narrays, self.npts)
         self.rawdata = arrays
-        print 'Before Assign Arrays ', self.rawdata[:, :5]
-        # self._assign_arrays()
+        # print 'Before Assign Arrays ', self.rawdata[:, :5]
+        self._assign_arrays()
 
         # now do error checking....
 #
@@ -459,7 +458,7 @@ class XDIFile(object):
            energy, angle, i0, itrans, ifluor, irefer,
            mutrans, mufluor, murefer, etc.
         """
-        print 'assign arrays ' , self.column_labels
+        print 'assign arrays ' , self.array_labels
         print 'Facility ' , self.attrs['facility']
         xunits = 'eV'
         xname = None
@@ -471,16 +470,16 @@ class XDIFile(object):
             sin = np.log
             asin = np.arcsin
 
-        for idx, name in enumerate(self.column_labels):
+        for idx, name in enumerate(self.array_labels):
             if HAS_NUMPY:
-                dat = self.rawdata[:,int(idx)-1]
+                dat = self.rawdata[idx,:]
             else:
-                dat = [d[idx-1] for d in self.rawdata]
+                dat = [d[idx] for d in self.rawdata]
             setattr(self, name, dat)
             if name in ('energy', 'angle'):
                 ix = idx
                 xname = name
-                units = self.column_attrs.get(idx, None)
+                units = self.array_units[idx]
                 if units is not None:
                     xunits = units
 
@@ -490,7 +489,7 @@ class XDIFile(object):
             return
 
         # convert energy to angle, or vice versa
-        if ix > 0 and 'd_spacing' in self.attrs['mono']:
+        if ix >= 0 and 'd_spacing' in self.attrs['mono']:
             dspace = float(self.attrs['mono']['d_spacing'])
             omega = PLANCK_hc/(2*dspace)
             if xname == 'energy' and not hasattr(self, 'angle'):
@@ -507,10 +506,8 @@ class XDIFile(object):
         if hasattr(self, 'i0'):
             if hasattr(self, 'itrans') and not hasattr(self, 'mutrans'):
                 self.mutrans = -log(self.itrans / (self.i0+1.e-12))
-
             elif hasattr(self, 'mutrans') and not hasattr(self, 'itrans'):
                 self.itrans  =  self.i0 * exp(-self.mutrans)
-
             if hasattr(self, 'ifluor') and not hasattr(self, 'mufluor'):
                 self.mufluor = self.ifluor/(self.i0+1.e-12)
 
@@ -529,11 +526,11 @@ if __name__ == '__main__':
     print x.attrs.keys()
     print 'Facility ' , x.attrs['facility']
     print 'Scan     ' , x.attrs['scan']
-    print 'columns   ' , x.column_labels
+    print 'columns  ' , x.array_labels
     print x.comments
     print 'Energy: ', x.energy[:5]
     try:
         print x.angle[:5]
     except AttributeError:
         print 'no angle calculated!'
-    print x.mutrans[:5]
+    print dir(x)
