@@ -4,12 +4,12 @@ All should either pass or give a useful error message.
 status      file                      description of error in file
 -----      --------           --------------------
 passes     bad_00.xdi          valid xdi file, used to modify for rest of files
-segfault   bad_01.xdi          No XDI line at top
-segfault   bad_02.xdi          No element.edge
-segfault   bad_03.xdi          No element.symbol
-correct*   bad_04.xdi          Invalid element.edge
-correct*   bad_05.xdi          Invalid element.symbol
-segfault   bad_06.xdi          No '------'
+passes     bad_01.xdi          No XDI line at top
+passes     bad_02.xdi          No element.edge
+passes     bad_03.xdi          No element.symbol
+passes     bad_04.xdi          Invalid element.edge
+passes     bad_05.xdi          Invalid element.symbol
+passes     bad_06.xdi          No '------'
 note1       bad_07.xdi          No Column labels
 passes     bad_08.xdi          Too few Column labels
 passes     bad_09.xdi          Too many Column labels
@@ -30,7 +30,6 @@ passes     bad_23.xdi          Header violates 'Family.Key: Value' -- key starts
 passess   bad_24.xdi          Header violates 'Family.Key: Value' -- Family starts with number
 
 Notes:
-   correct*  -- reports error number, but not a good error message
    note1     --  arrays available by index, but not by name. should fail.
    note2     --  passes, should fail
    note3     --  missing values or strings set to 0.  should fail.

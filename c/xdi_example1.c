@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-
 #include "strutil.h"
 #include "xdifile.h"
 
@@ -32,7 +31,7 @@ int main(int argc, char **argv) {
   xdifile = malloc(sizeof(XDIFile));
   ret = XDI_readfile(argv[1], xdifile);
   if (ret < 0) {
-    printf("Error reading XDI file %s! Error Code=%ld\n", argv[1], ret);
+    printf("Error reading XDI file '%s': %s\n", argv[1], XDI_errorstring(ret));
     return 1;
   }
 

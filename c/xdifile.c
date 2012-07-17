@@ -14,10 +14,20 @@
 #endif
 
 #include "strutil.h"
-#include "errors.h"
 #include "xdi_tokens.h"
 #include "xdifile.h"
 /*-------------------------------------------------------*/
+char *XDI_errorstring(int errcode) {
+  if (errcode == 0) { return ""; }
+  if (errcode == ERR_NOTXDI) {
+    return "not an XDI file";
+  } else if (errcode == ERR_NOELEM) {
+    return "no element.symbol given";
+  } else if (errcode == ERR_NOEDGE) {
+    return "no element.edge given";
+  }
+  return "";
+}
 
 int XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
@@ -56,8 +66,9 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     line = textlines[0]; line++;
     line[strcspn(line, CRLF)] = '\0';
     nwords = make_words(line, cwords, 2);
+    if (nwords < 1) { return ERR_NOTXDI; }
     if (strncasecmp(cwords[0], TOK_VERSION, strlen(TOK_VERSION)) != 0)  {
-      return -1;
+      return ERR_NOTXDI;
     } else {
       line = line+5;
       COPY_STRING(xdifile->xdi_version, line)
@@ -77,14 +88,14 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   }
 
   xdifile->dspacing = 0;
-  COPY_STRING(xdifile->element, "__");
-  COPY_STRING(xdifile->edge, "__");
+  COPY_STRING(xdifile->element, "~~");
+  COPY_STRING(xdifile->edge, "~~");
 
   xdifile->meta_families = calloc(nheader, sizeof(char *));
   xdifile->meta_keywords = calloc(nheader, sizeof(char *));
   xdifile->meta_values   = calloc(nheader, sizeof(char *));
 
-  ndict = 0;
+  ndict = -1;
   maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
   for (i = 1; i < nheader; i++) {
@@ -92,17 +103,19 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       COPY_STRING(line, textlines[i]);
       line++;
       nwords = split_on(line, TOK_DELIM, words);
+      if (nwords < 1) {continue;}
       COPY_STRING(mkey, words[0]);
       if ((mode==0) && (nwords == 2)) {
 	COPY_STRING(mval, words[1]);
 	nwords = split_on(words[0], TOK_DOT, words);
-	COPY_STRING(xdifile->meta_values[ndict],   mval);
-	COPY_STRING(xdifile->meta_families[ndict], words[0]);
-	COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
+	if (nwords > 1) {
+	  ndict++;
+	  COPY_STRING(xdifile->meta_values[ndict],   mval);
+	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
+	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
+	}
 	/* printf(" metadata:  %d %s %s\n", ndict, mkey, mval);   */
 	/* ndict,  words[0], words[1],  xdifile->meta_values[ndict]);*/
-
-	ndict++;
 	if (strncasecmp(mkey, TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(mkey+7)-1;
 	  if ((j > -1) && (j < MAX_COLUMNS)) {
@@ -153,7 +166,8 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       break;
     }
   }
-  if (valid == 0) { return ERR_NOEDGE;}
+  if (valid == 0) { printf("Invalid EDGE ");
+    return ERR_NOEDGE;}
 
   valid = 0;
   for (j = 0; j < n_elems; j++) {

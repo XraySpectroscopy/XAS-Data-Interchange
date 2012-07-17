@@ -27,3 +27,12 @@ int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
    int XDI_get_metadata(XDIFile *xdifile, char *family, char *key, char *value);
 */
 
+/* error codes */
+#define ERR_NOTXDI  -10
+#define ERR_NOARR_NAME  -21
+#define ERR_NOARR_INDEX -22
+#define ERR_NOELEM -31
+#define ERR_NOEDGE -32
+
+char *XDI_errorstring(int errcode);
+

@@ -6,7 +6,6 @@
 #include <errno.h>
 
 #include "strutil.h"
-#include "errors.h"
 /*-------------------------------------------------------*/
 /* read array of text lines from an open data file  */
 int readlines(char *filename, char **textlines) {
