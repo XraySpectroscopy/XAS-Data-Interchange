@@ -14,9 +14,9 @@
 #endif
 
 #include "strutil.h"
-#include "xdi_tokens.h"
 #include "xdifile.h"
-/*-------------------------------------------------------*/
+
+/* error string interpretation */
 char *XDI_errorstring(int errcode) {
   if (errcode == 0) { return ""; }
   if (errcode == ERR_NOTXDI) {
@@ -25,6 +25,8 @@ char *XDI_errorstring(int errcode) {
     return "no element.symbol given";
   } else if (errcode == ERR_NOEDGE) {
     return "no element.edge given";
+  } else if (errcode == ERR_NODSPACE) {
+    return "no mono.d_spacing given with angle array";
   }
   return "";
 }
@@ -41,7 +43,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   long  file_length, ilen, index, i, j, maxcol;
   long  ncol, nrows, nxrows, nheader, nwords, ndict;
-  int   is_newline, fnlen, mode, valid;
+  int   is_newline, fnlen, mode, valid, has_angle, has_energy;
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
@@ -86,7 +88,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
     }
   }
 
-  xdifile->dspacing = 0;
+  xdifile->dspacing = -1.0;
   COPY_STRING(xdifile->element, "~~");
   COPY_STRING(xdifile->edge, "~~");
 
@@ -167,8 +169,9 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       break;
     }
   }
-  if (valid == 0) { printf("Invalid EDGE ");
-    return ERR_NOEDGE;}
+  if (valid == 0) { 
+    return ERR_NOEDGE;
+  }
 
   valid = 0;
   for (j = 0; j < n_elems; j++) {
@@ -179,6 +182,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   }
   if (valid == 0) { return ERR_NOELEM;}
 
+
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
   COPY_STRING(xdifile->comments, comments);
@@ -188,11 +192,26 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   xdifile->array_labels = calloc(nrows, sizeof(char *));
   xdifile->array_units  = calloc(nrows, sizeof(char *));
+  has_energy = 0;
+  has_angle  = 0;
   for (j=0; j < nrows; j++) {
     COPY_STRING(xdifile->array_labels[j], col_labels[j]);
     COPY_STRING(xdifile->array_units[j], col_units[j]);
+    if (strcasecmp("energy", col_labels[j]) == 0) { 
+      has_energy = 1;
+    } else if (strcasecmp("angle", col_labels[j]) == 0) { 
+      has_angle = 1;
+    }
   }
+
+
+  /* check for mono d-spacing if angle is given but not energy*/
+  if ((has_angle == 1)  && (has_energy == 0) && (xdifile->dspacing < 0)) {
+    return ERR_NODSPACE;
+  }
+
   /* printf(" XDFILE maxcol, ncol, nrows %ld, %ld, %ld\n", maxcol, ncol, nrows); */
+
   xdifile->array = calloc(nrows, sizeof(double *));
   for (j = 0; j < nrows; j++) {
     xdifile->array[j] = calloc(ncol, sizeof(double));

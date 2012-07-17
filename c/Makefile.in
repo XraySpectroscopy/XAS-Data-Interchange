@@ -37,7 +37,7 @@ $(READER).o: $(READER).c
 default: $(READER)
 
 strutil.o: strutil.h
-xdifile.o: xdifile.h xdi_tokens.h strutil.h
+xdifile.o: xdifile.h strutil.h
 
 $(LIBXDIF_STATIC): $(XDIF_OBJ)
 	@rm -f $@
