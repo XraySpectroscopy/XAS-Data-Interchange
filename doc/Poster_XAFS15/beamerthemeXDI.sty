@@ -1,0 +1,149 @@
+% this style was modified from I6pd2, created by Thomas Deselaers an Philippe Dreuw
+\ProvidesPackage{beamerthemeXDI}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% colors from tangocolors
+% butter (yellowish)
+\definecolor{tabutter}{rgb}{0.98824, 0.91373, 0.30980}		% #fce94f
+\definecolor{ta2butter}{rgb}{0.92941, 0.83137, 0}		% #edd400
+
+% orange
+\definecolor{taorange}{rgb}{0.98824, 0.68627, 0.24314}		% #fcaf3e
+\definecolor{ta2orange}{rgb}{0.96078, 0.47451, 0}		% #f57900
+\definecolor{ta3orange}{rgb}{0.80784, 0.36078, 0}		% #ce5c00
+
+% aluminium
+\definecolor{taaluminium}{rgb}{0.93333, 0.93333, 0.92549}	% #eeeeec
+\definecolor{ta2aluminium}{rgb}{0.82745, 0.84314, 0.81176}	% #d3d7cf
+
+% gray
+\definecolor{tagray}{rgb}{0.53333, 0.54118, 0.52157}		% #888a85
+\definecolor{ta2gray}{rgb}{0.33333, 0.34118, 0.32549}		% #555753
+
+\selectcolormodel{cmyk}
+\mode<presentation>
+
+\usecolortheme{orchid}
+\useinnertheme[shadow]{rounded}
+\usecolortheme{whale}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{blockbg}{rgb}{0.96, 0.96, 0.92}
+\definecolor{posterbg}{rgb}{0.94, 0.93, 0.90}
+
+\setbeamercolor{headline}{fg=black, bg=tabutter}
+\setbeamerfont{footline}{size=\large,series=\tt}
+\setbeamercolor{separation line}{bg=ta2aluminium}
+\setbeamercolor{author in headline}{fg=blue}
+\setbeamercolor{institute in headline}{fg=blue}
+
+\setbeamercolor{author in head/foot}{fg=blue, bg=tabutter}
+
+ %% sets background color for non-blocks
+\setbeamercolor*{normal text}{fg=blue, bg=posterbg}
+
+ %% sets background color for blocks
+\setbeamercolor*{block body}{fg=black, bg=blockbg}
+\setbeamercolor*{block title}{fg=ta2butter, bg=ta2gray}
+\setbeamerfont{block title}{size=\large,series=\bf}
+
+\setbeamercolor{upper separation line head}{bg=taorange}
+\setbeamercolor{lower separation line head}{bg=taorange}
+\setbeamercolor{upper separation line foot}{bg=taorange}
+\setbeamercolor{lower separation line foot}{bg=taorange}
+
+
+% \setbeamercolor*{example body}{fg=ta3aluminium,bg=black}
+% \setbeamercolor*{example text}{fg=ta3aluminium,bg=black}
+% \setbeamercolor*{example title}{bg=taorange,fg=ta2gray}
+
+%% \setbeamercolor{alerted text}{fg=pink}
+
+% %\setbeamercolor{example text}{fg=taorange}
+
+\setbeamercolor{structure}{fg=blue}
+
+% \setbeamertemplate{itemize items}[triangle]
+\setbeamertemplate{navigation symbols}{}  % no navigation on a poster
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamertemplate{block begin}{
+  \vskip.75ex
+  \begin{beamercolorbox}[ht=3.5ex,dp=0.5ex,center,leftskip=-1em,colsep*=.75ex]{block title}%
+    \usebeamerfont*{block title}%
+    {\phantom{Gg}\insertblocktitle}% phantom because of baseline problem
+  \end{beamercolorbox}%
+  {\ifbeamercolorempty[bg]{block body}{}{\nointerlineskip\vskip-0.5pt}}%
+  \usebeamerfont{block body}%
+  \begin{beamercolorbox}[leftskip=1em,colsep*=.75ex,sep=0.5ex,vmode]{block body}%
+    \ifbeamercolorempty[bg]{block body}{\vskip-.25ex}{\vskip-.75ex}\vbox{}%
+  }
+  \setbeamertemplate{block end}{
+  \end{beamercolorbox}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamertemplate{headline}{
+  \leavevmode
+
+  \begin{beamercolorbox}[wd=\paperwidth]{headline}
+    \begin{columns}[T]
+      \begin{column}{.03\paperwidth}
+      \end{column}
+      \begin{column}{.9\paperwidth}
+        \vskip4ex
+        \raggedleft
+        \usebeamercolor{title in headline}{\color{fg}\textbf{\LARGE{\inserttitle}}\\[1ex]}
+        \usebeamercolor{author in headline}{\color{fg}\large{\insertauthor}\\[1ex]}
+        \usebeamercolor{institute in headline}{\color{fg}\large{\insertinstitute}\\[1ex]}
+      \end{column}
+      \begin{column}{.07\paperwidth}
+      \end{column}
+    \end{columns}
+    \vskip2ex
+  \end{beamercolorbox}
+
+  \begin{beamercolorbox}[wd=\paperwidth]{lower separation line head}
+    \rule{0pt}{4pt}
+  \end{beamercolorbox}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamertemplate{footline}{
+  \begin{beamercolorbox}[wd=\paperwidth]{upper separation line foot}
+    \rule{0pt}{4pt}
+  \end{beamercolorbox}
+
+  \leavevmode%
+  \begin{beamercolorbox}[ht=5ex,leftskip=1em,rightskip=1em]{author in head/foot}%
+    \vskip1ex
+    \texttt{http://github.com/XraySpectroscopy}
+    \hfill
+    \texttt{xasformat@millenia.cars.aps.anl.gov}
+    \vskip1ex
+  \end{beamercolorbox}
+  \vskip0pt%
+  \begin{beamercolorbox}[wd=\paperwidth]{lower separation line foot}
+    \rule{0pt}{4pt}
+  \end{beamercolorbox}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Display a grid to help align images ... and it looks nice with this color scheme
+%\beamertemplategridbackground[1cm]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mode<all>
+
+% adapt height of itemize rectangles
+\setbeamertemplate{itemize items}[triangle]
+\setbeamertemplate{itemize item}{\raisebox{0.12ex}{$\blacktriangleright$}\hskip0.1em}
+\setbeamertemplate{itemize subitem}{\raisebox{0.12ex}{$\triangleright$}\hskip0.1em}
+% or define your own template using \defbeamertemplate{itemize item}, see beameruserguide.pdf
+
+% equal font sizes for all levels
+\setbeamerfont{itemize/enumerate body}{size=\footnotesize}
+\setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
+\setbeamerfont{itemize/enumerate subsubbody}{size=\footnotesize}
+
