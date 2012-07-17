@@ -19,7 +19,7 @@ libdir = @libdir@
 
 # you shouldn't have to alter anything below this line
 #---------------------------------
-EXAMPLE1  = xdi_example1
+READER  = xdi_reader
 LIBXDIF_STATIC   = libxdifile.a
 LIBXDIF_SHARED = libxdifile.so
 XDIF_OBJ  = xdifile.o strutil.o
@@ -28,13 +28,13 @@ SHARED = $(CCOPTS) -shared
 CC = gcc $(CCOPTS)
 LINKXDIF = -L$(libdir) -L. -lxdifile
 
-all: $(EXAMPLE1) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
+all: $(READER) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
 
-$(EXAMPLE1).o: $(EXAMPLE1).c
+$(READER).o: $(READER).c
 
 .PHONY: clean install default
 
-default: $(EXAMPLE1)
+default: $(READER)
 
 strutil.o: strutil.h
 xdifile.o: xdifile.h xdi_tokens.h strutil.h
@@ -48,11 +48,11 @@ $(LIBXDIF_SHARED): $(XDIF_OBJ)
 	@rm -f $@
 	$(LINK) $(SHARED) -o $@ $(XDIF_OBJ)
 
-$(EXAMPLE1): $(LIBXDIF_STATIC) $(EXAMPLE1).o
-	$(LINK) -o $(EXAMPLE1)  $(EXAMPLE1).o $(LIBXDIF_STATIC)
+$(READER): $(LIBXDIF_STATIC) $(READER).o
+	$(LINK) -o $(READER)  $(READER).o $(LIBXDIF_STATIC)
 
 clean :
-	rm -f $(XDIF_OBJ) $(EXAMPLE1).o $(EXAMPLE1) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
+	rm -f $(XDIF_OBJ) $(READER).o $(READER) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
 
 install: $(LIBXDIF_STATIC)  $(LIBXDIF_SHARED)
 	cp -pr $(LIBXDIF_STATIC) $(libdir)/$(LIBXDIF_STATIC)

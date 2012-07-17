@@ -31,51 +31,38 @@ int main(int argc, char **argv) {
   xdifile = malloc(sizeof(XDIFile));
   ret = XDI_readfile(argv[1], xdifile);
   if (ret < 0) {
-    printf("Error reading XDI file '%s': %s\n", argv[1], XDI_errorstring(ret));
+    printf("Error reading XDI file '%s':\n     %s\n", 
+	   argv[1], XDI_errorstring(ret));
     return 1;
   }
 
-  printf("#-----\nXDI FILE Read\nVERSIONS: %s|%s|\n" ,
+  printf("# XDI FILE Read %s VERSIONS: %s|%s|\n" ,
+	 xdifile->filename,
 	 xdifile->xdi_version, xdifile->extra_version);
 
-  printf("Elem/Edge: %s|%s|\n",xdifile->element, xdifile->edge);
-  printf("Filename: %s\n",xdifile->filename);
-  printf("User Comments:\n%s\n====\n",xdifile->comments);
-  printf("Metadata (%ld): \n", xdifile->nmetadata);
+  printf("# Elem/Edge: %s|%s|\n",xdifile->element, xdifile->edge);
+  printf("# User Comments:\n%s\n",xdifile->comments);
+
+  printf("# Metadata(%ld entries):\n", xdifile->nmetadata);
   for (i=0; i < xdifile->nmetadata; i++) {
     printf(" %s / %s => %s\n",
 	   xdifile->meta_families[i],
 	   xdifile->meta_keywords[i],
 	   xdifile->meta_values[i]);
   }
-  printf("#Array labels: ");
-  for (j = 0; j < xdifile->narray_labels; j++ ) {
-    printf(" %s, ", xdifile->array_labels[j]);
-  }
 
-  printf("\nArray Data by index: %ld\n", xdifile->narrays);
-  for (j = 0; j < xdifile->narrays; j++ ) {
-    printf("  Array %ld:", j);
-    for (i = 0; i < 5; i++) {
-       printf(" %f,", xdifile->array[j][i]);
-    }
-    printf("... \n");
-  }
+  printf("# Arrays (index, name, first 4 elements):\n");
 
-  printf("\nArray Data by name:\n");
   tdat = (double *)calloc(xdifile->npts, sizeof(double));
-
-  for (j = 0; j < xdifile->narray_labels; j++ ) {
-    printf(" Array '%s':", xdifile->array_labels[j]);
+  for (j = 0; j < xdifile->narrays; j++ ) {
+    printf("  %ld '%s':\t", j, xdifile->array_labels[j]);
     ret = XDI_get_array_name(xdifile,
-			     xdifile->array_labels[j],
-			     tdat);
+			     xdifile->array_labels[j], tdat);
     for (k=0; k< 4; k++) {
       printf(" %f", tdat[k]);
     }
-    printf("... \n");
+    printf(" ...\n");
   }
-
 
   free(xdifile);
   return 0;

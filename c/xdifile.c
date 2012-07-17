@@ -35,6 +35,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   char *words[MAX_WORDS], *cwords[2];
   char *col_labels[MAX_COLUMNS], *col_units[MAX_COLUMNS];
   char *c, *line, *mkey,  *mval, *version_xdi, *version_extra;
+  char tlabel[32];
   char comments[1024] = "";
   FILE *inpFile;
 
@@ -46,10 +47,10 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   int n_elems = sizeof(ValidElems)/sizeof(char*);
 
   for (i=0; i < MAX_COLUMNS; i++) {
-    COPY_STRING(col_labels[i], "unknown");
+    sprintf(tlabel, "col%ld", i+1);
+    COPY_STRING(col_labels[i], tlabel);
     COPY_STRING(col_units[i], "");
   }
-
 
   /* read file to text lines */
   ilen = readlines(filename, textlines);
@@ -81,9 +82,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   nheader = 1;
   for (i = 1; i < ilen ; i++) {
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
-	nheader++;
-    } else {
-      break;
+      nheader = i+1; /*++;*/
     }
   }
 
@@ -156,6 +155,8 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 	}
 	strncat(comments, line, sizeof(comments) - strlen(comments) - 1);
       }
+    } else {
+      printf("Warning - ignoring line:   %s", textlines[i]);
     }
   }
   /* check edge, element, return error code if invalid */
@@ -184,10 +185,10 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   COPY_STRING(xdifile->filename, filename);
 
   maxcol++;
-  maxcol = min(nrows, maxcol);
-  xdifile->array_labels = calloc(maxcol, sizeof(char *));
-  xdifile->array_units  = calloc(maxcol, sizeof(char *));
-  for (j=0; j < maxcol; j++) {
+
+  xdifile->array_labels = calloc(nrows, sizeof(char *));
+  xdifile->array_units  = calloc(nrows, sizeof(char *));
+  for (j=0; j < nrows; j++) {
     COPY_STRING(xdifile->array_labels[j], col_labels[j]);
     COPY_STRING(xdifile->array_units[j], col_units[j]);
   }
@@ -206,7 +207,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   }
   xdifile->npts = ncol;
   xdifile->narrays = nrows;
-  xdifile->narray_labels = maxcol;
+  xdifile->narray_labels = min(nrows, maxcol);
   xdifile->nmetadata = ndict;
   return 0;
 }
