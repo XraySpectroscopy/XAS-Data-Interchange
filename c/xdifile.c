@@ -80,7 +80,10 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   COPY_STRING(xdifile->element, "__");
   COPY_STRING(xdifile->edge, "__");
 
-  xdifile->metadata = calloc(nheader, sizeof(metadata));
+  xdifile->meta_families = calloc(nheader, sizeof(char *));
+  xdifile->meta_keywords = calloc(nheader, sizeof(char *));
+  xdifile->meta_values   = calloc(nheader, sizeof(char *));
+
   ndict = 0;
   maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
@@ -92,12 +95,12 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       COPY_STRING(mkey, words[0]);
       if ((mode==0) && (nwords == 2)) {
 	COPY_STRING(mval, words[1]);
-	COPY_STRING(xdifile->metadata[ndict].value, mval);
 	nwords = split_on(words[0], TOK_DOT, words);
-	COPY_STRING(xdifile->metadata[ndict].family, words[0]);
-	COPY_STRING(xdifile->metadata[ndict].key,    words[1]);
+	COPY_STRING(xdifile->meta_values[ndict],   mval);
+	COPY_STRING(xdifile->meta_families[ndict], words[0]);
+	COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
 	/* printf(" metadata:  %d %s %s\n", ndict, mkey, mval);   */
-	/* ndict,  words[0], words[1],  xdifile->metadata[ndict].value);*/
+	/* ndict,  words[0], words[1],  xdifile->meta_values[ndict]);*/
 
 	ndict++;
 	if (strncasecmp(mkey, TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
@@ -163,8 +166,6 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
-
-  printf(" XXX COMM %s\n", comments);
 
   COPY_STRING(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
