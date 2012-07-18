@@ -38,8 +38,13 @@
 
   \begin{document}
   \begin{frame}{}
+
+   {\ }   \vspace{-20mm}
+
     \begin{columns}[t]
-      \begin{column}{.55\linewidth}
+      \begin{column}{.01\linewidth}\end{column}
+
+      \begin{column}{.54\linewidth}
         \begin{block}{\large Abstract}
           \justifying
 
@@ -60,8 +65,6 @@
 
         \end{block}
 
-        \vspace{2mm}
-
         \begin{block}{\large  X-ray Data Interchange Format:  Exchanging
             XAFS Data}
           \justifying
@@ -79,50 +82,53 @@
           Plainttext (ASCII) file.  Such files are human-readable and used
           widely in third party applications.
 
-
-          \vspace{2mm}
-
-          \begin{block}{\large XDI Design Principles}
-
-           \begin{columns}[T]
-             \begin{column}{0.05\linewidth}    \end{column}
-             \begin{column}{0.90\linewidth}
-
-            \begin{enumerate}[I.] \normalsize
-            \item $\mu(E)$ and $\chi(k)$ are the spectral ``unit of  currency''
-            \item The XDI format should use Plaintext ASCII for maximum portability.
-            \item The XDI format should be fully, and publicly documented.
-            \item The XDI format must support both array data and meta-data.
-            \item The XDI format should be extensible.
-            \item Application/programming interfaces (APIs) should be
-              available for many computer languages.
-            \end{enumerate}
-
-             \end{column}
-             \begin{column}{0.05\linewidth}    \end{column}
-             \end{columns}          \end{block}
+          
         \end{block}
+        
+        \begin{block}{\large XDI Design Principles}
 
-        \vspace{2mm}
+          \begin{columns}[T]
+            \begin{column}{0.05\linewidth}    \end{column}
+            \begin{column}{0.90\linewidth}
+              
+              \begin{enumerate}[I.] \normalsize
+              \item $\mu(E)$ and $\chi(k)$ are the spectral ``unit of  currency''
+              \item The XDI format should use Plaintext ASCII for maximum portability.
+              \item The XDI format should be fully, and publicly documented.
+              \item The XDI format must support both array data and meta-data.
+              \item The XDI format should be extensible.
+              \item Application/programming interfaces (APIs) should be
+                available for many computer languages.
+              \end{enumerate}
 
-      \begin{block}{\large XDI: Current Status}
+            \end{column}
+            \begin{column}{0.05\linewidth}    \end{column}
+          \end{columns} 
+        \end{block}
+        
+        \begin{block}{\large XDI: Current Status}
 
-        We currently have, ready for testing:
-        \begin{center}
-          \begin{minipage}{0.9\linewidth}
-            \begin{description}[A]
-            \item {\Blue{12 example XDI files}} 12 different spectra, all valid  XDI Files.
-            \item {\Blue{C library and Shared Object Library (DLL)}}  for
-              reading an XDI spectra:  Source code, Windows, Mac OSX binaries.
-            \item {\Blue{Python Library}}  Built using C library.
-            \end{description}
+          We currently have, ready for testing:
+          \begin{center}
+            \begin{minipage}{0.9\linewidth}
+              \begin{description}[A]
+              \item {\Blue{12 example XDI files}} 12 different spectra, all valid  XDI Files.
+              \item {\Blue{C library and Shared Object Library (DLL)}}  for
+                reading XDI files:\par   {\hspace{10mm}} Source code, Windows, Mac OSX, Linux binaries.
+              \item {\Blue{Python Library}}  Built using C library.
+              \item {\Blue{Fortran, Perl Library, Documentation}}  Underway.
+                {\BoldRed{Volunteers sought!}}
+              \end{description}
             \end{minipage}
-            \end{center}
-
-      \end{block}
+          \end{center}
+          
+        \end{block}
       \end{column}
 
-      \begin{column}{.42\linewidth}
+      \begin{column}{.01\linewidth}
+      \end{column}
+
+      \begin{column}{.44\linewidth}
         \begin{block}{Example XDI File}
           \begin{center}
             \begin{minipage}[t]{0.95\linewidth}
@@ -189,7 +195,7 @@
              \item {\Blue{\tt{i0}}}      Monitor, $I_0$.
              \item {\Blue{\tt{time}}}    Integration time.
              \item {\Blue{\tt{itrans}}}  Transmitted intensity, $I_1$.
-             \item {\Blue{\tt{ifluor}}}  Fluorescecnce intensity, $I_f$.
+             \item {\Blue{\tt{ifluor}}}  Fluorescence intensity, $I_f$.
              \item {\Blue{\tt{irefer}}}  Reference signal, $I_2$.
              \end{itemize}
            \end{column}
@@ -222,7 +228,7 @@
          entries arranged as {\BoldRed{{Family.Keyword: Value}}}, and  families including
 
          \begin{columns}[T]
-           \begin{column}{0.03\linewidth}
+           \begin{column}{0.02\linewidth}
            \end{column}
            \begin{column}{0.46\linewidth}
              \begin{itemize}
@@ -243,7 +249,7 @@
            \end{itemize}
 
            \end{column}
-           \begin{column}{0.03\linewidth}
+           \begin{column}{0.02\linewidth}
            \end{column}
 
          \end{columns}
@@ -256,46 +262,61 @@
 
        \end{block}
      \end{column}
+
    \end{columns}
 
+   % \begin{columns}[T]
+   %   \begin{column}{.01\linewidth}\end{column}
+   %   \begin{column}{.98\linewidth}     
+   
    \begin{block}{\large Storing and Managing Multiple XDI Spectra:  Data Libraries}
-
+     
      An XDI file contains exactly one $\mu(E)$ or $\chi(k)$ XAFS
      spectrum.  To support libraries of spectra or multi-spectral data
      sets, we propose some possible solutions to complement XDI for multiple spectra.
      These suggestions should not be viewed as exclusive.
-
+         
+     \vspace{-3mm}
+     
    \end{block}
+   
 
-  \vspace{-1mm}
+   {\ }   \vspace{-20mm}
+
+
+%      \end{column}
+%      \begin{column}{.01\linewidth}\end{column}
+%    \end{columns}
+% 
 
     \begin{columns}[t]
-      \begin{column}{.01\linewidth}
-      \end{column}
+      \begin{column}{.01\linewidth}\end{column}
       \begin{column}{.31\linewidth}
         \begin{block}{HDF5 -- Hierarchical Data Format}
 
-          \justifying Multiple Spectra held heierarchically, with highly
-          optimized data arrays.  Becoming standard at synchrotrons.  Good
-          library support.
+          \justifying Multiple Spectra held hierarchically, with highly
+          optimized data arrays.  Becoming standard at synchrotrons for
+          very large datasets.  Excellent library support.
 
-         \vspace{9mm}
+         \vspace{6mm}
 
          \begin{center}
-           \includegraphics[width=0.6\linewidth]{hdf5.png}
+           \includegraphics[width=0.62\linewidth]{hdf5.png}
          \end{center}
+
+         \vspace{10mm} {\ }   \vspace{10mm} {\ }
 
         \end{block}
       \end{column}
       \begin{column}{.01\linewidth}
       \end{column}
-      \begin{column}{.35\linewidth}
-        \begin{block}{CIF -- Crystallographic Information Framework}
+      \begin{column}{.34\linewidth}
+        \begin{block}{Crystallographic Information Framework}
 
-          \justifying CIF can encapsulate one or more data sets in a plain
-          text file.  Within each block, data and meta-data appear as
-          key-value pairs or in a series of tables.  Gives a text
-          representation of a relational database.
+          \justifying CIF can encapsulate one or more data sets in a text
+          file.  Within each block, data and meta-data appear as key-value
+          pairs or in a series of tables.  Plain Text representation of a
+          relational database.
 
          \vspace{2mm} {\ }
 
@@ -332,20 +353,34 @@
                 }
               \end{alltt}
               \end{minipage} }
+
+
+         \vspace{10mm} {\ }  \vspace{10mm} {\ }
+
         \end{block}
       \end{column}
       \begin{column}{.01\linewidth}
       \end{column}
       \begin{column}{.31\linewidth}
         \begin{block}{SQLite -- relational database in a file}
-          A sentence or two about SQL.
 
-         \vspace{9mm}
+          \justifying A real relational database in a portable file. Supports
+          SQL and many languagess.  An industry standard for
+          data storage. Like ASCII, not high performance for numerical
+          arrays.
+
+         \vspace{6mm}
 
          \begin{center}
-           \includegraphics[width=0.6\linewidth]{sqlite.png}
+           \includegraphics[width=0.7\linewidth]{sqlite.png}
          \end{center}
+
+         \vspace{10mm} {\ }   \vspace{10mm} {\ }
+
+
         \end{block}
+      \end{column}
+      \begin{column}{.01\linewidth}
       \end{column}
 
     \end{columns}
