@@ -53,7 +53,7 @@
           simple, plain-text file. The XAS Data Interchange (XDI) format
           uses space-delimited columns for numerical absorption data.  As
           such, it is similar to raw data formats currently used at many
-          XAS beamlines.  XDI, however offers a clearly defined structure
+          XAS beamlines.  XDI offers a clearly defined structure
           for metadata in the file header.  Several example XDI files and
           programming libraries for reading these files are publicly
           available.  Because XDI accommodates only single spectra, we also
@@ -69,11 +69,15 @@
             XAFS Data}
           \justifying
 
-          The storage and exchange of XAFS data is a common need in the
-          XAFS community.  Retrieving data on {\EmphRed{standards}} or
-          {\EmphRed{model compounds}} and using data taken on samples at
-          different facilities and beamlines are continuing needs for both
-          XANES and EXAFS analysis.
+          The exchange and long term storage of archived XAFS data is a common
+          need in the XAFS community.  Retrieving data on
+          {\EmphRed{standards}} or {\EmphRed{model compounds}} and using
+          data taken at different facilities and beamlines are continuing
+          needs for both XANES and EXAFS analysis.
+
+          {\hspace{16mm}} {\Blue{We need to share XAFS spectra between
+              facilities for decades to come.}}
+          
 
           \vspace{2mm}
 
@@ -136,6 +140,9 @@
                 {\footnotesize
                   \#XDI/1.0  {\BoldRed{$\leftarrow$ Version Info}}\par
                   \#Beamline.name: APS 10ID\par
+                  \#Detector.I0:  N2 15cm\par
+                  \#Detector.I1:  N2 15cm\par
+                  \#Sample.name: gamma-FeO(OH)\par
                   \#Mono.name:  Si 111\par
                   \#Mono.d\_spacing: 3.13553\par
                   \#Element.symbol: Fe\par
@@ -225,7 +232,7 @@
 
          \justifying
          Other metadata describe additional information about the spectra, with
-         entries arranged as {\BoldRed{{Family.Keyword: Value}}}, and  families including
+         entries arranged as {\BoldRed{{Family.Keyword: Value}}}.  Families include:
 
          \begin{columns}[T]
            \begin{column}{0.02\linewidth}
@@ -256,8 +263,8 @@
 
          \hspace{3mm}
 
-         This list is not exhaustive.  XDI is extensible, and adding new
-         metadata fields without affecting other applications is supported.
+         This list is not exhaustive.  XDI is extensible, and new metadata
+         fields can be added without affecting other applications.
 
 
        \end{block}
@@ -273,7 +280,7 @@
      
      An XDI file contains exactly one $\mu(E)$ or $\chi(k)$ XAFS
      spectrum.  To support libraries of spectra or multi-spectral data
-     sets, we propose some possible solutions to complement XDI for multiple spectra.
+     sets, we propose three possible solutions to complement XDI for multiple spectra.
      These suggestions should not be viewed as exclusive.
          
      \vspace{-3mm}
@@ -295,8 +302,8 @@
         \begin{block}{HDF5 -- Hierarchical Data Format}
 
           \justifying Multiple Spectra held hierarchically, with highly
-          optimized data arrays.  Becoming standard at synchrotrons for
-          very large datasets.  Excellent library support.
+          optimized data arrays.  HDF5 is becoming standard at synchrotrons
+          for very large datasets.  Excellent library support.
 
          \vspace{6mm}
 
@@ -315,12 +322,10 @@
 
           \justifying CIF can encapsulate one or more data sets in a text
           file.  Within each block, data and meta-data appear as key-value
-          pairs or in a series of tables.  Plain Text representation of a
-          relational database.
+          pairs or in a series of tables.  This gives a text representation
+          of a relational database.
 
-         \vspace{2mm} {\ }
-
-          {\centering \begin{minipage}{0.8\linewidth}
+          \begin{center} \begin{minipage}{0.66\linewidth}
               \begin{alltt}
                 {\tiny
                   data\_v2o5\_nanotube\par
@@ -352,7 +357,7 @@
                   \ldots\par
                 }
               \end{alltt}
-              \end{minipage} }
+              \end{minipage} \end{center}
 
 
          \vspace{10mm} {\ }  \vspace{10mm} {\ }
@@ -364,7 +369,7 @@
       \begin{column}{.31\linewidth}
         \begin{block}{SQLite -- relational database in a file}
 
-          \justifying A real relational database in a portable file. Supports
+          \justifying A true relational database in a portable file. Supports
           SQL and many languagess.  An industry standard for
           data storage. Like ASCII, not high performance for numerical
           arrays.
