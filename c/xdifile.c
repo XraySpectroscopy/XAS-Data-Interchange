@@ -48,7 +48,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
 
-  for (i=0; i < MAX_COLUMNS; i++) {
+  for (i = 0; i < MAX_COLUMNS; i++) {
     sprintf(tlabel, "col%ld", i+1);
     COPY_STRING(col_labels[i], tlabel);
     COPY_STRING(col_units[i], "");
@@ -169,7 +169,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
       break;
     }
   }
-  if (valid == 0) { 
+  if (valid == 0) {
     return ERR_NOEDGE;
   }
 
@@ -194,30 +194,27 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   xdifile->array_units  = calloc(nrows, sizeof(char *));
   has_energy = 0;
   has_angle  = 0;
-  for (j=0; j < nrows; j++) {
+  for (j = 0; j < nrows; j++) {
     COPY_STRING(xdifile->array_labels[j], col_labels[j]);
     COPY_STRING(xdifile->array_units[j], col_units[j]);
-    if (strcasecmp("energy", col_labels[j]) == 0) { 
+    if (strcasecmp("energy", col_labels[j]) == 0) {
       has_energy = 1;
-    } else if (strcasecmp("angle", col_labels[j]) == 0) { 
+    } else if (strcasecmp("angle", col_labels[j]) == 0) {
       has_angle = 1;
     }
   }
-
 
   /* check for mono d-spacing if angle is given but not energy*/
   if ((has_angle == 1)  && (has_energy == 0) && (xdifile->dspacing < 0)) {
     return ERR_NODSPACE;
   }
 
-  /* printf(" XDFILE maxcol, ncol, nrows %ld, %ld, %ld\n", maxcol, ncol, nrows); */
-
   xdifile->array = calloc(nrows, sizeof(double *));
   for (j = 0; j < nrows; j++) {
     xdifile->array[j] = calloc(ncol, sizeof(double));
     xdifile->array[j][0] = strtod(words[j], NULL);
   }
-  for (i = 1; i < ncol; i++ ) {
+  for (i = 1; i < ncol; i++) {
     nxrows = make_words(textlines[nheader+i], words, MAX_WORDS);
     nxrows = min(nrows, nxrows);
     for (j = 0; j < nxrows; j++) {
@@ -235,7 +232,7 @@ int XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
   /* get array by index (starting at 0) from an XDIFile structure */
   long j;
   if (n < xdifile->narrays) {
-    for (j=0; j < xdifile->npts ; j++) {
+    for (j = 0; j < xdifile->npts; j++) {
       out[j] = xdifile->array[n][j] ;
     }
     return 0;
@@ -246,7 +243,7 @@ int XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
 int XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   /* get array by name from an XDIFile structure */
   long i;
-  for (i = 0; i < xdifile->narray_labels; i++) {
+  for (i = 0; i < xdifile->narrays; i++) {
     if (strcasecmp(name, xdifile->array_labels[i]) == 0) {
       return XDI_get_array_index(xdifile, i, out);
     }
