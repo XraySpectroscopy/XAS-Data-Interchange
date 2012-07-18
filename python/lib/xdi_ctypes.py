@@ -3,6 +3,7 @@
 Read/Write XAS Data Interchange Format for Python
 """
 import re
+import sys
 import os
 import ctypes
 import ctypes.util
@@ -54,11 +55,12 @@ ATOM_SYMS = ('H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne',
 
 class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
-    _fields_ = [('nmetadata',     ctypes.c_ulong),
-                ('narrays',       ctypes.c_ulong),
-                ('npts',          ctypes.c_ulong),
-                ('narray_labels', ctypes.c_ulong),
+    _fields_ = [('nmetadata',     ctypes.c_long),
+                ('narrays',       ctypes.c_long),
+                ('npts',          ctypes.c_long),
+                ('narray_labels', ctypes.c_long),
                 ('dspacing',      ctypes.c_double),
+                ('xdi_libversion', ctypes.c_char_p),
                 ('xdi_version',   ctypes.c_char_p),
                 ('extra_version', ctypes.c_char_p),
                 ('filename',      ctypes.c_char_p),
@@ -315,6 +317,7 @@ class XDIFile(object):
         if filename is None and self.filename is not None:
             filename = self.filename
         XDILIB = get_xdilib()
+        
         pxdi = ctypes.pointer(XDIFileStruct())
         out = XDILIB.XDI_readfile(filename, pxdi)
         if out != 0:
@@ -522,8 +525,9 @@ class XDIFile(object):
                 self.irefer = self.itrans * exp(-self.murefer)
 
 if __name__ == '__main__':
-    x = XDIFile('../../data/cu_metal_rt.xdi')
+    x = XDIFile('cu_metal_rt.xdi')
     print x.attrs.keys()
+    print 'Library Version, File Version ', x.xdi_libversion, x.xdi_version
     print 'Facility ' , x.attrs['facility']
     print 'Scan     ' , x.attrs['scan']
     print 'columns  ' , x.array_labels
