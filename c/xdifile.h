@@ -1,4 +1,10 @@
-#define MAX_COLUMNS 64
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#define _EXPORT(a) __declspec(dllexport) a _stdcall
+#else
+#define _EXPORT(a) a
+#endif
+
+#define MAX_COLUMNS 64  /* maximum number of supported data columns */
 
 typedef struct {
   long nmetadata;        /* number of metadata family/key/val metadata */
@@ -6,7 +12,8 @@ typedef struct {
   long npts;             /* number of data points for all arrays */
   long narray_labels;    /* number of labeled arrays (may be < narrays) */
   double dspacing;       /* monochromator d spacing */
-  char *xdi_version;     /* XDI version string */
+  char *xdi_libversion;  /* XDI version of library */
+  char *xdi_version;     /* XDI version string from file*/
   char *extra_version;   /* Extra version strings from first line of file */
   char *filename;        /* name of file */
   char *element;         /* atomic symbol for element */
@@ -20,14 +27,15 @@ typedef struct {
   double **array;        /* 2D array of all array data */
 } XDIFile;
 
-int XDI_readfile(char *filename, XDIFile *xdifile) ;
-int XDI_get_array_index(XDIFile *xdifile, long n, double *out);
-int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
+_EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) ;
+_EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out);
+_EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 
+#define XDI_VERSION  "1.0.0"   /* XDI version marker */
 
 /* Tokens used in XDI File */
 
-#define TOK_VERSION  "XDI/"           /* XDI version marker -- required on line 1 */
+#define TOK_VERSION  "XDI/"           /* version marker in file -- required on line 1 */
 #define TOK_COMM     "#"              /* comment character, at start of line */
 #define TOK_DELIM    ":"              /* delimiter between metadata name and value */
 #define TOK_DOT      "."              /* delimiter between metadata family and key */
@@ -70,7 +78,6 @@ static char *ValidElems[] =
    "Uut", "Fl", "Uup", "Lv", "Uus", "Uuo"};
 
 
-
 /* error codes */
 #define ERR_NOTXDI  -10
 #define ERR_NOARR_NAME  -21
@@ -80,4 +87,5 @@ static char *ValidElems[] =
 #define ERR_NODSPACE -33
 
 char *XDI_errorstring(int errcode);
+
 

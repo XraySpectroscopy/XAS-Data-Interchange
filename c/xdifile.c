@@ -31,7 +31,8 @@ char *XDI_errorstring(int errcode) {
   return "";
 }
 
-int XDI_readfile(char *filename, XDIFile *xdifile) {
+
+_EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
   char *words[MAX_WORDS], *cwords[2];
@@ -47,6 +48,8 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
+
+  COPY_STRING(xdifile->xdi_libversion, XDI_VERSION);
 
   for (i = 0; i < MAX_COLUMNS; i++) {
     sprintf(tlabel, "col%ld", i+1);
@@ -228,7 +231,7 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   return 0;
 }
 
-int XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
+_EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
   /* get array by index (starting at 0) from an XDIFile structure */
   long j;
   if (n < xdifile->narrays) {
@@ -240,7 +243,7 @@ int XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
   return ERR_NOARR_INDEX;
 }
 
-int XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
+_EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   /* get array by name from an XDIFile structure */
   long i;
   for (i = 0; i < xdifile->narrays; i++) {
