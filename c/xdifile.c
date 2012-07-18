@@ -197,9 +197,9 @@ int XDI_readfile(char *filename, XDIFile *xdifile) {
   for (j = 0; j < nrows; j++) {
     COPY_STRING(xdifile->array_labels[j], col_labels[j]);
     COPY_STRING(xdifile->array_units[j], col_units[j]);
-    if (strcasecmp("energy", col_labels[j]) == 0) {
+    if (strcasecmp(TOK_COL_ENERGY, col_labels[j]) == 0) {
       has_energy = 1;
-    } else if (strcasecmp("angle", col_labels[j]) == 0) {
+    } else if (strcasecmp(TOK_COL_ANGLE, col_labels[j]) == 0) {
       has_angle = 1;
     }
   }

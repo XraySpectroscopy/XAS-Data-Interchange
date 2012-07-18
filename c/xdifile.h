@@ -37,6 +37,8 @@ int XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 #define TOK_DSPACE   "mono.d_spacing" /* mono d_spacing, in Angstroms */
 #define TOK_USERCOM_0 "///"           /* start multi-line user comment */
 #define TOK_USERCOM_1 "---"           /* end multi-line user comment */
+#define TOK_COL_ENERGY "energy"       /* name of energy column */
+#define TOK_COL_ANGLE  "angle"        /* name of angle column */
 
 /* Notes:
    1. The absorption edge must be one of those listed in ValidEdges below
