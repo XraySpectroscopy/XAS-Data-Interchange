@@ -48,20 +48,19 @@
         \begin{block}{\large Abstract}
           \justifying
 
-          To facilitate exchange and archiving of X-ray absorption data, we
-          propose a data format for $\mu(E)$ or $\chi(k)$ spectra using a
+          To better facilitate exchanging and archiving of X-ray absorption
+          data, we propose a data format for $\mu(E)$ or $\chi(k)$ using a
           simple, plain-text file. The XAS Data Interchange (XDI) format
-          uses space-delimited columns for numerical absorption data.  As
-          such, it is similar to raw data formats currently used at many
-          XAS beamlines.  XDI offers a clearly defined structure
-          for metadata in the file header.  Several example XDI files and
-          programming libraries for reading these files are publicly
-          available.  Because XDI accommodates only single spectra, we also
-          discuss approaches that are capable of combining multiple XAFS
-          spectra and non-XAFS data into multispectral libraries using
-          either the hierarchical data format (HDF5) or relational
-          databases based either on the CIF format or a SQL-based database
-          engine.
+          uses space-delimited columns for numerical absorption data,
+          similar to the data formats currently used at many XAS beamlines.
+          XDI offers a clearly defined structure for metadata in the file
+          header.  A programming library for reading XDI files and several
+          example XDI datasets are publicly available.  Because XDI
+          accommodates only a single spectrum, we also discuss formats that
+          are capable of combining multiple XAFS spectra and other data
+          into multispectral libraries using either the hierarchical data
+          format (HDF5) or relational databases based either on the CIF
+          format or a SQL-based database engine.
 
         \end{block}
 
@@ -69,32 +68,31 @@
             XAFS Data}
           \justifying
 
-          The exchange and long term storage of archived XAFS data is a common
-          need in the XAFS community.  Retrieving data on
-          {\EmphRed{standards}} or {\EmphRed{model compounds}} and using
-          data taken at different facilities and beamlines are continuing
+          The exchange of XAFS data is a common need in the XAFS community.
+          Retrieving archived data on {\EmphRed{standards}} or
+          {\EmphRed{model compounds}}, and the ability to compare data
+          taken at different facilities and beamlines are both continuing
           needs for both XANES and EXAFS analysis.
 
           {\hspace{16mm}} {\Blue{We need to share XAFS spectra between
               facilities for decades to come.}}
-          
+
 
           \vspace{2mm}
 
           There is no commonly accepted data format for XAFS data, though
           most data collection and processing software use some form of a
           Plainttext (ASCII) file.  Such files are human-readable and used
-          widely in third party applications.
+          in many third party applications.
 
-          
         \end{block}
-        
+
         \begin{block}{\large XDI Design Principles}
 
           \begin{columns}[T]
             \begin{column}{0.05\linewidth}    \end{column}
             \begin{column}{0.90\linewidth}
-              
+
               \begin{enumerate}[I.] \normalsize
               \item $\mu(E)$ and $\chi(k)$ are the spectral ``unit of  currency''
               \item The XDI format should use Plaintext ASCII for maximum portability.
@@ -107,9 +105,9 @@
 
             \end{column}
             \begin{column}{0.05\linewidth}    \end{column}
-          \end{columns} 
+          \end{columns}
         \end{block}
-        
+
         \begin{block}{\large XDI: Current Status}
 
           We currently have, ready for testing:
@@ -125,7 +123,7 @@
               \end{description}
             \end{minipage}
           \end{center}
-          
+
         \end{block}
       \end{column}
 
@@ -274,19 +272,19 @@
 
    % \begin{columns}[T]
    %   \begin{column}{.01\linewidth}\end{column}
-   %   \begin{column}{.98\linewidth}     
-   
+   %   \begin{column}{.98\linewidth}
+
    \begin{block}{\large Storing and Managing Multiple XDI Spectra:  Data Libraries}
-     
+
      An XDI file contains exactly one $\mu(E)$ or $\chi(k)$ XAFS
      spectrum.  To support libraries of spectra or multi-spectral data
      sets, we propose three possible solutions to complement XDI for multiple spectra.
      These suggestions should not be viewed as exclusive.
-         
+
      \vspace{-3mm}
-     
+
    \end{block}
-   
+
 
    {\ }   \vspace{-20mm}
 
@@ -294,7 +292,7 @@
 %      \end{column}
 %      \begin{column}{.01\linewidth}\end{column}
 %    \end{columns}
-% 
+%
 
     \begin{columns}[t]
       \begin{column}{.01\linewidth}\end{column}
