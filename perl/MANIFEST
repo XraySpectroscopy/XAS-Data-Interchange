@@ -1,7 +1,0 @@
-Build.PL
-lib/Xray/XDI.pm
-lib/Xray/XDI/Version1_0.pm
-MANIFEST			This list of files
-t/mo_foil.003
-t/xdi.aps10id
-META.yml
