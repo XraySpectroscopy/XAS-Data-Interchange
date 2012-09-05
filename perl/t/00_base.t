@@ -2,7 +2,7 @@
 
 ## test the Inline C code in the Xray::XDIFile module
 
-use Test::More tests => 25;
+use Test::More tests => 26;
 
 use strict;
 use warnings;
@@ -13,11 +13,13 @@ my $epsi = 0.001;
 
 BEGIN { use_ok('Xray::XDIFile') };
 
+my $errcode = 0;
 my $here    = dirname($0);
 my $file    = File::Spec->catfile($here, '..', '..', 'data', 'co_metal_rt.xdi');
-my $xdifile = Xray::XDIFile->new($file);
+my $xdifile = Xray::XDIFile->new($file, $errcode);
+ok($errcode == 0,                              'error code = 0');
 
-ok($xdifile =~ m{Xray::XDIFile},              'created Xray::XDIFile object');
+ok($xdifile =~ m{Xray::XDIFile},               'created Xray::XDIFile object');
 ok($xdifile->_filename =~ m{co_metal_rt.xdi},  'filename');
 ok($xdifile->_xdi_version >= 1.0,              'xdi_version');
 ok($xdifile->_extra_version =~ m{GSE},         'extra_version');

@@ -59,3 +59,4 @@ foreach my $i (1 .. $#{$xdi->array_labels}+1) {
   ok((abs($x[7] - $val)       < $epsi),                           "get_iarray: 7th data point, array $i");
 };
 
+undef $xdi;

@@ -4,6 +4,7 @@ use Moose;
 use MooseX::NonMoose;
 extends 'Xray::XDIFile';
 
+use feature "switch";
 use List::MoreUtils qw(uniq);
 
 our $VERSION = '0.01';
@@ -64,27 +65,51 @@ sub _build_object {
   $self->error(q{});
   $self->ok(1);
   if (not -e $self->file) {
-    $self->error('The file '.$self->file.' does not exist');
+    $self->error('The file '.$self->file.' does not exist as XDI');
     $self->ok(0);
     return undef;
   };
   if (not -r $self->file) {
-    $self->error('The file '.$self->file.' cannot be read');
+    $self->error('The file '.$self->file.' cannot be read as XDI');
     $self->ok(0);
     return undef;
   };
   if (-d $self->file) {
-    $self->error($self->file.' is a folder');
+    $self->error($self->file.' is a folder (i.e. not an XDI file)');
     $self->ok(0);
     return undef;
   };
-  my $obj = Xray::XDIFile->new($self->file);
+  my $errcode = 0;
+  my $obj = Xray::XDIFile->new($self->file, $errcode);
+
+  ##### from xdifile.h:
+  # /* error codes */
+  # #define ERR_NOTXDI  -10
+  # #define ERR_NOARR_NAME  -21
+  # #define ERR_NOARR_INDEX -22
+  # #define ERR_NOELEM -31
+  # #define ERR_NOEDGE -32
+  # #define ERR_NODSPACE -33
+
+  given ($errcode) {
+    when ([-10,-31,-32,-33]) {
+      $self->error($obj->_errorstring($errcode));
+      $self->ok(0);
+      return $obj;
+    };
+    when ($_ != 0) {
+      $self->error('not an XDI file, unknown error');
+      $self->ok(0);
+      return $obj;
+    };
+  };
   if (not defined $obj->_filename) {
-    $self->error('foo');
+    $self->error('some problem reading '.$self->file.' as an XDI file');
+    $self->ok(0);
     return $obj;
   };
   $self->filename($obj->_filename);
-  $self->xdi_version($obj->_xdi_version);
+  $self->xdi_version($obj->_xdi_version||q{});
   $self->extra_version($obj->_extra_version || q{});
   $self->element($obj->_element || q{});
   $self->edge($obj->_edge || q{});
@@ -174,6 +199,8 @@ Xray::XDI - Import/export of XAS Data Interchange files
 
 =head1 VERSION
 
+0.01
+
 =head1 SYNOPSIS
 
 Import an XDI file:
@@ -258,6 +285,9 @@ the XDI file.
 A reference to a hash of hashes containing the metadata from the XDI
 file.  The top level of the hash is the family name, the second level
 is the keyword.
+
+This module handles the mapping of this hash of hashes to and from the
+underlying arrays exposed by L<Xray::XDIFile>.
 
 =item C<data>
 
@@ -372,7 +402,7 @@ L<Moose>, L<MooseX::NonMoose>
 
 =item *
 
-Blah blah
+Test F<07_feo_rt.t> fails when run as C<make test>
 
 =back
 

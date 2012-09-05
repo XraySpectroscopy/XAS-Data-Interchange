@@ -17,6 +17,6 @@ WriteMakefile(
 				       'ExtUtils::MakeMaker'   => 6.52,
 				      },
 	      'test' => {
-			 'TESTS' => 't/*.t t/gooddata/*.t'
+			 'TESTS' => 't/*.t t/gooddata/*.t t/baddata/*.t'
 			},
 );

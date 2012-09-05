@@ -2,7 +2,7 @@
 
 ## test the construction of the Moose attribute structure in Xray::XDI;
 
-use Test::More tests => 23;
+use Test::More tests => 24;
 
 use strict;
 use warnings;
@@ -26,6 +26,8 @@ ok(ucfirst($xdi->element) eq 'Co',        'element');
 ok(ucfirst($xdi->edge) eq 'K',            'edge');
 ok($xdi->comments =~ m{room temperature}, 'comments');
 ok($xdi->nmetadata == 18,                 'nmetadata');
+
+ok($xdi->comments =~ m{vert slits},       'comments');
 
 my $hash = $xdi->metadata;
 my @families = sort keys(%$hash);

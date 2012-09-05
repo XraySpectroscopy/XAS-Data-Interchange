@@ -33,6 +33,7 @@ perl/META.yml
 perl/MYMETA.yml
 perl/MYMETA.json
 perl/Makefile
+perl/Makefile.old
 perl/XDIFile.inl
 perl/pm_to_blib
 _Inline/*

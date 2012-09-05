@@ -41,7 +41,81 @@ use Inline C => 'DATA',
 __DATA__
 
 =pod
- 
+
+
+=head1 NAME
+
+Xray::XDIFile - Inline::C interface to libxdifile
+
+=head1 VERSION
+
+0.01
+
+=head1 SYNOPSIS
+
+This is a slight rewrite of the xdi_reader example that comes with the
+linxdifile source code.  It uses L<Inline> to map perl scalars onto
+the data structures in libxdifile.
+
+Import an XDI file:
+
+  use Xray::XDIFile;
+  my $errcode;
+  my $xdifile = Xray::XDIFile->new('data.dat', $errcode);
+
+See xdifile.h for meaning of error codes.
+
+Export an XDI file:
+
+  $xdifile -> export("outfile.dat");
+
+This closely follows the example at
+L<https://metacpan.org/module/Inline::C-Cookbook#Object-Oriented-Inline>,
+mapping all the functions demonstrated in F<xdi_reader.c>.
+
+See L<Xray::XDI> for a Moose-ified wrapper around this.
+
+=head1 DEPENDENCIES
+
+=over 4
+
+=item *
+
+L<Inline>
+
+=back
+
+=head1 BUGS AND LIMITATIONS
+
+=over 4
+
+=item *
+
+Error handling is primitive
+
+=back
+
+Please report problems to Bruce Ravel (bravel AT bnl DOT gov)
+
+Patches are welcome.
+
+=head1 AUTHOR
+
+Bruce Ravel (bravel AT bnl DOT gov)
+
+L<http://cars9.uchicago.edu/~ravel/software/>
+
+=head1 LICENCE AND COPYRIGHT
+
+Copyright (c) 2012 Bruce Ravel (bravel AT bnl DOT gov). All rights reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlgpl>.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 =cut
 
 __C__
@@ -49,7 +123,7 @@ __C__
 #include "strutil.h"
 #include "xdifile.h"
 
-SV* new(char* class, char* file) {
+SV* new(char* class, char* file, SV* errcode) {
     XDIFile* xdifile;
     long ret;
 
@@ -59,11 +133,20 @@ SV* new(char* class, char* file) {
     New(42, xdifile, 1, XDIFile);
     xdifile = malloc(sizeof(XDIFile));
     ret = XDI_readfile(file, xdifile);
+    sv_setiv(errcode, ret);
 
     sv_setiv(obj, (IV)xdifile);
     SvREADONLY_on(obj);
     return obj_ref;
 }
+
+char* _errorstring(SV* obj, int code) {
+      char* string;
+      string = XDI_errorstring(code);
+
+      return string;
+}
+
 
 char* _filename(SV* obj) {
        return ((XDIFile*)SvIV(SvRV(obj)))->filename;
