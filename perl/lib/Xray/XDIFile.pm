@@ -5,25 +5,9 @@ use strict;
 use warnings;
 
 require Exporter;
-
 our @ISA = qw(Exporter);
-
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-# This allows declaration	use Xray::XDIFile ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
-# our %EXPORT_TAGS = ( 'all' => [ qw(
-# 	new
-# ) ] );
-
-# our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-
-# our @EXPORT = qw(
-# 	new
-# );
+# our @EXPORT_OK = (  );
+# our @EXPORT = qw(  );
 
 our $VERSION = '0.01';
 
@@ -31,11 +15,6 @@ use Inline C => 'DATA',
            LIBS => '-lxdifile',
            VERSION => '0.01',
            NAME => 'Xray::XDIFile';
-
-# Preloaded methods go here.
-
-
-
 
 1;
 __DATA__
@@ -120,7 +99,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 __C__
 
-#include "strutil.h"
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
@@ -141,17 +119,65 @@ SV* new(char* class, char* file, SV* errcode) {
 }
 
 char* _errorstring(SV* obj, int code) {
-      char* string;
-      string = XDI_errorstring(code);
-
-      return string;
+      return XDI_errorstring(code);
 }
 
+void _valid_edges(SV* obj) {
+  long i;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  for (i=0; i < sizeof(ValidEdges)/sizeof(ValidEdges[0]); i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( ValidEdges[i], 0 )));
+  }
+  Inline_Stack_Done;
+}
+void _valid_elements(SV* obj) {
+  long i;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  for (i=0; i < sizeof(ValidElems)/sizeof(ValidElems[0]); i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( ValidElems[i], 0 )));
+  }
+  Inline_Stack_Done;
+}
+
+char* _token(SV* obj, char* tok) {
+  if (strncmp(tok, "comment", 3) == 0) {
+    return TOK_COMM;
+  } else if (strncmp(tok, "delimiter", 2) == 0) {
+    return TOK_DELIM;
+  } else if (strncmp(tok, "dot", 2) == 0) {
+    return TOK_DOT;
+  } else if (strncmp(tok, "startcomment", 1) == 0) {
+    return TOK_USERCOM_0;
+  } else if (strncmp(tok, "endcomment", 3) == 0) {
+    return TOK_USERCOM_1;
+  } else if (strncmp(tok, "energycolumn", 3) == 0) {
+    return TOK_COL_ENERGY;
+  } else if (strncmp(tok, "anglecolumn", 1) == 0) {
+    return TOK_COL_ANGLE;
+  } else if (strncmp(tok, "version", 1) == 0) {
+    return TOK_VERSION;
+  } else if (strncmp(tok, "edge", 3) == 0) {
+    return TOK_EDGE;
+  } else if (strncmp(tok, "element", 2) == 0) {
+    return TOK_ELEM;
+  } else if (strncmp(tok, "column", 3) == 0) {
+    return TOK_COLUMN;
+  } else if (strncmp(tok, "dspacing", 2) == 0) {
+    return TOK_DSPACE;
+  } else {
+    return "";
+  }
+};
 
 char* _filename(SV* obj) {
        return ((XDIFile*)SvIV(SvRV(obj)))->filename;
 }
 
+char* _xdi_libversion(SV* obj) {
+       return ((XDIFile*)SvIV(SvRV(obj)))->xdi_libversion;
+}
 char* _xdi_version(SV* obj) {
        return ((XDIFile*)SvIV(SvRV(obj)))->xdi_version;
 }
@@ -166,6 +192,10 @@ char* _element(SV* obj) {
 
 char* _edge(SV* obj) {
        return ((XDIFile*)SvIV(SvRV(obj)))->edge;
+}
+
+double _dspacing(SV* obj) {
+       return ((XDIFile*)SvIV(SvRV(obj)))->dspacing;
 }
 
 char* _comments(SV* obj) {
@@ -213,6 +243,9 @@ long _npts(SV* obj) {
 long _narrays(SV* obj) {
        return ((XDIFile*)SvIV(SvRV(obj)))->narrays;
 }
+long _narray_labels(SV* obj) {
+       return ((XDIFile*)SvIV(SvRV(obj)))->narray_labels;
+}
 
 
 void _array_labels(SV* obj) {
@@ -221,6 +254,16 @@ void _array_labels(SV* obj) {
   Inline_Stack_Reset;
   for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->narrays; i++) {
     Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->array_labels[i], 0 )));
+  }
+  Inline_Stack_Done;
+}
+
+void _array_units(SV* obj) {
+  long i;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->narrays; i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->array_units[i], 0 )));
   }
   Inline_Stack_Done;
 }

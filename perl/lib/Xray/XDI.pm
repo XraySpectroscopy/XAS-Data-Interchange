@@ -19,33 +19,37 @@ has 'xdifile' => (
 		  lazy      => 1,
 		  builder   => '_build_object',
 		 );
-has 'ok'            => (is => 'rw', isa => 'Bool', default => 0);
-has 'error'         => (is => 'rw', isa => 'Str', default => q{});
+has 'ok'             => (is => 'rw', isa => 'Bool', default => 0);
+has 'error'          => (is => 'rw', isa => 'Str', default => q{});
 
-has 'filename'      => (is => 'rw', isa => 'Str', default => q{});
-has 'xdi_version'   => (is => 'rw', isa => 'Str', default => q{});
-has 'extra_version' => (is => 'rw', isa => 'Str', default => q{});
-has 'element'       => (is => 'rw', isa => 'Str', default => q{});
-has 'edge'          => (is => 'rw', isa => 'Str', default => q{});
-has 'comments'      => (is => 'rw', isa => 'Str', default => q{});
-has 'nmetadata'     => (is => 'rw', isa => 'Int', default => 0);
-has 'npts'          => (is => 'rw', isa => 'Int', default => 0);
-has 'narrays'       => (is => 'rw', isa => 'Int', default => 0);
+has 'filename'       => (is => 'rw', isa => 'Str', default => q{});
+has 'xdi_libversion' => (is => 'rw', isa => 'Str', default => q{});
+has 'xdi_version'    => (is => 'rw', isa => 'Str', default => q{});
+has 'extra_version'  => (is => 'rw', isa => 'Str', default => q{});
+has 'element'        => (is => 'rw', isa => 'Str', default => q{});
+has 'edge'           => (is => 'rw', isa => 'Str', default => q{});
+has 'dspacing'       => (is => 'rw', isa => 'Num', default => 0);
+has 'comments'       => (is => 'rw', isa => 'Str', default => q{});
+has 'nmetadata'      => (is => 'rw', isa => 'Int', default => 0);
+has 'npts'           => (is => 'rw', isa => 'Int', default => 0);
+has 'narrays'        => (is => 'rw', isa => 'Int', default => 0);
+has 'narray_labels'  => (is => 'rw', isa => 'Int', default => 0);
 
-has 'array_labels'  => (is => 'rw', isa => 'ArrayRef', default => sub{[]});
+has 'array_labels'   => (is => 'rw', isa => 'ArrayRef', default => sub{[]});
+has 'array_units'    => (is => 'rw', isa => 'ArrayRef', default => sub{[]});
 
-has 'metadata'      => (
-			traits    => ['Hash'],
-			is        => 'rw',
-			isa       => 'HashRef',
-			default   => sub { {} },
-			handles   => {
-				      'exists_in_metadata' => 'exists',
-				      'ids_in_metadata'    => 'keys',
-				      'get_metadata'       => 'get',
-				      'set_metadata'       => 'set',
-				     },
-		       );
+has 'metadata'       => (
+			 traits    => ['Hash'],
+			 is        => 'rw',
+			 isa       => 'HashRef',
+			 default   => sub { {} },
+			 handles   => {
+				       'exists_in_metadata' => 'exists',
+				       'ids_in_metadata'    => 'keys',
+				       'get_metadata'       => 'get',
+				       'set_metadata'       => 'set',
+				      },
+			);
 
 has 'data'      => (
 		    traits    => ['Hash'],
@@ -109,14 +113,17 @@ sub _build_object {
     return $obj;
   };
   $self->filename($obj->_filename);
+  $self->xdi_libversion($obj->_xdi_libversion||q{});
   $self->xdi_version($obj->_xdi_version||q{});
   $self->extra_version($obj->_extra_version || q{});
   $self->element($obj->_element || q{});
   $self->edge($obj->_edge || q{});
+  $self->dspacing($obj->_dspacing || 0);
   $self->comments($obj->_comments || q{});
   $self->nmetadata($obj->_nmetadata);
   $self->npts($obj->_npts);
   $self->narrays($obj->_narrays);
+  $self->narray_labels($obj->_narray_labels);
 
   ## import the metadata as a hash of hashes
   my @families = $obj->_meta_families;
@@ -131,6 +138,8 @@ sub _build_object {
   ## import the data as a hash of lists
   my @array_labels = $obj->_array_labels;
   $self->array_labels(\@array_labels);
+  my @array_units = $obj->_array_units;
+  $self->array_units(\@array_units);
 
   my %data = ();
   foreach my $i (0 .. $#array_labels) {
@@ -145,6 +154,15 @@ sub _build_object {
 
 
 ## Methods for data and metadata
+
+sub valid_edges {
+  my ($self) = @_;
+  return $self->xdifile->_valid_edges;
+};
+sub valid_elements {
+  my ($self) = @_;
+  return $self->xdifile->_valid_elements;
+};
 
 sub labels {
   my ($self) = @_;
@@ -184,6 +202,11 @@ sub get_iarray {
   return () if ($i > $self->narrays);
   return () if ($i < 1);
   return @{$self->data->{$self->array_labels->[$i-1]}};
+};
+
+sub token {
+  my ($self, $tok) = @_;
+  return $self->xdifile->_token($tok);
 };
 
 
@@ -368,6 +391,49 @@ column number 1.
 
 This returns an empty list if the column number is not present in the
 XDI file.
+
+=item C<valid_edges>
+
+Returns a list of edge symbols known to C<libxdifile>.
+
+=item C<valid_elements>
+
+Returns a list of element symbols known to C<libxdifile>.
+
+=item C<token>
+
+Return the named token as defined for F<libxdifile>.  Token names are
+
+=over 4
+
+=item I<comment> [C<#>]
+
+=item I<delimiter> [C<:>]
+
+=item I<dot> [C<.>]
+
+=item I<startcomment> [C<///>]
+
+=item I<endcomment> [C<--->]
+
+=item I<energycolumn> [C<energy>]
+
+=item I<anglecolumn> [C<angle>]
+
+=item I<version> [C<XDI/>]
+
+=item I<edge> [C<element.edge>]
+
+=item I<element> [C<element.symbol>]
+
+=item I<column> [C<column.>]
+
+=item I<dspacing> [C<mono.dspacing>]
+
+=back
+
+The actual values of the tokens at the time of this writing are given
+in brackets.
 
 =back
 

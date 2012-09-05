@@ -13,8 +13,8 @@ my $epsi = 0.001;
 
 BEGIN { use_ok('Xray::XDI') };
 
-TODO: {
-  local $TODO = "Skipping FeO test"; # why is this one failing...?
+SKIP: {
+  skip "Skipping FeO test", 21; # why is this one failing...?
 
 my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'data', 'feo_rt1.xdi');
