@@ -3,6 +3,7 @@ lib/Xray/XDI.pm
 lib/Xray/XDIFile.pm
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 README.org
 t/00_base.t
 t/01_moose_nonmoose.t

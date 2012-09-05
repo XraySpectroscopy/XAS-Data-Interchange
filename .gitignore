@@ -32,6 +32,7 @@ perl/Build
 perl/META.yml
 perl/MYMETA.yml
 perl/MYMETA.json
+perl/MANIFEST.bak
 perl/Makefile
 perl/Makefile.old
 perl/XDIFile.inl
