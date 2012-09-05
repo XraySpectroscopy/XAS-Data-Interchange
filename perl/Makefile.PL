@@ -16,4 +16,7 @@ WriteMakefile(
 				       'Inline::MakeMaker'     => 0.45,
 				       'ExtUtils::MakeMaker'   => 6.52,
 				      },
+	      'test' => {
+			 'TESTS' => 't/*.t t/gooddata/*.t'
+			},
 );

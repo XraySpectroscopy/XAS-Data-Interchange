@@ -18,7 +18,7 @@ has 'xdifile' => (
 		  lazy      => 1,
 		  builder   => '_build_object',
 		 );
-has 'ok'            => (is => 'rw', isa => 'Bool', default => 1);
+has 'ok'            => (is => 'rw', isa => 'Bool', default => 0);
 has 'error'         => (is => 'rw', isa => 'Str', default => q{});
 
 has 'filename'      => (is => 'rw', isa => 'Str', default => q{});
@@ -85,10 +85,10 @@ sub _build_object {
   };
   $self->filename($obj->_filename);
   $self->xdi_version($obj->_xdi_version);
-  $self->extra_version($obj->_extra_version);
-  $self->element($obj->_element);
-  $self->edge($obj->_edge);
-  $self->comments($obj->_comments);
+  $self->extra_version($obj->_extra_version || q{});
+  $self->element($obj->_element || q{});
+  $self->edge($obj->_edge || q{});
+  $self->comments($obj->_comments || q{});
   $self->nmetadata($obj->_nmetadata);
   $self->npts($obj->_npts);
   $self->narrays($obj->_narrays);
@@ -178,17 +178,17 @@ Xray::XDI - Import/export of XAS Data Interchange files
 
 Import an XDI file:
 
-use Xray::XDI;
-my $xdi = Xray::XDI->new(xdi_version=>"1.0");
-$xdi -> file('data.dat');
-$xdi -> parse;
-
-If the input data file is an XDI file, the grammar version will be
-taken from the first line.
+  use Xray::XDI;
+  my $xdi = Xray::XDI->new(file=>'data.dat');
+  if ($xdi->ok) {
+    # do stuff
+  } else {
+    print "Uh oh! ", $xdi->error, $/;
+  };
 
 Export an XDI file:
 
-$xdi -> export("outfile.dat");
+  $xdi -> export("outfile.dat");
 
 =head1 ATTRIBUTES
 
@@ -199,6 +199,17 @@ $xdi -> export("outfile.dat");
 The fully resolved path to the XDI file.  Setting this triggers the
 importing of the file and the setting of all other attributes from the
 contents of the file.
+
+=item C<ok>
+
+This is true when C<file> is properly imported.  When false, the
+problem will be recorded in the C<error> attribute.
+
+=item C<error>
+
+When an XDI file is imported properly, this is an empty string.  When
+import runs into a problem, the explanation will be stroed here as a
+string.
 
 =item C<xdifile>
 

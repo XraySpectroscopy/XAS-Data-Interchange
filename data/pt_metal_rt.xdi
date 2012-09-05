@@ -24,7 +24,7 @@
 # measured at beamline 13-ID-C
 # vert slits = 0.3 x 0.3mm (at ~50m)
 #----
-#   energy    time      i1        i0
+#   energy    time      itrans        i0
     11364.00    1.00    332768.1    56237.70 
     11374.00    1.00    310258.1    52281.70 
     11384.00    1.00    291573.1    48899.70 
