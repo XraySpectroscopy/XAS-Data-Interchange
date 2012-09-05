@@ -1,0 +1,33 @@
+* Xray-XDI version 0.01
+
+This module provides a perl interface to ~libxdifile~, the interface
+to the XDI file format.
+
+** INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+** DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+
+ 1. Inline
+ 2. Moose
+ 3. MooseX::NonMoose
+  
+
+** COPYRIGHT AND LICENCE
+
+Copyright (C) 2012 by Bruce Ravel
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.14.2 or,
+at your option, any later version of Perl 5 you may have available.
+
+

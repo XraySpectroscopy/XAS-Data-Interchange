@@ -1,0 +1,6 @@
+Revision history for Perl extension Xray::XDIFile.
+
+0.01  Tue Sep  4 11:32:19 2012
+	- original version; created by h2xs 1.23 with options
+		-PAXn Xray::XDIFile
+

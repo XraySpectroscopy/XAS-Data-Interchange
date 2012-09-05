@@ -16,12 +16,14 @@ exec_prefix = @exec_prefix@
 LDFLAGS = @LDFLAGS@
 bindir = @bindir@
 libdir = @libdir@
+includedir = @includedir@
 
 # you shouldn't have to alter anything below this line
 #---------------------------------
 READER  = xdi_reader
 LIBXDIF_STATIC   = libxdifile.a
 LIBXDIF_SHARED = libxdifile.so
+XDIHEADERS = strutil.h xdifile.h
 XDIF_OBJ  = xdifile.o strutil.o
 CCOPTS = ##  -arch i386 -arch x86_64
 SHARED = $(CCOPTS) -shared
@@ -57,3 +59,4 @@ clean :
 install: $(LIBXDIF_STATIC)  $(LIBXDIF_SHARED)
 	cp -pr $(LIBXDIF_STATIC) $(libdir)/$(LIBXDIF_STATIC)
 	cp -pr $(LIBXDIF_SHARED) $(libdir)/$(LIBXDIF_SHARED)
+	cp -pr $(XDIHEADERS) $(includedir)

@@ -1,0 +1,9 @@
+Changes
+Makefile.PL
+MANIFEST
+README.org
+t/00_base.t
+t/01_moose_nonmoose.t
+t/02_moosish.t
+lib/Xray/XDI.pm
+lib/Xray/XDIFile.pm
