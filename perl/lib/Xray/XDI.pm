@@ -3,6 +3,7 @@ package Xray::XDI;
 use Moose;
 use MooseX::NonMoose;
 extends 'Xray::XDIFile';
+with 'Xray::XDI::WriterPP';
 
 use feature "switch";
 use List::MoreUtils qw(uniq);

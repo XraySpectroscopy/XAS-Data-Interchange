@@ -1,4 +1,4 @@
-use 5.014002;
+
 use Inline::MakeMaker;
 
 WriteMakefile(
