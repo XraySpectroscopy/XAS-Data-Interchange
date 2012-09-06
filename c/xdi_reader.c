@@ -31,10 +31,12 @@ int main(int argc, char **argv) {
   xdifile = malloc(sizeof(XDIFile));
   ret = XDI_readfile(argv[1], xdifile);
   if (ret < 0) {
-    printf("Error reading XDI file '%s':\n     %s\n", 
+    printf("Error reading XDI file '%s':\n     %s\n",
 	   argv[1], XDI_errorstring(ret));
     return 1;
   }
+  printf("Error status '%s':\n     %ld   %s\n",
+	 argv[1], ret, XDI_errorstring(ret));
 
   printf("# XDI FILE Read %s VERSIONS: %s|%s|\n" ,
 	 xdifile->filename,

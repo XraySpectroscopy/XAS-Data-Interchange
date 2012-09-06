@@ -27,6 +27,8 @@ char *XDI_errorstring(int errcode) {
     return "no element.edge given";
   } else if (errcode == ERR_NODSPACE) {
     return "no mono.d_spacing given with angle array";
+  } else if (errcode == ERR_NOMINUSLINE) {
+    return "no line of minus signs '#-----' separarting header from data";
   }
   return "";
 }
@@ -44,7 +46,8 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
 
   long  file_length, ilen, index, i, j, maxcol;
   long  ncol, nrows, nxrows, nheader, nwords, ndict;
-  int   is_newline, fnlen, mode, valid, has_angle, has_energy;
+  int   is_newline, fnlen, mode, valid;
+  int   has_minusline, has_angle, has_energy;
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
@@ -151,6 +154,7 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
 	mode = 1;
       } else if (strncasecmp(mkey, TOK_USERCOM_1, strlen(TOK_USERCOM_1)) == 0) {
 	mode = 2;
+	has_minusline = 1;
       } else if (mode==1) {
 	if ((strlen(comments) > 0) && strlen(comments) < sizeof(comments)) {
 	  strncat(comments, "\n", sizeof(comments)-strlen(comments) - 1);
@@ -172,9 +176,8 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
       break;
     }
   }
-  if (valid == 0) {
-    return ERR_NOEDGE;
-  }
+  if (valid == 0) {  return ERR_NOEDGE;   }
+  if (has_minusline == 0) { return ERR_NOMINUSLINE;}
 
   valid = 0;
   for (j = 0; j < n_elems; j++) {
@@ -195,6 +198,7 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
 
   xdifile->array_labels = calloc(nrows, sizeof(char *));
   xdifile->array_units  = calloc(nrows, sizeof(char *));
+  has_minusline = 0;
   has_energy = 0;
   has_angle  = 0;
   for (j = 0; j < nrows; j++) {

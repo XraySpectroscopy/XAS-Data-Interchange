@@ -1,16 +1,16 @@
 invalid xdi files.  None should segfault.
 All should either pass or give a useful error message.
 
-status      file                      description of error in file
------      --------           --------------------
-passes     bad_00.xdi          valid xdi file, used to modify for rest of files
-passes     bad_01.xdi          No XDI line at top
-passes     bad_02.xdi          No element.edge
-passes     bad_03.xdi          No element.symbol
-passes     bad_04.xdi          Invalid element.edge
-passes     bad_05.xdi          Invalid element.symbol
-passes     bad_06.xdi          No '------'
-passes     bad_07.xdi          No Column labels
+status              file                     description of error in file
+--------      ---------         --------------------
+file read          bad_00.xdi          valid xdi file, used to modify for rest of files
+error msg       bad_01.xdi          No XDI line at top
+error msg       bad_02.xdi          No element.edge
+error msg       bad_03.xdi          No element.symbol
+error msg       bad_04.xdi          Invalid element.edge
+error msg       bad_05.xdi          Invalid element.symbol
+error msg       bad_06.xdi          No '------'
+file read         bad_07.xdi          No Column labels  -
 passes     bad_08.xdi          Too few Column labels
 passes     bad_09.xdi          Too many Column labels
 passes     bad_10.xdi          Column indices not continuous

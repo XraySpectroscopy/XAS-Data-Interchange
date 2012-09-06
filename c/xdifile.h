@@ -85,6 +85,7 @@ static char *ValidElems[] =
 #define ERR_NOELEM -31
 #define ERR_NOEDGE -32
 #define ERR_NODSPACE -33
+#define ERR_NOMINUSLINE -34
 
 char *XDI_errorstring(int errcode);
 
