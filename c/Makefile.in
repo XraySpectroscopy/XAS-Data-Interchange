@@ -3,7 +3,6 @@
 #
 #
 AR = ar
-CC = @CC@
 CPP = @CPP@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
@@ -18,6 +17,12 @@ bindir = @bindir@
 libdir = @libdir@
 includedir = @includedir@
 
+# you may have to alter these settings
+#---------------------------------
+
+CCOPTS = -fPIC
+## CCOPTS =  -arch i386 -arch x86_64
+
 # you shouldn't have to alter anything below this line
 #---------------------------------
 READER  = xdi_reader
@@ -25,9 +30,8 @@ LIBXDIF_STATIC   = libxdifile.a
 LIBXDIF_SHARED = libxdifile.so
 XDIHEADERS = strutil.h xdifile.h
 XDIF_OBJ  = xdifile.o strutil.o
-CCOPTS = ##  -arch i386 -arch x86_64
 SHARED = $(CCOPTS) -shared
-CC = gcc $(CCOPTS)
+CC = @CC@ $(CCOPTS)
 LINKXDIF = -L$(libdir) -L. -lxdifile
 
 all: $(READER) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
