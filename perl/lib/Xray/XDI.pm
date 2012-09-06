@@ -96,7 +96,7 @@ sub _build_object {
   # #define ERR_NODSPACE -33
 
   given ($errcode) {
-    when ([-10,-31,-32,-33]) {
+    when ([-10,-31,-32,-33,-34]) {
       $self->error($obj->_errorstring($errcode));
       $self->ok(0);
       return $obj;
@@ -108,7 +108,7 @@ sub _build_object {
     };
   };
   if (not defined $obj->_filename) {
-    $self->error('some problem reading '.$self->file.' as an XDI file');
+    $self->error('unknown problem reading '.$self->file.' as an XDI file');
     $self->ok(0);
     return $obj;
   };
