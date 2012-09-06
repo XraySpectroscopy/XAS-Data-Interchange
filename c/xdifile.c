@@ -17,7 +17,7 @@
 #include "xdifile.h"
 
 /* error string interpretation */
-char *XDI_errorstring(int errcode) {
+_EXPORT(char*) XDI_errorstring(int errcode) {
   if (errcode == 0) { return ""; }
   if (errcode == ERR_NOTXDI) {
     return "not an XDI file";

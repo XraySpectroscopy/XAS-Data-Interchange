@@ -31,6 +31,7 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) ;
 _EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 
+
 #define XDI_VERSION  "1.0.0"   /* XDI version marker */
 
 /* Tokens used in XDI File */
@@ -87,6 +88,6 @@ static char *ValidElems[] =
 #define ERR_NODSPACE -33
 #define ERR_NOMINUSLINE -34
 
-char *XDI_errorstring(int errcode);
 
 
+_EXPORT(char*) XDI_errorstring(int errcode);
