@@ -469,7 +469,7 @@ L<Moose>, L<MooseX::NonMoose>
 
 =item *
 
-Test F<07_feo_rt.t> fails when run as C<make test>
+...
 
 =back
 

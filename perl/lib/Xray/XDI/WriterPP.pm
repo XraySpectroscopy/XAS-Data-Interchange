@@ -1,6 +1,7 @@
 package Xray::XDI::WriterPP;
 
 use Moose::Role;
+use MooseX::Aliases;
 
 sub export {
   my ($self, $filename) = @_;
@@ -9,6 +10,8 @@ sub export {
   close $OUT;
   return $self;
 };
+alias write  => 'export';
+alias freeze => 'export';
 
 sub export_text {
   my ($self) = @_;
@@ -106,6 +109,9 @@ Export an XDI file:
 
   $xdi -> export("outfile.dat");
 
+C<write> and C<freeze> are aliases for C<export> and may be used
+interchangeably.
+
 =head1 BUGS AND LIMITATIONS
 
 =over 4
@@ -113,7 +119,7 @@ Export an XDI file:
 =item *
 
 Need an algorithm for determining column formatting in
-C<section_data>.
+C<section_data>.  Need to preserve resolution.
 
 =back
 

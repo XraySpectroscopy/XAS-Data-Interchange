@@ -71,6 +71,10 @@ L<Inline>
 
 Error handling is primitive
 
+=item *
+
+Initialize array members of the struct
+
 =back
 
 Please report problems to Bruce Ravel (bravel AT bnl DOT gov)
@@ -98,6 +102,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 __C__
 
+#include "strutil.h"
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
@@ -109,6 +114,20 @@ SV* new(char* class, char* file, SV* errcode) {
 
     New(42, xdifile, 1, XDIFile);
     xdifile = malloc(sizeof(XDIFile));
+
+    /* initialize */
+    COPY_STRING(xdifile->xdi_version,   "");
+    COPY_STRING(xdifile->extra_version, "");
+    COPY_STRING(xdifile->element,       "");
+    COPY_STRING(xdifile->edge,          "");
+    COPY_STRING(xdifile->comments,      "");
+
+    xdifile->dspacing	    = 0.0;
+    xdifile->nmetadata	    = 0;
+    xdifile->narrays	    = 0;
+    xdifile->npts	    = 0;
+    xdifile->narray_labels  = 0;
+
     ret = XDI_readfile(file, xdifile);
     sv_setiv(errcode, ret);
 

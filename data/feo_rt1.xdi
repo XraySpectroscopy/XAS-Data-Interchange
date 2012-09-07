@@ -6,7 +6,7 @@
 # Element.symbol: Fe
 # Scan.start_time: 2001-08-10T11:10:00
 # Mono.name: Si 111
-# Mono.dspacing: 3.13553
+# Mono.d_spacing: 3.13553
 # Beamline.name: 20BM
 # Beamline.focusing: no
 # Beamline.harmonic_rejection: detuned
