@@ -6,21 +6,17 @@ import os
 import ctypes
 import ctypes.util
 
-from math import pi, exp, log, sin, asin
+__version__ = '1.0.0'
+
 try:
-    import numpy as np
-    from numpy import pi, exp, log, sin
-    from numpy import arcsin as asin
+    from numpy import array, pi, exp, log, sin, arcsin
     HAS_NUMPY = True
+    RAD2DEG  = 180.0/pi
+    # from NIST.GOV CODATA:
+    # Planck constant over 2 pi times c: 197.3269718 (0.0000044) MeV fm
+    PLANCK_hc = 1973.269718 * 2 * pi # hc in eV * Ang = 12398.4193
 except ImportError:
     HAS_NUMPY = False
-
-RAD2DEG  = 180.0/pi
-# from NIST.GOV CODATA:
-# Planck constant over 2 pi times c: 197.3269718 (0.0000044) MeV fm
-PLANCK_hc = 1973.269718 * 2 * pi # hc in eV * Ang = 12398.4193
-
-__version__ = '1.0.0'
 
 class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
@@ -43,20 +39,28 @@ class XDIFileStruct(ctypes.Structure):
                 ('meta_values',   ctypes.c_void_p),
                 ('array',         ctypes.c_void_p)]
 
+def add_dot2path():
+    """add this folder to begninng of PATH environmental variable"""
+    sep = ':'
+    if os.name == 'nt': sep = ';'
+    paths = os.environ.get('PATH','').split(sep)
+    paths.insert(0, os.path.abspath(os.curdir))
+    os.environ['PATH'] = sep.join(paths)
+
+
 XDILIB = None
 def get_xdilib():
     """make initial connection to XDI dll"""
     global XDILIB
     if XDILIB is None:
+        add_dot2path()
         dllpath  = ctypes.util.find_library('xdifile')
         load_dll = ctypes.cdll.LoadLibrary
         if os.name == 'nt':
             load_dll = ctypes.windll.LoadLibrary
         XDILIB = load_dll(dllpath)
         XDILIB.XDI_errorstring.restype   = ctypes.c_char_p
-
     return XDILIB
-
 
 class XDIFileException(Exception):
     """XDI File Exception: General Errors"""
@@ -65,7 +69,6 @@ class XDIFileException(Exception):
         self.msg = msg
     def __str__(self):
         return self.msg
-
 
 class XDIFile(object):
     """ XAS Data Interchange Format:
@@ -76,17 +79,9 @@ class XDIFile(object):
 
     >>> xdi_file = XDFIile(filename)
 
-    Principle data members:
-      columns:  dict of column indices, with keys
-                       'energy', 'i0', 'itrans', 'ifluor', 'irefer'
-                       'mutrans', 'mufluor', 'murefer'
-                 some of which may be None.
-      column_data: dict of data for arrays -- same keys as
-                 for columns.
     Principle methods:
       read():     read XDI data file, set column data and attributes
       write(filename):  write xdi_file data to an XDI file.
-
     """
     _invalid_msg = "invalid data for '%s':  was expecting %s, got '%s'"
 
@@ -96,20 +91,12 @@ class XDIFile(object):
         self.comments = []
         self.rawdata = []
         self.attrs = {}
-
         if self.filename:
             self.read(self.filename)
-
-
-    def _warn(self, msg):
-        "print a warning message"
-        msg = '%s: %s' % (self.filename, msg)
-        print msg
 
     def write(self, filename):
         "write out an XDI File"
         print 'Writing XDI file not currently supported'
-
 
     def read(self, filename=None):
         """read validate and parse an XDI datafile into python structures
@@ -117,7 +104,7 @@ class XDIFile(object):
         if filename is None and self.filename is not None:
             filename = self.filename
         XDILIB = get_xdilib()
-        
+
         pxdi = ctypes.pointer(XDIFileStruct())
         out = XDILIB.XDI_readfile(filename, pxdi)
         if out != 0:
@@ -144,31 +131,29 @@ class XDIFile(object):
                 self.attrs[fam] = {}
             self.attrs[fam][key] = val
 
-        parrays  = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
-        arrays  = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
+        parrays = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
+        rawdata = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
 
         if HAS_NUMPY:
-            arrays = np.array(arrays)
-            arrays.shape = (self.narrays, self.npts)
-        self.rawdata = arrays
+            rawdata = array(rawdata)
+            rawdata.shape = (self.narrays, self.npts)
+        self.rawdata = rawdata
         self._assign_arrays()
 
         for attr in ('nmetadata', 'narray_labels', 'meta_families',
                      'meta_keywords', 'meta_values', 'array'):
             delattr(self, attr)
-            
-
 
     def _assign_arrays(self):
         """assign data arrays for principle data attributes:
            energy, angle, i0, itrans, ifluor, irefer,
-           mutrans, mufluor, murefer, etc.
-        """
+           mutrans, mufluor, murefer, etc.  """
+
         xunits = 'eV'
         xname = None
         ix = -1
         if HAS_NUMPY:
-            self.rawdata = np.array(self.rawdata)
+            self.rawdata = array(self.rawdata)
 
         for idx, name in enumerate(self.array_labels):
             if HAS_NUMPY:
@@ -184,7 +169,7 @@ class XDIFile(object):
                     xunits = units
 
         if not HAS_NUMPY:
-            self._warn('not calculating derived values -- install numpy!')
+            print '%s: not calculating derived values: install numpy!' % (self.filename)
             return
 
         # convert energy to angle, or vice versa
@@ -195,7 +180,7 @@ class XDIFile(object):
                 energy_ev = self.energy
                 if xunits.lower() == 'kev':
                     energy_ev = 1000. * energy_ev
-                self.angle = RAD2DEG * asin(omega/energy_ev)
+                self.angle = RAD2DEG * arcsin(omega/energy_ev)
             elif xname == 'angle' and not hasattr(self, 'energy'):
                 angle_rad = self.angle
                 if xunits.lower() in ('deg', 'degrees'):
@@ -221,7 +206,8 @@ class XDIFile(object):
                 self.irefer = self.itrans * exp(-self.murefer)
 
 if __name__ == '__main__':
-    x = XDIFile('cu_metal_rt.xdi')
+    x = XDIFile(os.path.join('..', '..', 'data', 'cu_metal_rt.xdi'))
+
     print 'Library Version, File Version ', x.xdi_libversion, x.xdi_version
 
     for fam in x.attrs:
