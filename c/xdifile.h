@@ -80,14 +80,21 @@ static char *ValidElems[] =
 
 
 /* error codes */
-#define ERR_NOTXDI  -10
-#define ERR_NOARR_NAME  -21
-#define ERR_NOARR_INDEX -22
-#define ERR_NOELEM -31
-#define ERR_NOEDGE -32
-#define ERR_NODSPACE -33
-#define ERR_NOMINUSLINE -34
+#define ERR_NOTXDI       -10
+#define ERR_NOARR_NAME   -21
+#define ERR_NOARR_INDEX  -22
+#define ERR_NOELEM       -30
+#define ERR_NOEDGE       -31
+#define ERR_NODSPACE     -32
 
+#define ERR_META_FAMNAME -41
+#define ERR_META_KEYNAME -42
+#define ERR_META_FORMAT  -43
+#define ERR_NOMINUSLINE  -80
+#define ERR_NCOLS_CHANGE -81
+#define ERR_NONNUMERIC   -82
+
+#define ERR_IGNOREDMETA -100
 
 
 _EXPORT(char*) XDI_errorstring(int errcode);

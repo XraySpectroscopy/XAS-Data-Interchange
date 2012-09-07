@@ -1,37 +1,42 @@
 invalid xdi files.  None should segfault.
 All should either pass or give a useful error message.
 
-status              file                     description of error in file
---------      ---------         --------------------
-file read          bad_00.xdi          valid xdi file, used to modify for rest of files
-error msg       bad_01.xdi          No XDI line at top
-error msg       bad_02.xdi          No element.edge
-error msg       bad_03.xdi          No element.symbol
-error msg       bad_04.xdi          Invalid element.edge
-error msg       bad_05.xdi          Invalid element.symbol
-error msg       bad_06.xdi          No '------'
-file read         bad_07.xdi          No Column labels  -
-passes     bad_08.xdi          Too few Column labels
-passes     bad_09.xdi          Too many Column labels
-passes     bad_10.xdi          Column indices not continuous
-passes     bad_11.xdi          Unsupported comment character
-passes     bad_12.xdi          angle given without mono.d_spacing
-note1      bad_13.xdi          inconsistent number of rows in data table -- too few
-passes     bad_14.xdi          inconsistent number of rows in data table -- too many
-passes     bad_15.xdi          NaN in data table
-note1      bad_16.xdi          string in data table
-note2      bad_17.xdi          bad number ('1.2.3') in data table
-passes     bad_18.xdi          Header violates 'Family.Key: Value' -- no value
-passes     bad_19.xdi          Header violates 'Family.Key: Value' -- no ':'
-passes     bad_20.xdi          Header violates 'Family.Key: Value' -- two ':'
-passes     bad_21.xdi          Header violates 'Family.Key: Value' -- no '.'
-passes     bad_22.xdi          Header violates 'Family.Key: Value' -- two '.'
-passes     bad_23.xdi          Header violates 'Family.Key: Value' -- key starts with number
-passes     bad_24.xdi          Header violates 'Family.Key: Value' -- Family starts with number
+file         status        OK?      description of error in file
+--------     --------      ---    --------------------
+bad_00.xdi   file read      Y     valid xdi file, used to modify for rest of files
+bad_01.xdi   error msg      Y     No XDI line at top
+bad_02.xdi   error msg      Y     No element.edge
+bad_03.xdi   error msg      Y     No element.symbol
+bad_04.xdi   error msg      Y     Invalid element.edge
+bad_05.xdi   error msg      Y     Invalid element.symbol
+bad_06.xdi   error msg      Y     No '------'
+bad_07.xdi   file read(1)   Y     No Column labels  -
+bad_08.xdi   file read(1)   Y     Too few Column labels
+bad_09.xdi   file read(1)   Y     Too many Column labels
+bad_10.xdi   file read(1)   Y     Column indices not continuous
+bad_11.xdi   error msg      Y     Unsupported comment character
+bad_12.xdi   error msg      Y     angle given without mono.d_spacing
+bad_13.xdi   file read(2)   N     inconsistent number of columns in data table -- too few
+bad_14.xdi   file read(2)   N     inconsistent number of columns in data table -- too many
+bad_15.xdi   file read(2)   N     NaN in data table
+bad_16.xdi   file read(2)   N     string in data table
+bad_17.xdi   file read(3)   N     bad number ('1.2.3') in data table
+bad_18.xdi   no message     N     Header violates 'Family.Key: Value' -- no value
+bad_19.xdi   no message     N     Header violates 'Family.Key: Value' -- no ':'
+bad_20.xdi   no message     N     Header violates 'Family.Key: Value' -- two ':'
+bad_21.xdi   no message     N     Header violates 'Family.Key: Value' -- no '.'
+bad_22.xdi   no message     N     Header violates 'Family.Key: Value' -- two '.'
+bad_23.xdi   no message     N     Header violates 'Family.Key: Value' -- key starts with number
+bad_24.xdi   no message     N     Header violates 'Family.Key: Value' -- Family starts with number
+bad_24.xdi   no message     N     Header violates 'Family.Key: Value' -- Family starts with number
+bad_25.xdi   no message     Y     No extra version given
+
 
 Notes:
-   note1 : missing values or strings set to 0.
-   note2 : '1.2.3' -> '1.2'.
- These appear to be features of using calloc (missing values -> 0) and
- strtod (strings ->0, delimiter behavior)
+  1. extra column labels ignored, unspecified column labels set to 'colN' (N=1...)
+  2. missing values or strings set to 0.
+  3. '1.2.3' -> '1.2'.
+
+These appear to be features of using calloc (missing values -> 0) and
+strtod (strings ->0, delimiter behavior) 
 

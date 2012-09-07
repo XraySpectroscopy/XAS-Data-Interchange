@@ -1,4 +1,4 @@
-# XDI/1.0 GSE/1.0
+# XDI/1.0
 # Column.1: energy eV
 # Column.2: i0
 # Column.3: itrans
@@ -21,6 +21,8 @@
 # Sample.name: Cu
 # Sample.prep: Cu metal foil
 # GSE.EXTRA:  config 1
+# GSE.EXTRA2:  config 2
+# GSE.EXTRA3:  config 3
 # ///
 # Cu foil Room Temperature
 # measured at beamline 13-ID

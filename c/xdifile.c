@@ -27,14 +27,27 @@ _EXPORT(char*) XDI_errorstring(int errcode) {
     return "no element.edge given";
   } else if (errcode == ERR_NODSPACE) {
     return "no mono.d_spacing given with angle array";
+  } else if (errcode == ERR_META_FAMNAME) {
+    return "invalid family name in meta-data";
+  } else if (errcode == ERR_META_KEYNAME) {
+    return "invalid keyword name in meta-data";
+  } else if (errcode == ERR_META_FORMAT) {
+    return "metadata not formatted as Family.Key: Value";
   } else if (errcode == ERR_NOMINUSLINE) {
-    return "no line of minus signs '#-----' separarting header from data";
+    return "no line of minus signs '#-----' separating header from data";
+  } else if (errcode == ERR_NCOLS_CHANGE) {
+    return "number of columns changes in file";
+  } else if (errcode == ERR_NONNUMERIC) {
+    return "non-numeric value in data table";
+  } else if (errcode == ERR_IGNOREDMETA) {
+    return "contains unrecognized header lines";
   }
   return "";
 }
 
 
-_EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
+_EXPORT(int) 
+XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
   char *header[MAX_LINES];
   char *words[MAX_WORDS], *cwords[2];
@@ -48,11 +61,27 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
   long  ncol, nrows, nxrows, nheader, nwords, ndict;
   int   is_newline, fnlen, mode, valid;
   int   has_minusline, has_angle, has_energy;
+  int   ignored_headerline;
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
 
+
   COPY_STRING(xdifile->xdi_libversion, XDI_VERSION);
+  COPY_STRING(xdifile->xdi_version, "");
+  COPY_STRING(xdifile->extra_version, "");
+  COPY_STRING(xdifile->element, "");
+  COPY_STRING(xdifile->edge, "");
+  COPY_STRING(xdifile->comments, "");
+  xdifile->dspacing = -1.0;
+
+  has_minusline = 0;
+  ignored_headerline = -1;
+  nheader = 0;
+  ndict   =  -1;
+  maxcol  = 0;
+
+  /* */
 
   for (i = 0; i < MAX_COLUMNS; i++) {
     sprintf(tlabel, "col%ld", i+1);
@@ -69,7 +98,7 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
     printf("%s\n", strerror(errno));
     return ilen;
   }
-  nheader=0;
+
   /* check fist line for XDI header, get version info */
   if (strncmp(textlines[0], TOK_COMM, 1) == 0)  {
     line = textlines[0]; line++;
@@ -87,23 +116,17 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
     }
   }
 
-  nheader = 1;
   for (i = 1; i < ilen ; i++) {
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
-      nheader = i+1; /*++;*/
+      nheader = i;
     }
   }
-
-  xdifile->dspacing = -1.0;
-  COPY_STRING(xdifile->element, "~~");
-  COPY_STRING(xdifile->edge, "~~");
+  nheader++;
 
   xdifile->meta_families = calloc(nheader, sizeof(char *));
   xdifile->meta_keywords = calloc(nheader, sizeof(char *));
   xdifile->meta_values   = calloc(nheader, sizeof(char *));
 
-  ndict = -1;
-  maxcol = 0;
   mode = 0; /*  metadata (Family.Member: Value) mode */
   for (i = 1; i < nheader; i++) {
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
@@ -121,7 +144,7 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
 	}
-	/* printf(" metadata:  %d %s %s\n", ndict, mkey, mval);   */
+	/*printf(" metadata:  %d %s %s\n", ndict, mkey, mval);  */
 	/* ndict,  words[0], words[1],  xdifile->meta_values[ndict]);*/
 	if (strncasecmp(mkey, TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(mkey+7)-1;
@@ -165,9 +188,14 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
 	strncat(comments, line, sizeof(comments) - strlen(comments) - 1);
       }
     } else {
-      printf("Warning - ignoring line:   %s", textlines[i]);
+      if (ignored_headerline < 0) {
+	ignored_headerline = i;
+      }
     }
   }
+  if (has_minusline == 0)     { return ERR_NOMINUSLINE; }
+  if (ignored_headerline > 0) { return ERR_IGNOREDMETA; }
+
   /* check edge, element, return error code if invalid */
   valid = 0;
   for (j = 0; j < n_edges; j++) {
@@ -177,7 +205,6 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
     }
   }
   if (valid == 0) {  return ERR_NOEDGE;   }
-  if (has_minusline == 0) { return ERR_NOMINUSLINE;}
 
   valid = 0;
   for (j = 0; j < n_elems; j++) {
@@ -188,7 +215,6 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
   }
   if (valid == 0) { return ERR_NOELEM;}
 
-
   ncol = ilen - nheader + 1;
   nrows = make_words(textlines[nheader], words, MAX_WORDS);
   COPY_STRING(xdifile->comments, comments);
@@ -198,7 +224,6 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
 
   xdifile->array_labels = calloc(nrows, sizeof(char *));
   xdifile->array_units  = calloc(nrows, sizeof(char *));
-  has_minusline = 0;
   has_energy = 0;
   has_angle  = 0;
   for (j = 0; j < nrows; j++) {
@@ -231,7 +256,7 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) {
   xdifile->npts = ncol;
   xdifile->narrays = nrows;
   xdifile->narray_labels = min(nrows, maxcol);
-  xdifile->nmetadata = ndict;
+  xdifile->nmetadata = ndict+1;
   return 0;
 }
 
