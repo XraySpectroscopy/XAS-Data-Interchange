@@ -7,6 +7,11 @@
 #include "strutil.h"
 #include "xdifile.h"
 
+#ifndef min
+#define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#endif
+
+
 void show_syntax(void) {
   /* show command line syntax */
   printf("\nSyntax: xdi_reader filename\n");
@@ -53,14 +58,14 @@ int main(int argc, char **argv) {
 	   xdifile->meta_values[i]);
   }
 
-  printf("# Arrays (index, name, first 4 elements):\n");
+  printf("# Arrays (index, name, %ld points, first 4 elements):\n", xdifile->npts);
 
   tdat = (double *)calloc(xdifile->npts, sizeof(double));
   for (j = 0; j < xdifile->narrays; j++ ) {
     printf("  %ld '%s':\t", j, xdifile->array_labels[j]);
     ret = XDI_get_array_name(xdifile,
 			     xdifile->array_labels[j], tdat);
-    for (k=0; k< 4; k++) {
+    for (k=0; k < min(5, xdifile->npts); k++) {
       printf(" %f", tdat[k]);
     }
     printf(" ...\n");
