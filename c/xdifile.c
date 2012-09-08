@@ -47,11 +47,16 @@ _EXPORT(char*) XDI_errorstring(int errcode) {
 
 /* */
 int xdi_strtod(char* inp, double *dval) {
-  *dval = strtod(inp, NULL);
-  if (*dval != (*dval + 0) ) {
+  /* converts string containing number (double) to double
+     returns 0 on success
+     returnds non-zero if string is NaN or not a valid number
+   */
+  char *end;
+  *dval = strtod(inp, &end);
+  if (*dval != (*dval+0) ) { /* tests for NaN */
     return -1;
   }
-  return 0;
+  return *end != '\0';
 }
 
 
