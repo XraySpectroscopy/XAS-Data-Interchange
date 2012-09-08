@@ -28,6 +28,8 @@ CCOPTS = -fPIC
 READER  = xdi_reader
 LIBXDIF_STATIC   = libxdifile.a
 LIBXDIF_SHARED = libxdifile.so
+LIBXDIF_DYLIB = libxdifile.dylib
+LIBXDIF_DLL = xdifile.dll
 XDIHEADERS = strutil.h xdifile.h
 XDIF_OBJ  = xdifile.o strutil.o
 SHARED = $(CCOPTS) -shared
@@ -57,8 +59,11 @@ $(LIBXDIF_SHARED): $(XDIF_OBJ)
 $(READER): $(LIBXDIF_STATIC) $(READER).o
 	$(LINK) -o $(READER)  $(READER).o $(LIBXDIF_STATIC)
 
-clean :
-	rm -f $(XDIF_OBJ) $(READER).o $(READER) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
+clean:
+	rm -f $(XDIF_OBJ) $(READER).o $(READER) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED) $(LIBXDIF_DYLIB) $(LIBXDIF_DLL)
+
+distclean: clean
+	rm -f Makefile config.log config.status stamp-h1
 
 install: $(LIBXDIF_STATIC)  $(LIBXDIF_SHARED)
 	cp -pr $(LIBXDIF_STATIC) $(libdir)/$(LIBXDIF_STATIC)
