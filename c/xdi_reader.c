@@ -11,7 +11,6 @@
 #define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
 #endif
 
-
 void show_syntax(void) {
   /* show command line syntax */
   printf("\nSyntax: xdi_reader filename\n");
@@ -21,7 +20,7 @@ void show_syntax(void) {
 int main(int argc, char **argv) {
   XDIFile *xdifile;
   long  file_length, ilen, index, i, j, ret;
-  long  ncol, nrows, nheader, nwords, ndict;
+  long  ncol, nrows, nheader, nwords, ndict, nout;
   int   is_newline, fnlen, k;
   double *tdat;
 
@@ -58,17 +57,14 @@ int main(int argc, char **argv) {
 	   xdifile->meta_values[i]);
   }
 
-  printf("# Arrays (index, name, %ld points, first 4 elements):\n", xdifile->npts);
-
+  nout = min(4, xdifile->npts - 2);
+  printf("# Arrays Index, Name, Values: (%ld points total): \n", xdifile->npts);
   tdat = (double *)calloc(xdifile->npts, sizeof(double));
   for (j = 0; j < xdifile->narrays; j++ ) {
-    printf("  %ld '%s':\t", j, xdifile->array_labels[j]);
-    ret = XDI_get_array_name(xdifile,
-			     xdifile->array_labels[j], tdat);
-    for (k=0; k < min(5, xdifile->npts); k++) {
-      printf(" %f", tdat[k]);
-    }
-    printf(" ...\n");
+    printf(" %ld %9s: ", j, xdifile->array_labels[j]);
+    ret = XDI_get_array_name(xdifile,xdifile->array_labels[j], tdat);
+    for (k=0; k < nout; k++) {  printf("%.8g, ", tdat[k]); }
+    printf("..., %.8g, %.8g\n", tdat[xdifile->npts-2], tdat[xdifile->npts-1]);
   }
 
   free(xdifile);
