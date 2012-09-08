@@ -16,9 +16,9 @@ bad_09.xdi   file read(1)   Y     Too many Column labels
 bad_10.xdi   file read(1)   Y     Column indices not continuous
 bad_11.xdi   error msg      Y     Unsupported comment character
 bad_12.xdi   error msg      Y     angle given without mono.d_spacing
-bad_13.xdi   file read(2)   N     inconsistent number of columns in data table -- too few
-bad_14.xdi   file read(2)   N     inconsistent number of columns in data table -- too many
-bad_15.xdi   file read(2)   N     NaN in data table
+bad_13.xdi   error msg    Y     inconsistent number of columns in data table -- too few
+bad_14.xdi   error msg   Y     inconsistent number of columns in data table -- too many
+bad_15.xdi   error msg   Y     NaN in data table
 bad_16.xdi   file read(2)   N     string in data table
 bad_17.xdi   file read(3)   N     bad number ('1.2.3') in data table
 bad_18.xdi   no message     N     Header violates 'Family.Key: Value' -- no value
@@ -38,5 +38,5 @@ Notes:
   3. '1.2.3' -> '1.2'.
 
 These appear to be features of using calloc (missing values -> 0) and
-strtod (strings ->0, delimiter behavior) 
+strtod (strings ->0, delimiter behavior)
 
