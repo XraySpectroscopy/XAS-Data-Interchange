@@ -18,4 +18,9 @@ my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_06.xdi')
 my $xdi  = Xray::XDI->new(file=>$file);
 
 ok((not $xdi->ok), 'bad_06.xdi flagged as failing to import');
-ok(($xdi->error =~ m{no line of minus signs}), 'correctly identified problem')
+ok(($xdi->error =~ m{no line of minus signs}), 'correctly identified problem');
+
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 6, $/;
+close $COV;

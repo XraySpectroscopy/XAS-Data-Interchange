@@ -28,12 +28,12 @@ ok($xdi->xdi_libversion eq $new->xdi_version,	      'xdi_version');
 ok($xdi->extra_version  eq $new->extra_version,	      'extra_version');
 
 ok(ucfirst($xdi->element) eq ucfirst($new->element),  'element');
-ok(ucfirst($xdi->edge) eq ucfirst($new->edge),	      'edge');
+ok(ucfirst($xdi->edge)    eq ucfirst($new->edge),     'edge');
 ok(abs($xdi->dspacing - $new->dspacing) < $epsi,      'dspacing');
-ok($xdi->comments eq $new->comments,		      'comments');
-ok($xdi->npts == $new->npts,			      'npts');
-ok($xdi->narrays == $new->narrays,		      'narrays');
-ok($xdi->narray_labels == $new->narray_labels,	      'narray_labels');
+ok($xdi->comments         eq $new->comments,	      'comments');
+ok($xdi->npts             == $new->npts,	      'npts');
+ok($xdi->narrays          == $new->narrays,	      'narrays');
+ok($xdi->narray_labels    == $new->narray_labels,     'narray_labels');
 
 my @x = $xdi->get_array('mutrans');
 my @y = $new->get_array('mutrans');
@@ -41,7 +41,7 @@ ok(sum(pairwise {abs($a - $b)} @x, @y) < $epsi,       'mutrans array');
 
 $xdi->write('write.xdi');
 $xdi->freeze('freeze.xdi');
-ok(-s 'foo.xdi' == -s 'write.xdi', 'write alias');
+ok(-s 'foo.xdi' == -s 'write.xdi',  'write alias' );
 ok(-s 'foo.xdi' == -s 'freeze.xdi', 'freeze alias');
 
 unlink 'foo.xdi';

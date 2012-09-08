@@ -26,3 +26,8 @@ $xdi  = Xray::XDI->new(file=>$file);
 
 ok((not $xdi->ok), 'bad_04.xdi flagged as failing to import');
 ok(($xdi->error =~ m{no element\.edge}), 'correctly identified invalid edge symbol');
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 2, $/;
+print $COV 4, $/;
+close $COV;

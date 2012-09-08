@@ -19,3 +19,8 @@ my $xdi  = Xray::XDI->new(file=>$file);
 
 ok((not $xdi->ok), 'bad_11.xdi flagged as failing to import');
 ok(($xdi->error =~ m{contains unrecognized header lines}), 'correctly identified bad comment character');
+
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 11, $/;
+close $COV;

@@ -31,3 +31,10 @@ $xdi  = Xray::XDI->new(file=>$file);
 
 ok((not $xdi->ok), 'bad_17.xdi flagged as failing to import');
 ok(($xdi->error =~ m{non-numeric value}), 'correctly identified 1.2.3 as a problem');
+
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 15, $/;
+print $COV 16, $/;
+print $COV 17, $/;
+close $COV;

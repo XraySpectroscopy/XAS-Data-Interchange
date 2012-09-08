@@ -25,3 +25,9 @@ $xdi  = Xray::XDI->new(file=>$file);
 
 ok((not $xdi->ok), 'bad_14.xdi flagged as failing to import');
 ok(($xdi->error =~ m{number of columns changes}), 'correctly identified too many columns');
+
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 13, $/;
+print $COV 14, $/;
+close $COV;

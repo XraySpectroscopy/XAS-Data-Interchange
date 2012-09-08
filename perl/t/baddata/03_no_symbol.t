@@ -25,3 +25,9 @@ $xdi  = Xray::XDI->new(file=>$file);
 
 ok((not $xdi->ok), 'bad_05.xdi flagged as failing to import');
 ok(($xdi->error =~ m{no element.symbol}), 'correctly identified invalid element symbol');
+
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 3, $/;
+print $COV 5, $/;
+close $COV;
