@@ -1,6 +1,6 @@
 * Xray-XDI version 0.01
 
-This module provides a perl interface to ~libxdifile~, the interface
+This module provides a perl interface to ~libxdifile~, the C interface
 to the XDI file format.
 
 ** INSTALLATION
@@ -12,22 +12,33 @@ To install this module type the following:
    make test
    make install
 
+If any tests fail, send a bug report to Bruce Ravel (bravel AT bnl DOT
+gov).  The bug report should identify the operating system, the
+version of perl (~perl -v~), and screen output from the ~make test~
+phase.
+
+For documentation, once installed:
+
+   perldoc Xray::XDI
+
 ** DEPENDENCIES
 
-This module requires these other modules and libraries:
-
+This module requires these modules, all available from cpan and as
+packages for major linux distributions:
 
  1. Inline
  2. Moose
  3. MooseX::NonMoose
+ 4. MooseX::Aliases
   
 
 ** COPYRIGHT AND LICENCE
 
-Copyright (C) 2012 by Bruce Ravel
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.14.2 or,
-at your option, any later version of Perl 5 you may have available.
+To the extent possible, the authors have waived all rights granted by
+copyright law and related laws for the code and documentation that
+make up the Perl Interface to the XAS Data Interchange Format.  While
+information about Authorship may be retained in some files for
+historical reasons, this work is hereby placed in the Public Domain.
+This work is published from: United States.
 
 

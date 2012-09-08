@@ -145,13 +145,14 @@ L<http://cars9.uchicago.edu/~ravel/software/>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2012 Bruce Ravel (bravel AT bnl DOT gov). All rights reserved.
+To the extent possible, the authors have waived all rights granted by
+copyright law and related laws for the code and documentation that
+make up the Perl Interface to the XAS Data Interchange Format.
+While information about Authorship may be retained in some files for
+historical reasons, this work is hereby placed in the Public Domain.
+This work is published from: United States.
 
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself. See L<perlgpl>.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Author: Bruce Ravel (bravel AT bnl DOT gov).
+Last update: 8 September, 2012
 
 =cut

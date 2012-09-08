@@ -89,16 +89,8 @@ sub _build_object {
   my $errcode = 0;
   my $obj = Xray::XDIFile->new($self->file, $errcode);
   $self->errorcode($errcode);
-  ##### from xdifile.h:
-  # /* error codes */
-  # #define ERR_NOTXDI  -10
-  # #define ERR_NOARR_NAME  -21
-  # #define ERR_NOARR_INDEX -22
-  # #define ERR_NOELEM -31
-  # #define ERR_NOEDGE -32
-  # #define ERR_NODSPACE -33
-  # #define ERR_NOMINUSLINE -34
 
+  ##### see xdifile.h for error codes
   given ($errcode) {
     when ([-10,-30,-31,-32,-41,-42,-43,-80,-81,-82,-100]) {
       $self->error($obj->_errorstring($errcode));
@@ -120,6 +112,7 @@ sub _build_object {
     $self->ok(0);
     return $obj;
   };
+
   $self->filename($obj->_filename);
   $self->xdi_libversion($obj->_xdi_libversion||q{});
   $self->xdi_version($obj->_xdi_version||q{});
@@ -158,6 +151,9 @@ sub _build_object {
 
   return $obj;
 };
+
+
+
 
 
 ## Methods for data and metadata
@@ -447,6 +443,18 @@ in brackets.
 
 =back
 
+=head1 VALIDATION
+
+If the sole intent is to validate an XDI file, i.e. to determine
+whether or not it conforms to the specification, it should be adequate
+to do something like the following:
+
+  $xdi = Xray::XDI->new('somefile.dat');
+  $is_valid = $xdi->ok;
+  $problem = $xdi->error if not $is_valid;
+  undef $xdi;
+  print "okee dokee!\n" if $is_valid;
+
 =head1 DIAGNOSTICS
 
 =over 4
@@ -494,13 +502,14 @@ L<http://cars9.uchicago.edu/~ravel/software/>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2012 Bruce Ravel (bravel AT bnl DOT gov). All rights reserved.
+To the extent possible, the authors have waived all rights granted by
+copyright law and related laws for the code and documentation that
+make up the Perl Interface to the XAS Data Interchange Format.
+While information about Authorship may be retained in some files for
+historical reasons, this work is hereby placed in the Public Domain.
+This work is published from: United States.
 
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself. See L<perlgpl>.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Author: Bruce Ravel (bravel AT bnl DOT gov).
+Last update: 8 September, 2012
 
 =cut
