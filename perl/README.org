@@ -7,10 +7,10 @@ to the XDI file format.
 
 To install this module type the following:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+:   perl Makefile.PL
+:   make
+:   make test
+:   make install
 
 If any tests fail, send a bug report to Bruce Ravel (bravel AT bnl DOT
 gov).  The bug report should identify the operating system, the
@@ -19,7 +19,7 @@ phase.
 
 For documentation, once installed:
 
-   perldoc Xray::XDI
+:   perldoc Xray::XDI
 
 ** DEPENDENCIES
 
