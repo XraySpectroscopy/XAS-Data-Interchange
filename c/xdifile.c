@@ -147,9 +147,11 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       COPY_STRING(line, textlines[i]);
       line++;
       nwords = split_on(line, TOK_DELIM, words);
-      if (nwords < 1) {continue;}
+      if (nwords < 1) {
+	continue;
+      }
       COPY_STRING(mkey, words[0]);
-      if ((mode==0) && (nwords == 2)) {
+      if ((mode==0) && (nwords == 2)) { /* metadata */
 	COPY_STRING(mval, words[1]);
 	nwords = split_on(words[0], TOK_DOT, words);
 	if (nwords > 1) {
@@ -157,6 +159,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  COPY_STRING(xdifile->meta_values[ndict],   mval);
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
+	} else {
+	  return ERR_META_FORMAT;
 	}
 	/*printf(" metadata:  %d %s %s\n", ndict, mkey, mval);  */
 	/* ndict,  words[0], words[1],  xdifile->meta_values[ndict]);*/
