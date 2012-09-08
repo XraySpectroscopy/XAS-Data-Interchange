@@ -49,7 +49,7 @@ ok(ucfirst($xdi->element) eq 'Co',        'element');
 ok(ucfirst($xdi->edge) eq 'K',            'edge');
 ok(abs($xdi->dspacing - 3.13555) < $epsi, 'dspacing');
 ok($xdi->comments =~ m{room temperature}, 'comments');
-ok($xdi->nmetadata == 18,                 'nmetadata');
+ok($xdi->nmetadata == 19,                 'nmetadata');
 
 ok($xdi->comments =~ m{vert slits},       'comments');
 

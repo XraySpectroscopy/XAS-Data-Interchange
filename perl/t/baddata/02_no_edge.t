@@ -17,12 +17,12 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_02.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'file flagged as failing to import');
+ok((not $xdi->ok), 'bad_02.xdi flagged as failing to import');
 ok(($xdi->error =~ m{no element\.edge}), 'correctly identified missing edge symbol');
 
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_04.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'file flagged as failing to import');
+ok((not $xdi->ok), 'bad_04.xdi flagged as failing to import');
 ok(($xdi->error =~ m{no element\.edge}), 'correctly identified invalid edge symbol');

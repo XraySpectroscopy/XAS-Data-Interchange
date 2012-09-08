@@ -112,6 +112,16 @@ Export an XDI file:
 C<write> and C<freeze> are aliases for C<export> and may be used
 interchangeably.
 
+=head1 DEPENDENCIES
+
+=over 4
+
+=item *
+
+L<Moose>, L<MooseX::Aliases>
+
+=back
+
 =head1 BUGS AND LIMITATIONS
 
 =over 4

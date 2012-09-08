@@ -20,8 +20,10 @@ has 'xdifile' => (
 		  lazy      => 1,
 		  builder   => '_build_object',
 		 );
+# no need to fiddle with inline_constructor here
 has 'ok'             => (is => 'rw', isa => 'Bool', default => 0);
-has 'error'          => (is => 'rw', isa => 'Str', default => q{});
+has 'errorcode'      => (is => 'rw', isa => 'Int',  default => 0);
+has 'error'          => (is => 'rw', isa => 'Str',  default => q{});
 
 has 'filename'       => (is => 'rw', isa => 'Str', default => q{});
 has 'xdi_libversion' => (is => 'rw', isa => 'Str', default => q{});
@@ -86,7 +88,7 @@ sub _build_object {
   };
   my $errcode = 0;
   my $obj = Xray::XDIFile->new($self->file, $errcode);
-
+  $self->errorcode($errcode);
   ##### from xdifile.h:
   # /* error codes */
   # #define ERR_NOTXDI  -10
@@ -95,9 +97,10 @@ sub _build_object {
   # #define ERR_NOELEM -31
   # #define ERR_NOEDGE -32
   # #define ERR_NODSPACE -33
+  # #define ERR_NOMINUSLINE -34
 
   given ($errcode) {
-    when ([-10,-31,-32,-33,-34]) {
+    when ([-10,-30,-31,-32,-41,-42,-43,-80,-81,-82,-100]) {
       $self->error($obj->_errorstring($errcode));
       $self->ok(0);
       return $obj;
@@ -106,6 +109,10 @@ sub _build_object {
       $self->error('not an XDI file, unknown error');
       $self->ok(0);
       return $obj;
+    };
+    default {
+      $self->error(q{});
+      $self->ok(1);
     };
   };
   if (not defined $obj->_filename) {
@@ -126,7 +133,7 @@ sub _build_object {
   $self->narrays($obj->_narrays);
   $self->narray_labels($obj->_narray_labels);
 
-  ## import the metadata as a hash of hashes
+  ## store the metadata as a hash of hashes
   my @families = $obj->_meta_families;
   my @keywords = $obj->_meta_keywords;
   my @values   = $obj->_meta_values;
@@ -136,19 +143,18 @@ sub _build_object {
   };
   $self->metadata(\%hash);
 
-  ## import the data as a hash of lists
+  ## store the data as a hash of lists
   my @array_labels = $obj->_array_labels;
   $self->array_labels(\@array_labels);
   my @array_units = $obj->_array_units;
   $self->array_units(\@array_units);
 
   my %data = ();
-  foreach my $i (0 .. $#array_labels) {
+  foreach my $i (0 .. $self->narray_labels-1) {
     my @x = $obj->_data_array($i);
     $data{$array_labels[$i]} = \@x;
   };
   $self->data(\%data);
-
 
   return $obj;
 };
@@ -212,7 +218,6 @@ sub token {
 
 
 no Moose;
-# no need to fiddle with inline_constructor here
 __PACKAGE__->meta->make_immutable;
 1;
 
@@ -269,6 +274,10 @@ The underlying L<Xray::XDIFile> object.
 =item C<xdi_version>
 
 The XDI specification version under which the file was written.
+
+=item C<xdi_version>
+
+The XDI specification against which L<Xray::XDIFile> was compiled.
 
 =item C<extra_version>
 
