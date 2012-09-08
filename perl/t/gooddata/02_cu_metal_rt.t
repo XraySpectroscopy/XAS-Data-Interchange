@@ -27,7 +27,7 @@ ok( (($labels[0] eq 'energy') and
      ($labels[3] eq 'mutrans')),                                  'labels: label names');
 
 my @families = $xdi->families;
-ok($#families == 7,                                               'families: number of families');
+ok($#families == 8,                                               'families: number of families');
 ok( (($families[0] eq 'Beamline') and
      ($families[1] eq 'Column')   and
      ($families[2] eq 'Detector')),                               'famlies: family names');

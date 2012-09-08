@@ -17,5 +17,10 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_12.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'file flagged as failing to import');
+ok((not $xdi->ok), 'bad_12.xdi flagged as failing to import');
 ok(($xdi->error =~ m{no mono.d_spacing}), 'correctly identified missing d-spacing');
+
+
+open(my $COV, '>>', 'coverage.txt');
+print $COV 12, $/;
+close $COV;

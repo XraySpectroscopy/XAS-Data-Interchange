@@ -48,7 +48,7 @@ ok(ucfirst($xdifile->_element) eq 'Co',        'element');
 ok(ucfirst($xdifile->_edge) eq 'K',            'edge');
 ok(abs($xdifile->_dspacing - 3.13555) < $epsi, 'dspacing');
 ok($xdifile->_comments =~ m{room temperature}, 'comments');
-ok($xdifile->_nmetadata == 18,                 'nmetadata');
+ok($xdifile->_nmetadata == 19,                 'nmetadata');
 
 my @families = $xdifile->_meta_families;
 my @keywords = $xdifile->_meta_keywords;

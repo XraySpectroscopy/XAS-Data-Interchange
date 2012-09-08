@@ -53,6 +53,9 @@ mapping all the functions demonstrated in F<xdi_reader.c>.
 
 See L<Xray::XDI> for a Moose-ified wrapper around this.
 
+All methods share a name with L<Xray::XDI>, except that methods of
+this object are all preceded with an underscore.
+
 =head1 DEPENDENCIES
 
 =over 4
@@ -102,7 +105,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 __C__
 
-#include "strutil.h"
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
@@ -114,19 +116,6 @@ SV* new(char* class, char* file, SV* errcode) {
 
     New(42, xdifile, 1, XDIFile);
     xdifile = malloc(sizeof(XDIFile));
-
-    /* initialize */
-    COPY_STRING(xdifile->xdi_version,   "");
-    COPY_STRING(xdifile->extra_version, "");
-    COPY_STRING(xdifile->element,       "");
-    COPY_STRING(xdifile->edge,          "");
-    COPY_STRING(xdifile->comments,      "");
-
-    xdifile->dspacing	    = 0.0;
-    xdifile->nmetadata	    = 0;
-    xdifile->narrays	    = 0;
-    xdifile->npts	    = 0;
-    xdifile->narray_labels  = 0;
 
     ret = XDI_readfile(file, xdifile);
     sv_setiv(errcode, ret);
