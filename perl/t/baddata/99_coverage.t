@@ -1,6 +1,6 @@
 #!/usr/bin/perl  -I../../blib/lib -I../../blib/arch
 
-## test the inconsistent column number bad data examples
+## bad file coverage test
 
 use Test::More tests => 1;
 
@@ -22,7 +22,7 @@ my $text;
 };
 
 my @list = sort {$a <=> $b} split(" ", $text);
-my @all = (1 .. 25);
+my @all = (1 .. 29);
 
 TODO: {
   local $TODO = "not all bad data tests are finished";

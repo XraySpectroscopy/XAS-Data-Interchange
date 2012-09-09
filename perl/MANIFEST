@@ -1,9 +1,9 @@
 Changes
 lib/Xray/XDI.pm
+lib/Xray/XDI/WriterPP.pm
 lib/Xray/XDIFile.pm
 Makefile.PL
 MANIFEST
-MANIFEST.SKIP
 README.org
 t/00_base.t
 t/01_moose_nonmoose.t
@@ -12,7 +12,13 @@ t/03_nofile.t
 t/baddata/01_no_xdi_line.t
 t/baddata/02_no_edge.t
 t/baddata/03_no_symbol.t
+t/baddata/06_no_minus_signs.t
+t/baddata/11_bad_comment_char.t
 t/baddata/12_no_dspacing.t
+t/baddata/13_inconsistent_columns.t
+t/baddata/15_nonnumeric.t
+t/baddata/99_coverage.t
+t/baddata/test_coverage.sh
 t/gooddata/01_cu_metal_10k.t
 t/gooddata/02_cu_metal_rt.t
 t/gooddata/03_fe2o3.t
@@ -25,3 +31,4 @@ t/gooddata/09_pt_metal_rt.t
 t/gooddata/10_se_na2so4_rt.t
 t/gooddata/11_se_znse_rt.t
 t/gooddata/12_zn_na2so4_rt.t
+t/writer/01_pp.t
