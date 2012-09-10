@@ -38,6 +38,7 @@ perl/Makefile.old
 perl/XDIFile.inl
 perl/pm_to_blib
 _Inline/*
+perl/t/baddata/coverage.txt
 
 *.aux
 *.dvi

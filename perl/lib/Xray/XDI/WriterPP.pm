@@ -15,23 +15,23 @@ alias freeze => 'export';
 
 sub export_text {
   my ($self) = @_;
-  my $text = $self->section_version;
-  $text   .= $self->section_columns;
-  $text   .= $self->section_metadata;
-  $text   .= $self->section_comments;
-  $text   .= $self->section_labels;
-  $text   .= $self->section_data;
+  my $text = $self->_section_version;
+  $text   .= $self->_section_columns;
+  $text   .= $self->_section_metadata;
+  $text   .= $self->_section_comments;
+  $text   .= $self->_section_labels;
+  $text   .= $self->_section_data;
   return $text;
 };
 
-sub section_version {
+sub _section_version {
   my ($self) = @_;
   return $self->token('comment') . ' ' .
          $self->token('version') . $self->xdi_libversion . ' ' .
          $self->extra_version . $/;
 };
 
-sub section_columns {
+sub _section_columns {
   my ($self) = @_;
   my $text   = q{};
   my $i      = 1;
@@ -44,7 +44,7 @@ sub section_columns {
   return $text;
 };
 
-sub section_metadata {
+sub _section_metadata {
   my ($self) = @_;
   my $text   = q{};
   foreach my $fam ($self->families) {
@@ -58,7 +58,7 @@ sub section_metadata {
   return $text;
 };
 
-sub section_comments {
+sub _section_comments {
   my ($self) = @_;
   my $text   = q{};
   $text .= $self->token('comment') . $self->token('startcomment') x 20 . $/;
@@ -70,7 +70,7 @@ sub section_comments {
 };
 
 
-sub section_labels {
+sub _section_labels {
   my ($self) = @_;
   my $text   = q{};
   $text .= $self->token('comment');
@@ -81,7 +81,7 @@ sub section_labels {
   return $text;
 };
 
-sub section_data {
+sub _section_data {
   my ($self) = @_;
   my $text   = q{};
   foreach my $i (0 .. $self->npts-1) {
@@ -129,7 +129,7 @@ L<Moose>, L<MooseX::Aliases>
 =item *
 
 Need an algorithm for determining column formatting in
-C<section_data>.  Need to preserve resolution.
+C<_section_data>.  Need to preserve resolution.
 
 =back
 
@@ -145,13 +145,14 @@ L<http://cars9.uchicago.edu/~ravel/software/>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2012 Bruce Ravel (bravel AT bnl DOT gov). All rights reserved.
+To the extent possible, the authors have waived all rights granted by
+copyright law and related laws for the code and documentation that
+make up the Perl Interface to the XAS Data Interchange Format.
+While information about Authorship may be retained in some files for
+historical reasons, this work is hereby placed in the Public Domain.
+This work is published from: United States.
 
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself. See L<perlgpl>.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Author: Bruce Ravel (bravel AT bnl DOT gov).
+Last update: 8 September, 2012
 
 =cut
