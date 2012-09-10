@@ -31,7 +31,7 @@ LIBXDIF_SHARED = libxdifile.so
 LIBXDIF_DYLIB = libxdifile.dylib
 LIBXDIF_DLL = xdifile.dll
 XDIHEADERS = strutil.h xdifile.h
-XDIF_OBJ  = xdifile.o strutil.o
+XDIF_OBJ  = xdifile.o strutil.o slre.o
 SHARED = $(CCOPTS) -shared
 CC = @CC@ $(CCOPTS)
 LINKXDIF = -L$(libdir) -L. -lxdifile
@@ -45,7 +45,8 @@ $(READER).o: $(READER).c
 default: $(READER)
 
 strutil.o: strutil.h
-xdifile.o: xdifile.h strutil.h
+xdifile.o: xdifile.h strutil.h slre.h
+slre.o:  slre.h
 
 $(LIBXDIF_STATIC): $(XDIF_OBJ)
 	@rm -f $@

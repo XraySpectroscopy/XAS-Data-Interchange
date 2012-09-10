@@ -13,6 +13,7 @@
 #define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
 #endif
 
+#include "slre.h"
 #include "strutil.h"
 #include "xdifile.h"
 
@@ -147,16 +148,19 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       COPY_STRING(line, textlines[i]);
       line++;
       nwords = split_on(line, TOK_DELIM, words);
-      if (nwords < 1) {
-	continue;
-      }
+      if (nwords < 1) { continue; }
       COPY_STRING(mkey, words[0]);
+
       if ((mode==0) && (nwords == 2)) { /* metadata */
 	COPY_STRING(mval, words[1]);
 	nwords = split_on(words[0], TOK_DOT, words);
 	if (nwords > 1) {
 	  ndict++;
 	  COPY_STRING(xdifile->meta_values[ndict],   mval);
+	  /* need to test words[0] and words[1] as valid family/key names
+	    family name cannot start with number
+	    key cannot contain '.'
+	   */
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
 	} else {
@@ -205,6 +209,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  printf("Warning.... user comment may be truncated!\n");
 	}
 	strncat(comments, line, sizeof(comments) - strlen(comments) - 1);
+      } else if (mode == 0) {
+	return ERR_META_FORMAT;
       }
     } else {
       if (ignored_headerline < 0) {
