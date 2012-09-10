@@ -10,33 +10,28 @@ bad_03.xdi   error msg      Y     No element.symbol
 bad_04.xdi   error msg      Y     Invalid element.edge
 bad_05.xdi   error msg      Y     Invalid element.symbol
 bad_06.xdi   error msg      Y     No '------'
-bad_07.xdi   file read(1)    Y     No Column labels  -
-bad_08.xdi   file read(1)    Y     Too few Column labels
-bad_09.xdi   file read(1)    Y     Too many Column labels
-bad_10.xdi   file read(1)    Y     Column indices not continuous
+bad_07.xdi   file read(1)   Y     No Column labels  -
+bad_08.xdi   file read(1)   Y     Too few Column labels
+bad_09.xdi   file read(1)   Y     Too many Column labels
+bad_10.xdi   file read(1)   Y     Column indices not continuous
 bad_11.xdi   error msg      Y     Unsupported comment character
 bad_12.xdi   error msg      Y     angle given without mono.d_spacing
-bad_13.xdi   error msg     Y     inconsistent number of columns in data table -- too few
-bad_14.xdi   error msg     Y     inconsistent number of columns in data table -- too many
-bad_15.xdi   error msg     Y     NaN in data table
-bad_16.xdi   error msg     Y     string in data table
-bad_17.xdi   error msg     Y     bad number ('1.2.3') in data table
-bad_18.xdi   no message     N     Header violates 'Family.Key: Value' -- no value
-bad_19.xdi   no message     N     Header violates 'Family.Key: Value' -- no ':'
-bad_20.xdi   no message     N     Header violates 'Family.Key: Value' -- two ':'
-bad_21.xdi   no message     N     Header violates 'Family.Key: Value' -- no '.'
+bad_13.xdi   error msg      Y     inconsistent number of columns in data table -- too few
+bad_14.xdi   error msg      Y     inconsistent number of columns in data table -- too many
+bad_15.xdi   error msg      Y     NaN in data table
+bad_16.xdi   error msg      Y     string in data table
+bad_17.xdi   error msg      Y     bad number ('1.2.3') in data table
+bad_18.xdi   error msg      Y     Header violates 'Family.Key: Value' -- no value
+bad_19.xdi   error msg      Y     Header violates 'Family.Key: Value' -- no ':'
+bad_20.xdi   error msg      Y     Header violates 'Family.Key: Value' -- two ':'
+bad_21.xdi   error msg      Y     Header violates 'Family.Key: Value' -- no '.'
 bad_22.xdi   no message     N     Header violates 'Family.Key: Value' -- two '.'
-bad_23.xdi   no message     N     Header violates 'Family.Key: Value' -- key starts with number
+bad_23.xdi   file read(2)   Y     Header violates 'Family.Key: Value' -- key starts with number
 bad_24.xdi   no message     N     Header violates 'Family.Key: Value' -- Family starts with number
-bad_24.xdi   no message     N     Header violates 'Family.Key: Value' -- Family starts with number
-bad_25.xdi   no message     Y     No extra version given
-
+bad_25.xdi   file read(3)   Y     No extra version given
 
 Notes:
   1. extra column labels ignored, unspecified column labels set to 'colN' (N=1...)
-  2. missing values or strings set to 0.
-  3. '1.2.3' -> '1.2'.
-
-These appear to be features of using calloc (missing values -> 0) and
-strtod (strings ->0, delimiter behavior)
+  2. keys are allowed to start with a number...
+  3. extra version is left null
 

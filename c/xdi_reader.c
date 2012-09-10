@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
   int   is_newline, fnlen, k;
   double *tdat;
 
-
   /* require 2 arguments! */
   if (argc < 2) {
     show_syntax();
@@ -39,12 +38,9 @@ int main(int argc, char **argv) {
 	   argv[1], XDI_errorstring(ret));
     return 1;
   }
-  printf("Error status '%s':\n     %ld   %s\n",
-	 argv[1], ret, XDI_errorstring(ret));
 
   printf("# XDI FILE Read %s VERSIONS: |%s|%s|\n" ,
-	 xdifile->filename,
-	 xdifile->xdi_version, xdifile->extra_version);
+	 xdifile->filename, xdifile->xdi_version, xdifile->extra_version);
 
   printf("# Elem/Edge: %s|%s|\n", xdifile->element, xdifile->edge);
   printf("# User Comments:\n%s\n", xdifile->comments);
