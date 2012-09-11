@@ -60,7 +60,6 @@ int xdi_strtod(char* inp, double *dval) {
   return *end != '\0';
 }
 
-
 _EXPORT(int)
 XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
@@ -68,15 +67,17 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   char *words[MAX_WORDS], *cwords[2];
   char *col_labels[MAX_COLUMNS], *col_units[MAX_COLUMNS];
   char *c, *line, *mkey,  *mval, *version_xdi, *version_extra;
+  char *reword;
   char tlabel[32];
   char comments[1024] = "";
   double dval ;
   FILE *inpFile;
-  long  file_length, ilen, index, i, j, maxcol;
+  long  file_length, ilen, index, i, j, n1, maxcol;
   long  ncol, nrows, nxrows, nheader, nwords, ndict;
   int   is_newline, fnlen, mode, valid, stat;
   int   has_minusline, has_angle, has_energy;
   int   ignored_headerline;
+  const char *regex_status;
 
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
@@ -161,6 +162,18 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    family name cannot start with number
 	    key cannot contain '.'
 	   */
+	  regex_status = slre_match(1, "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_]+$",
+				      words[0], strlen(words[0]));
+	  if (regex_status != NULL) {
+	    return ERR_META_FAMNAME;
+	  }
+	    
+	  regex_status = slre_match(1, "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$",
+				      words[1], strlen(words[1]));
+	  if (regex_status != NULL) {
+	    return ERR_META_KEYNAME;
+	  }
+	    
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
 	} else {
