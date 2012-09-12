@@ -211,13 +211,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  if (0 != xdi_strtod(mval, &dval)) {  return ERR_NONNUMERIC;}
 	  xdifile->dspacing = dval;
 	} else if (strcasecmp(mkey, TOK_TIMESTAMP) == 0) {
-	  printf(" TimeStamp: %s\n ", mval);
 	  regex_status = slre_match(1, "^\\d\\d\\d\\d-\\d\\d?-\\d\\d?[T ]\\d\\d?:\\d\\d[:\\d\\d]*.*$",
 				      mval, strlen(mval));
-	  if (regex_status != NULL) {
-	    return ERR_META_TIMESTAMP;
-	  }
-	  printf(" Stats %s\n", regex_status);
+	  if (regex_status != NULL) { return ERR_META_TIMESTAMP; }
 	}
       } else if (strncasecmp(mkey, TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
 	mode = 1;
