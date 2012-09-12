@@ -34,6 +34,8 @@ _EXPORT(char*) XDI_errorstring(int errcode) {
     return "invalid keyword name in meta-data";
   } else if (errcode == ERR_META_FORMAT) {
     return "metadata not formatted as Family.Key: Value";
+  } else if (errcode == ERR_META_TIMESTAMP) {
+    return "invalid timestamp syntax. Should be: YYYY-MM-DD HH:MM:SS";
   } else if (errcode == ERR_NOMINUSLINE) {
     return "no line of minus signs '#-----' separating header from data";
   } else if (errcode == ERR_NCOLS_CHANGE) {
@@ -167,13 +169,13 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  if (regex_status != NULL) {
 	    return ERR_META_FAMNAME;
 	  }
-	    
+
 	  regex_status = slre_match(1, "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$",
 				      words[1], strlen(words[1]));
 	  if (regex_status != NULL) {
 	    return ERR_META_KEYNAME;
 	  }
-	    
+
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
 	} else {
@@ -208,6 +210,14 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	} else if (strcasecmp(mkey, TOK_DSPACE) == 0) {
 	  if (0 != xdi_strtod(mval, &dval)) {  return ERR_NONNUMERIC;}
 	  xdifile->dspacing = dval;
+	} else if (strcasecmp(mkey, TOK_TIMESTAMP) == 0) {
+	  printf(" TimeStamp: %s\n ", mval);
+	  regex_status = slre_match(1, "^\\d\\d\\d\\d-\\d\\d?-\\d\\d?[T ]\\d\\d?:\\d\\d[:\\d\\d]*.*$",
+				      mval, strlen(mval));
+	  if (regex_status != NULL) {
+	    return ERR_META_TIMESTAMP;
+	  }
+	  printf(" Stats %s\n", regex_status);
 	}
       } else if (strncasecmp(mkey, TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
 	mode = 1;

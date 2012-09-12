@@ -31,7 +31,6 @@ _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) ;
 _EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 
-
 #define XDI_VERSION  "1.0.0"   /* XDI version marker */
 
 /* Tokens used in XDI File */
@@ -44,6 +43,7 @@ _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 #define TOK_ELEM     "element.symbol" /* atomic symbol of absorbing element */
 #define TOK_COLUMN   "column."        /* column label (followed by integer <= 64) */
 #define TOK_DSPACE   "mono.d_spacing" /* mono d_spacing, in Angstroms */
+#define TOK_TIMESTAMP  "scan.start_time" /* scan time */
 #define TOK_USERCOM_0 "///"           /* start multi-line user comment */
 #define TOK_USERCOM_1 "---"           /* end multi-line user comment */
 #define TOK_COL_ENERGY "energy"       /* name of energy column */
@@ -90,6 +90,8 @@ static char *ValidElems[] =
 #define ERR_META_FAMNAME -41
 #define ERR_META_KEYNAME -42
 #define ERR_META_FORMAT  -43
+#define ERR_META_TIMESTAMP -44
+
 #define ERR_NOMINUSLINE  -80
 #define ERR_NCOLS_CHANGE -81
 #define ERR_NONNUMERIC   -82
