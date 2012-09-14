@@ -34,8 +34,10 @@ _EXPORT(char*) XDI_errorstring(int errcode) {
     return "invalid keyword name in meta-data";
   } else if (errcode == ERR_META_FORMAT) {
     return "metadata not formatted as Family.Key: Value";
-  } else if (errcode == ERR_META_TIMESTAMP) {
-    return "invalid timestamp syntax. Should be: YYYY-MM-DD HH:MM:SS";
+  } else if (errcode == ERR_DATE_FORMAT) {
+    return "invalid timestamp: format should be YYYY-MM-DD HH:MM:SS";
+  } else if (errcode == ERR_DATE_RANGE) {
+    return "invalid timestamp: date out of valid range";
   } else if (errcode == ERR_NOMINUSLINE) {
     return "no line of minus signs '#-----' separating header from data";
   } else if (errcode == ERR_NCOLS_CHANGE) {
@@ -60,6 +62,31 @@ int xdi_strtod(char* inp, double *dval) {
     return -1;
   }
   return *end != '\0';
+}
+
+int xdi_is_datestring(char *inp) {
+  /* tests if input string is a valid datetime timestamp.
+     This uses regular expression to check format and validates
+     range of values, though not exhaustively.
+  */
+  const char *regex_status;
+  int year, month, day, hour, minute, sec;
+  regex_status = slre_match(1, "^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[T ](\\d\\d?):(\\d\\d):(\\d\\d).*$",
+			    inp, strlen(inp),
+			    SLRE_INT, sizeof(sec), &year,
+			    SLRE_INT, sizeof(sec), &month,
+			    SLRE_INT, sizeof(sec), &day,
+			    SLRE_INT, sizeof(sec), &hour,
+			    SLRE_INT, sizeof(sec), &minute,
+			    SLRE_INT, sizeof(sec), &sec);
+
+  if (regex_status != NULL) { return ERR_DATE_FORMAT;}
+  if ((year < 1900) || (month < 1) || (month > 12) ||
+      (day < 1) || (day > 31) ||  (hour < 0) || (hour > 23) ||
+      (minute < 0) || (minute > 59) ||  (sec < 0) || (sec > 59)) {
+    return ERR_DATE_RANGE;
+  }
+  return 0;
 }
 
 _EXPORT(int)
@@ -211,9 +238,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  if (0 != xdi_strtod(mval, &dval)) {  return ERR_NONNUMERIC;}
 	  xdifile->dspacing = dval;
 	} else if (strcasecmp(mkey, TOK_TIMESTAMP) == 0) {
-	  regex_status = slre_match(1, "^\\d\\d\\d\\d-\\d\\d?-\\d\\d?[T ]\\d\\d?:\\d\\d[:\\d\\d]*.*$",
-				      mval, strlen(mval));
-	  if (regex_status != NULL) { return ERR_META_TIMESTAMP; }
+	  j = xdi_is_datestring(mval);
+	  if (0 != j) return j;
 	}
       } else if (strncasecmp(mkey, TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
 	mode = 1;

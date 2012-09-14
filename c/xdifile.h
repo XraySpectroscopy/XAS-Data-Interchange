@@ -90,7 +90,9 @@ static char *ValidElems[] =
 #define ERR_META_FAMNAME -41
 #define ERR_META_KEYNAME -42
 #define ERR_META_FORMAT  -43
-#define ERR_META_TIMESTAMP -44
+
+#define ERR_DATE_FORMAT  -51
+#define ERR_DATE_RANGE   -52
 
 #define ERR_NOMINUSLINE  -80
 #define ERR_NCOLS_CHANGE -81
