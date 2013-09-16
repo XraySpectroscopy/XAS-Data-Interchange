@@ -32,6 +32,7 @@ bad_25.xdi   file read(4)   Y     No extra version given
 bad_26.xdi   file read(5)   Y     No user comment
 bad_27.xdi   file read(5)   Y     Line of '////', but no user comment
 bad_28.xdi   error msg      Y     incorrectly format date-time
+bad_29.xdi   error msg      Y     date-time has invalid range (month > 12)
 
 Notes:
   1. files read, return value > 0, indicating Warning  
@@ -39,4 +40,3 @@ Notes:
   3. keys are allowed to start with a number...
   4. extra version is left as empty string ''
   5. user comment is left as empty string ''
-
