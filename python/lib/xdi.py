@@ -6,17 +6,20 @@ import os
 import ctypes
 import ctypes.util
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 try:
-    from numpy import array, pi, exp, log, sin, arcsin
+    from numpy import array, exp, log, sin, arcsin
     HAS_NUMPY = True
-    RAD2DEG  = 180.0/pi
-    # from NIST.GOV CODATA:
-    # Planck constant over 2 pi times c: 197.3269718 (0.0000044) MeV fm
-    PLANCK_hc = 1973.269718 * 2 * pi # hc in eV * Ang = 12398.4193
 except ImportError:
     HAS_NUMPY = False
+
+PI = 3.14159265358979323846
+RAD2DEG  = 180.0/PI
+
+# from NIST.GOV CODATA:
+# Planck constant over 2 pi times c: 197.3269718 (0.0000044) MeV fm
+PLANCK_HC = 1973.269718 * 2 * PI # hc in eV * Ang = 12398.4193
 
 class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
@@ -24,20 +27,26 @@ class XDIFileStruct(ctypes.Structure):
                 ('narrays',       ctypes.c_long),
                 ('npts',          ctypes.c_long),
                 ('narray_labels', ctypes.c_long),
+                ('nouter',         ctypes.c_long),
+                ('error_lineno',  ctypes.c_long),
                 ('dspacing',      ctypes.c_double),
-                ('xdi_libversion', ctypes.c_char_p),
+                ('xdi_libversion',ctypes.c_char_p),
                 ('xdi_version',   ctypes.c_char_p),
                 ('extra_version', ctypes.c_char_p),
                 ('filename',      ctypes.c_char_p),
                 ('element',       ctypes.c_char_p),
                 ('edge',          ctypes.c_char_p),
                 ('comments',      ctypes.c_char_p),
+                ('error_line',    ctypes.c_char_p),
                 ('array_labels',  ctypes.c_void_p),
+                ('outer_label',   ctypes.c_char_p),                
                 ('array_units',   ctypes.c_void_p),
                 ('meta_families', ctypes.c_void_p),
                 ('meta_keywords', ctypes.c_void_p),
                 ('meta_values',   ctypes.c_void_p),
-                ('array',         ctypes.c_void_p)]
+                ('array',         ctypes.c_void_p),
+                ('outer_array',   ctypes.c_void_p),
+                ('outer_breakpts', ctypes.c_void_p)]
 
 def add_dot2path():
     """add this folder to begninng of PATH environmental variable"""
@@ -88,9 +97,11 @@ class XDIFile(object):
     def __init__(self, filename=None):
         self.filename = filename
         self.xdi_pyversion =  __version__
+        self.xdilib = get_xdilib()
         self.comments = []
         self.rawdata = []
         self.attrs = {}
+        self.status = None
         if self.filename:
             self.read(self.filename)
 
@@ -103,12 +114,11 @@ class XDIFile(object):
         """
         if filename is None and self.filename is not None:
             filename = self.filename
-        XDILIB = get_xdilib()
 
         pxdi = ctypes.pointer(XDIFileStruct())
-        out = XDILIB.XDI_readfile(filename, pxdi)
-        if out != 0:
-            msg =  XDILIB.XDI_errorstring(out)
+        self.status = out = self.xdilib.XDI_readfile(filename, pxdi)
+        if out < 0:
+            msg = self.xdilib.XDI_errorstring(out)
             msg = 'Error reading XDIFile %s\n%s' % (filename, msg)
             raise XDIFileException(msg)
 
@@ -119,7 +129,7 @@ class XDIFile(object):
         pchar = ctypes.c_char_p
         self.array_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
         self.array_units  = (self.narrays*pchar).from_address(xdi.array_units)[:]
-
+        
         mfams = (self.nmetadata*pchar).from_address(xdi.meta_families)[:]
         mkeys = (self.nmetadata*pchar).from_address(xdi.meta_keywords)[:]
         mvals = (self.nmetadata*pchar).from_address(xdi.meta_values)[:]
@@ -133,7 +143,18 @@ class XDIFile(object):
 
         parrays = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
         rawdata = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
-
+        
+        nout = xdi.nouter
+        outer, breaks = [], []
+        if nout > 1:
+            outer  = (nout*ctypes.c_double).from_address(xdi.outer_array)[:]
+            breaks = (nout*ctypes.c_long).from_address(xdi.outer_breakpts)[:]
+        for attr in ('outer_array', 'outer_breakpts', 'nouter'):
+            delattr(self, attr)
+        self.outer_array    = array(outer)
+        self.outer_breakpts = array(breaks)
+        
+        
         if HAS_NUMPY:
             rawdata = array(rawdata)
             rawdata.shape = (self.narrays, self.npts)
@@ -169,13 +190,13 @@ class XDIFile(object):
                     xunits = units
 
         if not HAS_NUMPY:
-            print '%s: not calculating derived values: install numpy!' % (self.filename)
             return
 
         # convert energy to angle, or vice versa
         if ix >= 0 and 'd_spacing' in self.attrs['mono']:
             dspace = float(self.attrs['mono']['d_spacing'])
-            omega = PLANCK_hc/(2*dspace)
+            if dspace < 0: dspace = 0.001
+            omega = PLANCK_HC/(2*dspace)
             if xname == 'energy' and not hasattr(self, 'angle'):
                 energy_ev = self.energy
                 if xunits.lower() == 'kev':
