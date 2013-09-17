@@ -277,7 +277,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	return ERR_META_FORMAT;
       }
     } else {
-      if (ignored_headerline < 0) {
+      if ((ignored_headerline < 0) && (has_minusline == 0)) {
 	ignored_headerline = i;
       }
     }
@@ -353,6 +353,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   for (i = nheader-2; i < ilen; i++) {
     /* may find a header line interspersed in array data */
     COPY_STRING(line, textlines[i]);
+    xdifile->error_lineno = i; 
+    COPY_STRING(xdifile->error_line, line);
+
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
       line++;
       nwords = split_on(line, TOK_DELIM, words);
@@ -378,6 +381,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       ++ipt;
     }
   }
+  /* success */
+  xdifile->error_lineno = 0; 
+  COPY_STRING(xdifile->error_line, "");
+
   xdifile->npts = ipt;
   xdifile->nouter = iouter;
   xdifile->narrays = ncols;
@@ -389,6 +396,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
     xdifile->outer_array[j] = outer_arr[j];
     xdifile->outer_breakpts[j] = outer_pts[j];
   }
+
   return iret;
 
 }
