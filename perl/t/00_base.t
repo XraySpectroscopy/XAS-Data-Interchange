@@ -2,7 +2,7 @@
 
 ## test the Inline C code in the Xray::XDIFile module
 
-use Test::More tests => 45;
+use Test::More tests => 46;
 
 use strict;
 use warnings;
@@ -20,19 +20,20 @@ my $xdifile = Xray::XDIFile->new($file, $errcode);
 ok($errcode == 0,                              'error code = 0');
 ok($xdifile =~ m{Xray::XDIFile},               'created Xray::XDIFile object');
 
-ok( $xdifile->_token('comment') eq '#',               'token: comment');
-ok( $xdifile->_token('delimiter') eq ':',             'token: delimiter');
-ok( $xdifile->_token('dot') eq '.',                   'token: dot');
-ok( $xdifile->_token('startcomment') eq '///',        'token: startcomment');
-ok( $xdifile->_token('endcomment') eq '---',          'token: endcomment');
-ok( $xdifile->_token('energycolumn') eq 'energy',     'token: energycolumn');
-ok( $xdifile->_token('anglecolumn') eq 'angle',       'token: anglecolumn');
-ok( $xdifile->_token('version') eq 'XDI/',            'token: version');
-ok( $xdifile->_token('edge') eq 'element.edge',       'token: edge');
-ok( $xdifile->_token('element') eq 'element.symbol',  'token: element');
-ok( $xdifile->_token('column') eq 'column.',          'token: column');
-ok( $xdifile->_token('dspacing') eq 'mono.d_spacing', 'token: dspacing');
-ok( $xdifile->_token('glorb') eq '',                  'token: not a token');
+ok( $xdifile->_token('comment') eq '#',                 'token: comment');
+ok( $xdifile->_token('delimiter') eq ':',               'token: delimiter');
+ok( $xdifile->_token('dot') eq '.',                     'token: dot');
+ok( $xdifile->_token('startcomment') eq '///',          'token: startcomment');
+ok( $xdifile->_token('endcomment') eq '---',            'token: endcomment');
+ok( $xdifile->_token('energycolumn') eq 'energy',       'token: energycolumn');
+ok( $xdifile->_token('anglecolumn') eq 'angle',         'token: anglecolumn');
+ok( $xdifile->_token('version') eq 'XDI/',              'token: version');
+ok( $xdifile->_token('edge') eq 'element.edge',         'token: edge');
+ok( $xdifile->_token('element') eq 'element.symbol',    'token: element');
+ok( $xdifile->_token('column') eq 'column.',            'token: column');
+ok( $xdifile->_token('dspacing') eq 'mono.d_spacing',   'token: dspacing');
+ok( $xdifile->_token('timestamp') eq 'scan.start_time', 'token: starttime');
+ok( $xdifile->_token('glorb') eq '',                    'token: "glorb" is not a token');
 
 my @edges = $xdifile->_valid_edges;
 ok($#edges == 26, 'edge symbols');
@@ -40,7 +41,7 @@ my @elements = $xdifile->_valid_elements;
 ok($#elements == 117, 'element symbols');
 
 ok($xdifile->_filename =~ m{co_metal_rt.xdi},  'filename');
-ok($xdifile->_xdi_libversion eq '1.0.0',       'xdi_libversion');
+ok($xdifile->_xdi_libversion eq '1.1.0',       'xdi_libversion');
 ok($xdifile->_xdi_version >= 1.0,              'xdi_version');
 ok($xdifile->_extra_version =~ m{GSE},         'extra_version');
 
@@ -62,7 +63,7 @@ ok($families[6] eq 'Mono',   'specific family');
 ok($keywords[6] eq 'name',   'specific keyword');
 ok($values[6]   eq 'Si 111', 'specific value');
 
-ok($xdifile->_npts    == 418, 'npts');
+ok($xdifile->_npts    == 417, 'npts');
 ok($xdifile->_narrays ==   3, 'narrays');
 ok($xdifile->_narrays ==  $xdifile->_narray_labels, 'narray_labels');
 

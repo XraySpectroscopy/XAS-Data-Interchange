@@ -2,7 +2,7 @@
 
 ## test the construction of the Moose attribute structure in Xray::XDI;
 
-use Test::More tests => 45;
+use Test::More tests => 46;
 
 use strict;
 use warnings;
@@ -16,23 +16,24 @@ BEGIN { use_ok('Xray::XDI') };
 my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', 'data', 'co_metal_rt.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
-ok($xdi =~ m{Xray::XDI},                         'created Xray::XDI object');
-ok($xdi->ok,                                     'ok flag is true');
-ok($xdi->error eq '',                            'error text is empty');
+ok($xdi =~ m{Xray::XDI},                           'created Xray::XDI object');
+ok($xdi->ok,                                       'ok flag is true');
+ok($xdi->error eq '',                              'error text is empty');
 
-ok( $xdi->token('comment') eq '#',               'token: comment');
-ok( $xdi->token('delimiter') eq ':',             'token: delimiter');
-ok( $xdi->token('dot') eq '.',                   'token: dot');
-ok( $xdi->token('startcomment') eq '///',        'token: startcomment');
-ok( $xdi->token('endcomment') eq '---',          'token: endcomment');
-ok( $xdi->token('energycolumn') eq 'energy',     'token: energycolumn');
-ok( $xdi->token('anglecolumn') eq 'angle',       'token: anglecolumn');
-ok( $xdi->token('version') eq 'XDI/',            'token: version');
-ok( $xdi->token('edge') eq 'element.edge',       'token: edge');
-ok( $xdi->token('element') eq 'element.symbol',  'token: element');
-ok( $xdi->token('column') eq 'column.',          'token: column');
-ok( $xdi->token('dspacing') eq 'mono.d_spacing', 'token: dspacing');
-ok( $xdi->token('glorb') eq '',                  'token: not a token');
+ok( $xdi->token('comment') eq '#',                 'token: comment');
+ok( $xdi->token('delimiter') eq ':',               'token: delimiter');
+ok( $xdi->token('dot') eq '.',                     'token: dot');
+ok( $xdi->token('startcomment') eq '///',          'token: startcomment');
+ok( $xdi->token('endcomment') eq '---',            'token: endcomment');
+ok( $xdi->token('energycolumn') eq 'energy',       'token: energycolumn');
+ok( $xdi->token('anglecolumn') eq 'angle',         'token: anglecolumn');
+ok( $xdi->token('version') eq 'XDI/',              'token: version');
+ok( $xdi->token('edge') eq 'element.edge',         'token: edge');
+ok( $xdi->token('element') eq 'element.symbol',    'token: element');
+ok( $xdi->token('column') eq 'column.',            'token: column');
+ok( $xdi->token('dspacing') eq 'mono.d_spacing',   'token: dspacing');
+ok( $xdi->token('timestamp') eq 'scan.start_time', 'token: timestamp');
+ok( $xdi->token('glorb') eq '',                    'token: "glorb" is not a token');
 
 my @edges = $xdi->valid_edges;
 ok($#edges == 26,                                'edge symbols');
@@ -41,7 +42,7 @@ ok($#elements == 117,                            'element symbols');
 
 
 ok($xdi->filename =~ m{co_metal_rt.xdi},  'filename');
-ok($xdi->xdi_libversion eq '1.0.0',       'xdi_libversion');
+ok($xdi->xdi_libversion eq '1.1.0',       'xdi_libversion');
 ok($xdi->xdi_version >= 1.0,              'xdi_version');
 ok($xdi->extra_version =~ m{GSE},         'extra_version');
 
@@ -66,7 +67,7 @@ ok($count == $xdi->nmetadata,                                     'correct numbe
 ok($xdi->metadata->{Mono}->{name} eq 'Si 111',                     'fetching Mono.name');
 ok($xdi->metadata->{Facility}->{xray_source} eq 'APS undulator A', 'fetching Facility.xray_source');
 
-ok($xdi->npts    == 418, 'npts');
+ok($xdi->npts    == 417, 'npts');
 ok($xdi->narrays ==   3, 'narrays');
 ok($xdi->narrays == $xdi->narray_labels, 'narray_labels');
 

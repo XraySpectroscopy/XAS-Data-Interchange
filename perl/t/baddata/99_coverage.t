@@ -24,11 +24,6 @@ my $text;
 my @list = sort {$a <=> $b} split(" ", $text);
 my @all = (1 .. 29);
 
-TODO: {
-  local $TODO = "not all bad data tests are finished";
-
-  ok($#list eq $#all, sprintf('tested %d of %d bad files (%s)',
-			      $#list+1, $#all+1, join(",", @list)));
-};
-
+ok($#list eq $#all, sprintf('tested %d of %d bad files (%s)',
+			    $#list+1, $#all+1, join(",", @list)));
 unlink 'coverage.txt';

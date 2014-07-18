@@ -174,6 +174,12 @@ char* _token(SV* obj, char* tok) {
     return TOK_COLUMN;
   } else if (strncmp(tok, "dspacing", 2) == 0) {
     return TOK_DSPACE;
+  } else if (strncmp(tok, "timestamp", 2) == 0) {
+    return TOK_TIMESTAMP;
+  } else if (strncmp(tok, "outervalue", 6) == 0) {
+    return TOK_OUTER_VAL;
+  } else if (strncmp(tok, "outername", 6) == 0) {
+    return TOK_OUTER_NAME;
   } else {
     return "";
   }

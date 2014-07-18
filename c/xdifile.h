@@ -94,7 +94,7 @@ static char *ValidElems[] =
 
 
 /* error codes   
-  < 1  data file is not valid
+  < 0  data file is not valid
   = 0  all OK.
   > 0  data file is valid but may be incomplete as XAFS data
 */

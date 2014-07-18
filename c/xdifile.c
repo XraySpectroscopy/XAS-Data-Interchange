@@ -119,7 +119,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   COPY_STRING(xdifile->xdi_version, "");
   COPY_STRING(xdifile->extra_version, "");
   COPY_STRING(xdifile->element, "__");
-  COPY_STRING(xdifile->edge, "K");
+  COPY_STRING(xdifile->edge, "_");
   COPY_STRING(xdifile->comments, "");
   COPY_STRING(xdifile->error_line, "");
   COPY_STRING(xdifile->outer_label, "");

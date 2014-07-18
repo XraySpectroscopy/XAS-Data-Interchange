@@ -17,6 +17,8 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_11.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
+print $xdi->error, $/;
+
 ok((not $xdi->ok), 'bad_11.xdi flagged as failing to import');
 ok(($xdi->error =~ m{contains unrecognized header lines}), 'correctly identified bad comment character');
 

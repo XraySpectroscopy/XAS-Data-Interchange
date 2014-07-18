@@ -17,13 +17,13 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_03.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_03.xdi flagged as failing to import');
+ok(($xdi->warning and $xdi->ok), 'bad_03.xdi flagged with a warning');
 ok(($xdi->error =~ m{no element.symbol}), 'correctly identified missing element symbol');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_05.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_05.xdi flagged as failing to import');
+ok(($xdi->warning and $xdi->ok), 'bad_05.xdi flagged with a warning');
 ok(($xdi->error =~ m{no element.symbol}), 'correctly identified invalid element symbol');
 
 
