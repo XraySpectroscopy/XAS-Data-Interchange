@@ -47,4 +47,6 @@ perl/*.inl
 *.out
 *.snm
 *.toc
+latex/xdi.log
+latex/xdi.pdf
 doc/Poster_XAFS15/XDI_Poster.log
