@@ -43,7 +43,7 @@ _EXPORT(char*) XDI_errorstring(int errcode) {
   } else if (errcode == ERR_NCOLS_CHANGE) {
     return "number of columns changes in file";
   } else if (errcode == ERR_NONNUMERIC) {
-    return "non-numeric value in data table";
+    return "non-numeric value in data table or for d-spacing";
   } else if (errcode == ERR_IGNOREDMETA) {
     return "contains unrecognized header lines";
   }
@@ -170,8 +170,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
      nheader= index of first line that does not start with '#'
   */
   for (i = 1; i < ilen ; i++) {
-    if ((strlen(textlines[i]) > 3) && 
-	(strncmp(textlines[i], TOK_COMM, 1) != 0))  {
+    regex_status = slre_match(1, DATALINE, textlines[i], strlen(textlines[i]));
+    if ((strlen(textlines[i]) > 3) && (regex_status == NULL)) {
+  	/* (strncmp(textlines[i], TOK_COMM, 1) != 0))  { */
       break;
     }
   }
@@ -282,8 +283,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       }
     }
   }
-  if (has_minusline == 0)     { iret = ERR_NOMINUSLINE; }
   if (ignored_headerline > 0) { iret = ERR_IGNOREDMETA; }
+  if (has_minusline == 0)     { iret = ERR_NOMINUSLINE; }
 
   /* check edge, element, return error code if invalid */
   valid = 0;

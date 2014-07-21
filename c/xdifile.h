@@ -62,6 +62,7 @@ _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 #define FAMILYNAME "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
 #define KEYNAME    "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
 
+#define DATALINE "^[ \t]*[0123456789.]"
 
 /* Notes:
    1. The absorption edge must be one of those listed in ValidEdges below
