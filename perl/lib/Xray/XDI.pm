@@ -536,6 +536,6 @@ historical reasons, this work is hereby placed in the Public Domain.
 This work is published from: United States.
 
 Author: Bruce Ravel (bravel AT bnl DOT gov).
-Last update: 8 September, 2012
+Last update: 22 July, 2014
 
 =cut

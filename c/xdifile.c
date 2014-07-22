@@ -95,7 +95,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   char *header[MAX_LINES];
   char *words[MAX_WORDS], *cwords[2];
   char *col_labels[MAX_COLUMNS], *col_units[MAX_COLUMNS];
-  char *c, *line, *mkey,  *mval, *version_xdi, *version_extra;
+  char *c, *line, *fullline, *mkey,  *mval, *version_xdi, *version_extra;
   char *reword;
   char tlabel[32];
   char comments[1024] = "";
@@ -189,7 +189,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
       COPY_STRING(line, textlines[i]);
+      COPY_STRING(fullline, textlines[i]);
       line++;
+      fullline++;
       nwords = split_on(line, TOK_DELIM, words);
       if (nwords < 1) { continue; }
       COPY_STRING(mkey, words[0]);
@@ -270,10 +272,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	if ((strlen(comments) > 0) && strlen(comments) < sizeof(comments)) {
 	  strncat(comments, "\n", sizeof(comments)-strlen(comments) - 1);
 	}
-	if (strlen(line) + 1 > sizeof(comments) - strlen(comments)) {
+	if (strlen(fullline) + 1 > sizeof(comments) - strlen(comments)) {
 	  printf("Warning.... user comment may be truncated!\n");
 	}
-	strncat(comments, line, sizeof(comments) - strlen(comments) - 1);
+	strncat(comments, fullline, sizeof(comments) - strlen(comments) - 1);
       } else if (mode == 0) {
 	return ERR_META_FORMAT;
       }

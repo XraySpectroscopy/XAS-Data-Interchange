@@ -31,18 +31,17 @@ ok(ucfirst($xdi->element) eq ucfirst($new->element),  'element');
 ok(ucfirst($xdi->edge)    eq ucfirst($new->edge),     'edge');
 ok(abs($xdi->dspacing - $new->dspacing) < $epsi,      'dspacing');
 
-use Term::ANSIColor qw(:constants);
-use String::Diff;
-local %String::Diff::DEFAULT_MARKS = (
-				      remove_open  => RED.REVERSE,
-				      remove_close => RESET,
-				      append_open  => GREEN.REVERSE,
-				      append_close => RESET,
-				     );
-my($x, $n) = String::Diff::diff($xdi->comments,  $new->comments);
-
-print $x, $/, $/;
-print $n, $/;
+# use Term::ANSIColor qw(:constants);
+# use String::Diff;
+# local %String::Diff::DEFAULT_MARKS = (
+# 				      remove_open  => RED.REVERSE,
+# 				      remove_close => RESET,
+# 				      append_open  => GREEN.REVERSE,
+# 				      append_close => RESET,
+# 				     );
+# my($x, $n) = String::Diff::diff($xdi->comments,  $new->comments);
+# print $x, $/, $/;
+# print $n, $/;
 
 ok($xdi->comments         eq $new->comments,	      'comments');
 ok($xdi->npts             == $new->npts,	      'npts');
