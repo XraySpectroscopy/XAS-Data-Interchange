@@ -154,6 +154,8 @@ sub _build_object {
   my %data = ();
   foreach my $i (0 .. $self->narray_labels-1) {
     my @x = $obj->_data_array($i);
+    #print $array_labels[$i], $/;
+    #print join("|", @x), $/, $/;
     $data{$array_labels[$i]} = \@x;
   };
   $self->data(\%data);
@@ -161,24 +163,24 @@ sub _build_object {
   return $obj;
 };
 
-use Term::ANSIColor qw(:constants);
-sub trace {
-  my ($self) = @_;
-  my $max_depth = 30;
-  my $i = 0;
-  my ($green, $red, $yellow, $end) = (BOLD.GREEN, BOLD.RED, BOLD.YELLOW, RESET);
-  local $|=1;
-  print($/.BOLD."--- Begin stack trace ---$end\n");
-  while ( (my @call_details = (caller($i++))) && ($i<$max_depth) ) {
-    my $from = $call_details[1];
-    my $line  = $call_details[2];
-    my $color = RESET.YELLOW;
-    (my $func = $call_details[3]) =~ s{(?<=::)(\w+)\z}{$color$1};
-    print("$green$from$end line $red$line$end in function $yellow$func$end\n");
-  }
-  print(BOLD."--- End stack trace ---$end\n");
-  return $self;
-};
+# use Term::ANSIColor qw(:constants);
+# sub trace {
+#   my ($self) = @_;
+#   my $max_depth = 30;
+#   my $i = 0;
+#   my ($green, $red, $yellow, $end) = (BOLD.GREEN, BOLD.RED, BOLD.YELLOW, RESET);
+#   local $|=1;
+#   print($/.BOLD."--- Begin stack trace ---$end\n");
+#   while ( (my @call_details = (caller($i++))) && ($i<$max_depth) ) {
+#     my $from = $call_details[1];
+#     my $line  = $call_details[2];
+#     my $color = RESET.YELLOW;
+#     (my $func = $call_details[3]) =~ s{(?<=::)(\w+)\z}{$color$1};
+#     print("$green$from$end line $red$line$end in function $yellow$func$end\n");
+#   }
+#   print(BOLD."--- End stack trace ---$end\n");
+#   return $self;
+# };
 
 
 

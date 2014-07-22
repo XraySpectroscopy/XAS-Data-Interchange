@@ -63,7 +63,7 @@ ok($families[6] eq 'Mono',   'specific family');
 ok($keywords[6] eq 'name',   'specific keyword');
 ok($values[6]   eq 'Si 111', 'specific value');
 
-ok($xdifile->_npts    == 417, 'npts');
+ok($xdifile->_npts    == 418, 'npts');
 ok($xdifile->_narrays ==   3, 'narrays');
 ok($xdifile->_narrays ==  $xdifile->_narray_labels, 'narray_labels');
 

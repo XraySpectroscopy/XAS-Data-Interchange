@@ -57,6 +57,6 @@ $xdi->freeze('freeze.xdi');
 ok(-s 'foo.xdi' == -s 'write.xdi',  'write alias' );
 ok(-s 'foo.xdi' == -s 'freeze.xdi', 'freeze alias');
 
-#unlink 'foo.xdi';
-#unlink 'write.xdi';
-#unlink 'freeze.xdi';
+unlink 'foo.xdi';
+unlink 'write.xdi';
+unlink 'freeze.xdi';

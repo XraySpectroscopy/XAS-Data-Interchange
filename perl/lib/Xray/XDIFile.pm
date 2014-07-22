@@ -109,25 +109,25 @@ __C__
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
-    XDIFile* xdifile;
-    long ret;
+  XDIFile* xdifile;
+  long ret;
 
-    SV*      obj_ref = newSViv(0);
-    SV*      obj = newSVrv(obj_ref, class);
+  SV*      obj_ref = newSViv(0);
+  SV*      obj = newSVrv(obj_ref, class);
 
-    New(42, xdifile, 1, XDIFile);
-    xdifile = malloc(sizeof(XDIFile));
+  Newx(xdifile, 1, XDIFile);
+  xdifile = malloc(sizeof(XDIFile));
 
-    ret = XDI_readfile(file, xdifile);
-    sv_setiv(errcode, ret);
+  ret = XDI_readfile(file, xdifile);
+  sv_setiv(errcode, ret);
 
-    sv_setiv(obj, (IV)xdifile);
-    SvREADONLY_on(obj);
-    return obj_ref;
+  sv_setiv(obj, (IV)xdifile);
+  SvREADONLY_on(obj);
+  return obj_ref;
 }
 
 char* _errorstring(SV* obj, int code) {
-      return XDI_errorstring(code);
+  return XDI_errorstring(code);
 }
 
 void _valid_edges(SV* obj) {

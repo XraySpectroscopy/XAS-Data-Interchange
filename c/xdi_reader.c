@@ -66,9 +66,8 @@ int main(int argc, char **argv) {
     ret = XDI_get_array_name(xdifile,xdifile->array_labels[j], tdat);
     printf(" %ld %9s: ", j, xdifile->array_labels[j]);
     for (k=0; k < nout; k++) {  printf("%.8g, ", tdat[k]); }
-    printf("\n");
-    /* printf("..., %.8g, %.8g\n", tdat[xdifile->npts-2], tdat[xdifile->npts-1]);
-     */
+    /* printf("\n"); */
+    printf("..., %.8g, %.8g\n", tdat[xdifile->npts-2], tdat[xdifile->npts-1]);
   }
 
   if ((strlen(xdifile->outer_label) > 0)&& xdifile->nouter > 1) {

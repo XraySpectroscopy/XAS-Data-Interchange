@@ -26,6 +26,11 @@ For documentation, once installed:
 
 :   perldoc Xray::XDI
 
+*Note:* The compilation of Xray::XDIFile currently generates a large
+number of warings about casting pointers to/from integers of different
+sizes.  This does not affect the preformance of the wrapper, but does
+need to be cleaned up eventually.
+
 ** DEPENDENCIES
 
 This module requires these modules, all available from cpan and as

@@ -67,7 +67,7 @@ ok($count == $xdi->nmetadata,                                     'correct numbe
 ok($xdi->metadata->{Mono}->{name} eq 'Si 111',                     'fetching Mono.name');
 ok($xdi->metadata->{Facility}->{xray_source} eq 'APS undulator A', 'fetching Facility.xray_source');
 
-ok($xdi->npts    == 417, 'npts');
+ok($xdi->npts    == 418, 'npts');
 ok($xdi->narrays ==   3, 'narrays');
 ok($xdi->narrays == $xdi->narray_labels, 'narray_labels');
 

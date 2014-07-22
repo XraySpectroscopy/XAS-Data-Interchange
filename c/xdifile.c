@@ -353,7 +353,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   /* loop through data table, inserting data into xdifile->array */
   ipt = 0;
   iouter = 1;
-  for (i = nheader-2; i < ilen; i++) {
+  for (i = nheader-2; i <= ilen; i++) {
     /* may find a header line interspersed in array data */
     COPY_STRING(line, textlines[i]);
     xdifile->error_lineno = i; 
