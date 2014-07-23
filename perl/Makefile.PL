@@ -1,11 +1,29 @@
 
-use Inline::MakeMaker;
+BEGIN {
+  eval {
+    require Inline::MakeMaker;
+  };
+  if ($@) {
+    print "You need to install the 'Inline' perl module before building the XDI perl wrapper.
+See https://metacpan.org/release/Inline
+or install from a package for your system:
+   debian/ubuntu:     libinline-perl
+   redhat/mandriva:   perl-Inline
+   suse:              perl-Inline
+   gentoo:            dev-perl/Inline
+";
+    exit;
+  }
+}
+
+import Inline::MakeMaker;
 
 WriteMakefile(
 	      NAME              => 'Xray::XDI',
 	      VERSION_FROM      => 'lib/Xray/XDI.pm', # finds $VERSION
 	      PREREQ_PM         => {
 				    Inline             => 0.5,
+				    Inline::C          => 0.62,
 				    Moose              => 2.06,
 				    'MooseX::NonMoose' => 0.22,
 				    'MooseX::Aliases'  => 0.10,
@@ -31,4 +49,4 @@ WriteMakefile(
 # This work is published from: United States.
 #
 # Author: Bruce Ravel (bravel AT bnl DOT gov).
-# Last update: 8 September, 2012
+# Last update: 22 July, 2014

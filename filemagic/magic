@@ -1,0 +1,5 @@
+# ----- XDI files: file(1) magic for XAS Data Interchange (XDI) files
+#
+0	string	#\ XDI/		XAS Data Interchange file
+>&0	regex	[0-9.]+		-- XDI specification %s
+# ----- XDI files

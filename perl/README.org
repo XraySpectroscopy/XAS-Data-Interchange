@@ -5,6 +5,11 @@ to the XDI file format.
 
 ** INSTALLATION
 
+Before installation, you must somehow install perl's [[https://metacpan.org/release/Inline][Inline]] package.
+This can be installed from the ~cpan~ utility (=install Inline=) or
+using your system's package manager (~libinline-perl~ on debian & ubuntu,
+~perl-Inline~ on redhat, mandriva, & SUSE).
+
 To install this module type the following:
 
 :   perl Makefile.PL
@@ -21,15 +26,21 @@ For documentation, once installed:
 
 :   perldoc Xray::XDI
 
+*Note:* The compilation of Xray::XDIFile currently generates a large
+number of warings about casting pointers to/from integers of different
+sizes.  This does not affect the preformance of the wrapper, but does
+need to be cleaned up eventually.
+
 ** DEPENDENCIES
 
 This module requires these modules, all available from cpan and as
 packages for major linux distributions:
 
  1. Inline
- 2. Moose
- 3. MooseX::NonMoose
- 4. MooseX::Aliases
+ 2. Inline::C
+ 3. Moose
+ 4. MooseX::NonMoose
+ 5. MooseX::Aliases
   
 
 ** COPYRIGHT AND LICENCE
@@ -41,4 +52,5 @@ information about Authorship may be retained in some files for
 historical reasons, this work is hereby placed in the Public Domain.
 This work is published from: United States.
 
-
+Author: Bruce Ravel (bravel AT bnl DOT gov).
+Last update: 22 July, 2014

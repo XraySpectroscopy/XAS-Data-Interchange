@@ -100,7 +100,7 @@ historical reasons, this work is hereby placed in the Public Domain.
 This work is published from: United States.
 
 Author: Bruce Ravel (bravel AT bnl DOT gov).
-Last update: 8 September, 2012
+Last update: 22 July, 2014
 
 =cut
 
@@ -109,25 +109,25 @@ __C__
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
-    XDIFile* xdifile;
-    long ret;
+  XDIFile* xdifile;
+  long ret;
 
-    SV*      obj_ref = newSViv(0);
-    SV*      obj = newSVrv(obj_ref, class);
+  SV*      obj_ref = newSViv(0);
+  SV*      obj = newSVrv(obj_ref, class);
 
-    New(42, xdifile, 1, XDIFile);
-    xdifile = malloc(sizeof(XDIFile));
+  Newx(xdifile, 1, XDIFile);
+  xdifile = malloc(sizeof(XDIFile));
 
-    ret = XDI_readfile(file, xdifile);
-    sv_setiv(errcode, ret);
+  ret = XDI_readfile(file, xdifile);
+  sv_setiv(errcode, ret);
 
-    sv_setiv(obj, (IV)xdifile);
-    SvREADONLY_on(obj);
-    return obj_ref;
+  sv_setiv(obj, (IV)xdifile);
+  SvREADONLY_on(obj);
+  return obj_ref;
 }
 
 char* _errorstring(SV* obj, int code) {
-      return XDI_errorstring(code);
+  return XDI_errorstring(code);
 }
 
 void _valid_edges(SV* obj) {
@@ -174,6 +174,12 @@ char* _token(SV* obj, char* tok) {
     return TOK_COLUMN;
   } else if (strncmp(tok, "dspacing", 2) == 0) {
     return TOK_DSPACE;
+  } else if (strncmp(tok, "timestamp", 2) == 0) {
+    return TOK_TIMESTAMP;
+  } else if (strncmp(tok, "outervalue", 6) == 0) {
+    return TOK_OUTER_VAL;
+  } else if (strncmp(tok, "outername", 6) == 0) {
+    return TOK_OUTER_NAME;
   } else {
     return "";
   }

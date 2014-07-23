@@ -39,6 +39,7 @@ perl/XDIFile.inl
 perl/pm_to_blib
 _Inline/*
 perl/t/baddata/coverage.txt
+perl/*.inl
 
 *.aux
 *.dvi
@@ -46,4 +47,6 @@ perl/t/baddata/coverage.txt
 *.out
 *.snm
 *.toc
+latex/xdi.log
+latex/xdi.pdf
 doc/Poster_XAFS15/XDI_Poster.log

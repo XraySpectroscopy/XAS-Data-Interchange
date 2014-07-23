@@ -5,13 +5,12 @@ use MooseX::NonMoose;
 extends 'Xray::XDIFile';
 with 'Xray::XDI::WriterPP';
 
-use feature "switch";
-use List::MoreUtils qw(uniq);
+use List::MoreUtils qw(any uniq);
 
 our $VERSION = '0.01';
 
 has 'file' => (is => 'rw', isa => 'Str', default => q{},
-	      trigger => sub{$_[0]->_build_object; });
+	       trigger => sub{$_[0]->_build_object});
 
 has 'xdifile' => (
 		  is        => 'ro',
@@ -22,6 +21,7 @@ has 'xdifile' => (
 		 );
 # no need to fiddle with inline_constructor here
 has 'ok'             => (is => 'rw', isa => 'Bool', default => 0);
+has 'warning'        => (is => 'rw', isa => 'Bool', default => 0);
 has 'errorcode'      => (is => 'rw', isa => 'Int',  default => 0);
 has 'error'          => (is => 'rw', isa => 'Str',  default => q{});
 
@@ -71,6 +71,7 @@ sub _build_object {
   my ($self) = @_;
   $self->error(q{});
   $self->ok(1);
+  $self->warning(0);
   if (not -e $self->file) {
     $self->error('The file '.$self->file.' does not exist as XDI');
     $self->ok(0);
@@ -90,23 +91,31 @@ sub _build_object {
   my $obj = Xray::XDIFile->new($self->file, $errcode);
   $self->errorcode($errcode);
 
+  #print $self->file, $/;
+  #$self->trace;
+  #print '>>>>>', $errcode, $/;
+
   ##### see xdifile.h for error codes
-  given ($errcode) {
-    when ([-10,-30,-31,-32,-41,-42,-43,-80,-81,-82,-100]) {
-      $self->error($obj->_errorstring($errcode));
-      $self->ok(0);
-      return $obj;
+  ##### see xdifile.c (line 23 and following) for error messages
+  if ($errcode < 0) {
+    my @errors = ();
+    foreach my $i (0 .. 10) {
+      push @errors, $obj->_errorstring(-1*2**$i) if (abs($errcode) & 2**$i);
     };
-    when ($_ != 0) {
-      $self->error('not an XDI file, unknown error');
-      $self->ok(0);
-      return $obj;
-    };
-    default {
-      $self->error(q{});
-      $self->ok(1);
-    };
+    $self->error(join(", ", @errors));
+    $self->ok(0);
+    return $obj;
   };
+  if ($errcode > 0) {
+    my @errors = ();
+    foreach my $i (0 .. 4) {
+      push @errors, $obj->_errorstring(2**$i) if ($errcode & 2**$i);
+    };
+    $self->error(join(", ", @errors));
+    $self->ok(1);
+    $self->warning(1);
+  };
+
   if (not defined $obj->_filename) {
     $self->error('unknown problem reading '.$self->file.' as an XDI file');
     $self->ok(0);
@@ -145,6 +154,8 @@ sub _build_object {
   my %data = ();
   foreach my $i (0 .. $self->narray_labels-1) {
     my @x = $obj->_data_array($i);
+    #print $array_labels[$i], $/;
+    #print join("|", @x), $/, $/;
     $data{$array_labels[$i]} = \@x;
   };
   $self->data(\%data);
@@ -152,7 +163,24 @@ sub _build_object {
   return $obj;
 };
 
-
+# use Term::ANSIColor qw(:constants);
+# sub trace {
+#   my ($self) = @_;
+#   my $max_depth = 30;
+#   my $i = 0;
+#   my ($green, $red, $yellow, $end) = (BOLD.GREEN, BOLD.RED, BOLD.YELLOW, RESET);
+#   local $|=1;
+#   print($/.BOLD."--- Begin stack trace ---$end\n");
+#   while ( (my @call_details = (caller($i++))) && ($i<$max_depth) ) {
+#     my $from = $call_details[1];
+#     my $line  = $call_details[2];
+#     my $color = RESET.YELLOW;
+#     (my $func = $call_details[3]) =~ s{(?<=::)(\w+)\z}{$color$1};
+#     print("$green$from$end line $red$line$end in function $yellow$func$end\n");
+#   }
+#   print(BOLD."--- End stack trace ---$end\n");
+#   return $self;
+# };
 
 
 
@@ -510,6 +538,6 @@ historical reasons, this work is hereby placed in the Public Domain.
 This work is published from: United States.
 
 Author: Bruce Ravel (bravel AT bnl DOT gov).
-Last update: 8 September, 2012
+Last update: 22 July, 2014
 
 =cut

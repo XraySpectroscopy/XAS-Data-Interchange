@@ -1,0 +1,46 @@
+#!/bin/sh
+##################################################
+## install magic for recognizing XDI files into
+## system magic file
+##################################################
+## this must be run as root/sudo
+##################################################
+
+
+showhelp () {
+    echo "
+install_magic: append file magic for XDI file to system magic file
+
+   install_magic [filename] [-h]
+         filename       specify location of system magic file (default=/etc/magic)
+         -h             show this help
+"
+}
+
+## ======== identify system file =========================
+system_file=/etc/magic
+if [ $1 ]; then
+    system_file=$1
+fi
+if [ "$system_file" = '-h' ]; then
+    showhelp
+    exit 0
+fi
+tempfile=./system.magic
+
+## ======== sanity checking ==============================
+if [ `whoami` != 'root' ]; then
+    echo "install_magic: this script must be run as root"
+    exit 0
+fi
+
+if [ ! -e $system_file ]; then
+    echo "install_magic: magic file not found at '$system_file'"
+    exit 0
+fi
+
+## ======== append XDi magic to system file ==============
+cp $system_file $tempfile	                 # make a copy of the system magic file
+sed -i "/# ----- XDI/,/# ----- XDI/ d" $tempfile # remove any previous definition of an XDI file
+cat $tempfile magic > $system_file               # concatinate system file with XDI definition
+rm $tempfile			                 # remove copy of old system file
