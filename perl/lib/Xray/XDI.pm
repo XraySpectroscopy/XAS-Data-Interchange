@@ -7,7 +7,7 @@ with 'Xray::XDI::WriterPP';
 
 use List::MoreUtils qw(any uniq);
 
-our $VERSION = '0.01';
+our $VERSION = 1.0;
 
 has 'file' => (is => 'rw', isa => 'Str', default => q{},
 	       trigger => sub{$_[0]->_build_object});
@@ -216,6 +216,16 @@ sub get_item {
   return q{} if not $self->metadata->{$family};
   return q{} if not $self->metadata->{$family}->{$keyword};
   return $self->metadata->{$family}->{$keyword};
+};
+
+sub set {
+  my ($self, $family, $keyword, $value) = @_;
+  return q{} if not $self->metadata->{$family};
+  return q{} if not $self->metadata->{$family}->{$keyword};
+  my $rhash = $self->metadata;
+  $rhash->{$family}->{$keyword} = $value;
+  $self->metadata($rhash);
+  return $self;
 };
 
 sub get_array {
@@ -514,7 +524,15 @@ L<Moose>, L<MooseX::NonMoose>
 
 =item *
 
-...
+need an add data column method
+
+=item *
+
+need a remove data column method
+
+=item *
+
+need a remove metadatum method
 
 =back
 
