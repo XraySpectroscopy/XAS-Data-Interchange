@@ -3,6 +3,7 @@
 %% Dictionary of Metadata
 %%
 \usepackage{bera}               % font selection
+\usepackage[ascii]{inputenc}
 
 \usepackage{fancybox}           % shadow and oval boxes
 \usepackage{amsmath, amssymb}   % AMS mathematics
@@ -27,6 +28,8 @@
 \setlength\cftparskip{-1pt}
 
 \usepackage{fullpage}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.25ex plus2mm minus1mm}
 
 %% typset "XDI" and XDI version number
 \newcommand{\sltt}[1]{\textit{\texttt{#1}}}
@@ -49,3 +52,17 @@
 
 \newcommand{\DMD}{\href{https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata}
   {\textsf{Dictionary of Metadata}}}
+
+
+\newcommand{\Summary}{{\xdi}}
+\setlength{\headsep}{2ex}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\Summary}
+\lfoot{}
+\cfoot{}
+\rfoot{\thepage \hspace{1pt} / \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{2pt}

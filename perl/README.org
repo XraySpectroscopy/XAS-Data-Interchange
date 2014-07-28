@@ -42,6 +42,10 @@ packages for major linux distributions:
  4. MooseX::NonMoose
  5. MooseX::Aliases
   
+** MISSING FEATURES
+
+ * method for putting an array onto an Xray::XDI object
+ * method for getting all tokens (extend token method)
 
 ** COPYRIGHT AND LICENCE
 
