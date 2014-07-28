@@ -2,6 +2,7 @@ package Xray::XDI;
 
 use Moose;
 use MooseX::NonMoose;
+use MooseX::Aliases;
 extends 'Xray::XDIFile';
 with 'Xray::XDI::WriterPP';
 
@@ -227,6 +228,18 @@ sub set {
   $self->metadata($rhash);
   return $self;
 };
+
+sub push_comment {
+  my ($self, @comments) = @_;
+  my $all = $self->comments;
+  foreach my $comm (@comments) {
+    $comm =~ s{[\n\r]+\z}{};
+    $all .= "\n" . $comm;
+  };
+  $self->comments($all);
+  return $self;
+};
+alias push_comments => 'push_comment';
 
 sub get_array {
   my ($self, $label) = @_;
