@@ -1,0 +1,68 @@
+%%
+%% This file defines the appearence of the XDI specification and the
+%% Dictionary of Metadata
+%%
+\usepackage{bera}               % font selection
+\usepackage[utf8]{inputenc}
+
+\usepackage{fancybox}           % shadow and oval boxes
+\usepackage{amsmath, amssymb}   % AMS mathematics
+\usepackage{graphicx}           % figures
+
+\usepackage{color}
+\usepackage{fancybox}           % shadow and oval boxes
+
+                                % hyperlinks
+\definecolor{purple}{rgb}{.48, .31, .69}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=purple]{hyperref}
+
+%\usepackage{highlight}         % notes to self -- this is highly non-standard
+                                % and should be commented out for
+                                % general use
+
+\usepackage{lineno}             % line numbering 
+
+\usepackage{alltt}              % a verbatim-like environment in which the meaning of slashes and curly braces is unchanged
+
+\usepackage{tocloft}            % fine control over the table of contents
+\setlength\cftparskip{-1pt}
+
+\usepackage{fullpage}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.25ex plus2mm minus1mm}
+
+%% typset "XDI" and XDI version number
+\newcommand{\sltt}[1]{\textit{\texttt{#1}}}
+\newcommand{\xdi}{\sltt{XDI}}
+\newcommand{\xdiversion}{1.0}
+
+%% typeset monospace font within a small, gray box
+\setlength{\fboxsep}{2pt}
+\setlength{\fboxrule}{1pt}
+\definecolor{dark-gray}{gray}{0.75}
+\definecolor{light-gray}{gray}{0.95}
+\newcommand{\xditt}[1]{\fcolorbox{dark-gray}{light-gray}{\small\texttt{#1}}}
+
+
+%% \newcommand{\mcomm}[2]{\marginpar{\quad\includegraphics[width=1.0cm]{exclamation.jpg}\\%
+%%     See p.~\pageref{#2}\\\textit{#1}}}
+
+\newenvironment{Boxedminipage}{\begin{Sbox}\begin{minipage}}%
+    {\end{minipage}\end{Sbox}\shadowbox{\TheSbox}}
+
+\newcommand{\DMD}{\href{https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata}
+  {\textsf{Dictionary of Metadata}}}
+
+
+\newcommand{\Summary}{{\xdi}}
+\setlength{\headsep}{2ex}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\Summary}
+\lfoot{}
+\cfoot{}
+\rfoot{\thepage \hspace{1pt} / \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{2pt}
