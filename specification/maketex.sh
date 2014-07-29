@@ -34,5 +34,5 @@ sed -i 's/texttt/xditt/g' temp1.tex
 
 ## clean up
 inner="_inner"
-cp temp1.tex $file$inner.tex
+mv temp1.tex $file$inner.tex
 echo "done"

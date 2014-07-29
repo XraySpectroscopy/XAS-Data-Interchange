@@ -47,6 +47,13 @@ perl/*.inl
 *.out
 *.snm
 *.toc
+latex/auto/*
 latex/xdi.log
 latex/xdi.pdf
 doc/Poster_XAFS15/XDI_Poster.log
+
+specification/auto/*
+specification/background_inner.tex
+specification/spec_inner.tex
+specification/xdi_background.log
+specification/xdi_spec.log
