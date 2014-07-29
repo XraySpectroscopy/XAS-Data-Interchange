@@ -18,25 +18,13 @@ Specification Document
 ------------------------
 
 
-The
-[XDI specification](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Xdispec)
-is maintained as a GitHub wiki
+The [XDI specification](specification/spec.md), version 1.0.
+
 
 The
 [metadata dictionary](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
 is also a GitHub wiki
 
-Please note that the LaTeX version of the specification is out-of-date
-with respect to the version on the wiki.  The LaTeX will be brought
-up-to-date when the final version 1.0 specification is agreed upon by
-those involved.
-
-The specification is also provided as
-[a grammer file](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/grammar).
-In that file, the file specification is defined as an augmeted
-Backus-Naur Form (BNF) grammer.  This grammer can be used by any
-aBNF-aware tool to parse the contents of an XDI-compliant file.  This,
-too, may be out of date until the 1.0 specification is released.
 
 
 Implementations
