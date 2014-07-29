@@ -1,0 +1,44 @@
+%%
+%% This file is used to quickly convert script.md into a latex file
+%%
+%% Pandoc is required
+%%
+%% pdflatex --shell-espace wrappedscript.tex
+%%  or
+%% pdflatex --enable-write18 wrappedscript.tex
+%%
+\documentclass{article}
+\usepackage{xdi}
+\renewcommand{\Summary}{{\xdi} Specification \xdiversion}
+
+% \usepackage{hyperref}
+% \hypersetup{colorlinks=true, linkcolor=blue}
+% \usepackage{fullpage}
+% \usepackage{alltt}
+% \usepackage{boxedminipage}
+% \usepackage[usenames,dvipsnames]{color}
+% \definecolor{MYgray}{gray}{0.33}
+
+% \newenvironment{MYverbatim}%
+% {\begin{flushright}\begin{boxedminipage}[h]{0.8\linewidth}\begin{alltt}}%
+%       {\end{alltt}\end{boxedminipage}\end{flushright}}
+% \renewenvironment{verbatim}{\begin{MYverbatim}\color{MYgray}}{\vspace{-2.5ex}\end{MYverbatim}}% as suggested above
+
+
+% \setlength{\parindent}{0pt}
+% \setlength{\parskip}{1ex}
+
+\begin{document}
+\tableofcontents
+%%\input{|"pandoc -f markdown -t latex script.md"}
+\input{spec.tex}
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% TeX-parse-self: t
+%%% TeX-auto-save: t
+%%% TeX-auto-untabify: t
+%%% TeX-PDF-mode: t
+%%% End:
