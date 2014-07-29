@@ -128,7 +128,7 @@ easily readable by both humans and computers. These fields, described
 below, contain information about XAS experiments which is useful for
 both users and applications. A complete list of defined headers along
 with their specifications is found in
-[Defined namespace](#defined-namespaces).
+[Defined namespaces](#defined-namespaces).
 
 # Definition of the XAS Data Interchange Format
 
@@ -153,12 +153,14 @@ this specification.
 Several XDI *tokens* are used throughout the definition of the XDI
 file.
 
- * The white space token is a space (ASCII 32) or a tab (ASCII 9)
- * The comment token is a hash (`#`)
+ * The white-space token is a space (ASCII 32) or a tab (ASCII 9)
+ * The comment token is a hash (`#`, ASCII 35)
  * The end-of-line token can be carriage return (ASCII 13,
    `CR`, Mac-style), newline (ASCII 10, `LF`,
    Unix-style), or a sequence of one carriage return + one newline
    (Windows-style)
+ * The namespace-separator token is a dot (`.`, ASCII 46)
+ * The metadata-end token is a colon (`:`, ASCII 58)
  * The field-end token consists of three or more foreward slash
    characters (`/`, ASCII 47)
  * The header-end token consists of three or more dash characters
@@ -272,7 +274,7 @@ entries allow programs to annotate the file as it proceeds through the
 collection and analysis process.  Such annotation is **optional**
 although version information **should** be included in this sequence
 by software that create XDI files containing extension fields (see
-[Extension header and extension namespaces](#extension-header-and-extension-namespaces)).
+[Extension headers](#extension-headers)).
 When an application adds versioning information to this line, it
 **should** be appended to the end of the line.  The order of the
 optional version entries is undefined but **should** be preserved by
@@ -305,7 +307,7 @@ data acquisition program which uses non-standard versioning.
 
 The name of the the additional applications **must** be used for
 any extension headers associated with that application (see
-[Extension header and extension namespaces](#extension-header-and-extension-namespaces)).
+[Extension headers](#extension-headers)).
 
 
 ### Header Fields
@@ -322,7 +324,7 @@ the last occurrence **must** be used as the value for the field.
 Except in the case of a defined header whose value has a defined
 structure, values are assumed to be free-form text, as explained in
 [Text encoding](#text-encoding).  The defined fields are explained in
-[Defined namespace](#defined-namespaces).
+[Defined namespaces](#defined-namespaces).
 
 When a user comments section is present, the header fields subsection
 must end with a field-end line.  When a comments section is absent,
@@ -336,7 +338,7 @@ Following the dividing line at the end of the header fields subsection
 is the area of the header that contains user comments.  This area is
 reserved for comments supplied by the experimenter and **must not** be
 used by software as a place to store other information.  Refer to
-[Extension header and extension namespaces](#extension-header-and-extension-namespaces)
+[Extension headers](#extension-headers)
 for information about using extension fields for this purpose.
 
 This section **may** contain zero lines of commentary or empty
@@ -427,10 +429,10 @@ A missing value **must** be interpreted as an empty string.
 Here are some examples which demonstrate both the format of the XDI
 field and the *namespace* concept:
 
-    # Beamline.name: APS 20BM
-    # Beamline.source: bend magnet
-    # Column.1: energy eV
-    # Column.3: i0
+        # Beamline.name: APS 20BM
+        # Beamline.source: bend magnet
+        # Column.1: energy eV
+        # Column.3: i0
 
 The namespaces are used to group related fields.  In the example
 above, two namespaces are shown.  The `Beamline` namespace
@@ -439,11 +441,11 @@ measured, while the `Column` namespace explains how to
 interpret the columns in the data section.
 
 There are two kinds of
-namespaces. [Defined namespace](#defined-namespaces) are defined in
+namespaces. [Defined namespaces](#defined-namespaces) are defined in
 the
 [Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata).
 Extension namespaces
-([Extension header and extension namespaces](#extension-header-and-extension-namespaces))
+([Extension headers](#extension-headers))
 may be added by application developers to insert metadata into the
 data file.
 
@@ -451,10 +453,10 @@ data file.
 Header fields are case insentitive. As an example, the following lines
 **must** be interpreted identically:
 
-    # Beamline.name: APS 20BM
-    # beamline.name: APS 20BM
-    # BEAMLINE.NAME: APS 20BM
-    # bEAmlINe.naME: APS 20BM
+        # Beamline.name: APS 20BM
+		# beamline.name: APS 20BM
+		# BEAMLINE.NAME: APS 20BM
+		# bEAmlINe.naME: APS 20BM
 
 Capitalization (like the first of these examples) of the namespace is
 **recommended**.
@@ -538,13 +540,13 @@ stages of data processing (mu(E), normalized mu(E), chi(k), the
 Fourier transform of chi(k), or the Fourier filter of chi(k)) are
 provided.
 
-## Extension header and extension namespaces
+## Extension headers
 
 Extension fields are fields present in the header of an XDI file that
 are not defined in the XDI specification.  Such fields **must** be
 structured by the same syntax as a defined field.  The values of
 extension fields **must** be interpreted as free-form text.  Any field
-not defined in [Defined namespace](#defined-namespaces) **must** be
+not defined in [Defined namespaces](#defined-namespaces) **must** be
 considered an extension field.
 
 Data acquisition systems and data analysis packages may embed

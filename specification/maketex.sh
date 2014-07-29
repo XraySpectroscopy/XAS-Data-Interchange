@@ -26,6 +26,9 @@ else
     exit
 fi
 
+##sed  's/\\hyperref[(.*)]{.*}/Sec.~\\ref{$1}/' temp1.tex
+sed -i 's/\\hyperref\[\(.*\)\]{.*}/Sec.~\\ref{\1}/' temp1.tex
+
 echo -n "xdi and xditt commands ..."
 ## use the \xdi macro
 sed -i 's/XDI /{\\xdi} /g' temp1.tex
