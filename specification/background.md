@@ -9,7 +9,7 @@ corrections.  Some data processing is required to correct, calibrate,
 and/or align the data.  Those scans are then merged into a single
 spectrum.
 
-![The merge of several dozen scans at the Cd K edge on a sample dilute in Cd.](convxas.png)
+![The merge of several dozen scans at the Cd K edge on a sample dilute in Cd.](images/convxas.png)
 
 XDI is about how we express the merged spectrum.
 
@@ -22,7 +22,7 @@ measured. XAS can be measured on particular spots.  In this example
 the Co and Ca distribution in leaf of a metal accumulating plant is
 shown.  Co micro-XAS spectra are measured at two spots on the leaf.
 
-![Co K edge micro-XAS measured at two spots on a leaf.](xrfxas.png)
+![Co K edge micro-XAS measured at two spots on a leaf.](images/xrfxas.png)
 
 XDI is about how we express the micro-XAS spectrum extracted from
 the imaging experiment.
@@ -37,8 +37,7 @@ DAFS data measured near the Ti K and Ba L3 edges on BaTiO3.  From
 these data, mu(E) or chi(k) spectra are extracted and interpreted as
 position-selective EXAFS.
 
-![A DAFS measurement on BaTiO3.](dafs.png)
-![chi(k) extracted from the DAFS.](dafschik.png)
+![A DAFS measurement on BaTiO3 and the chi(k) spectrum extracted from it.](images/dafs.png)
 
 XDI is about how we express the mu(E) or chi(k) spectra extracted from
 the anomalous diffraction measurement.
@@ -52,8 +51,7 @@ in the X-ray Raman channel, superposed over the Comptopn
 scattering. (Bergmann, et al. Chem. Phys. Lett. 369 184 (2003)
 [doi:10.1016/S0009-2614(02)02003-1](http://dx.doi.org/10.1016/S0009-2614(02)02003-1))
 
-![NIXS data measured on graphite.](nixs.png)
-![XANES spectrum extracted from the NIXS.](xels.png)
+![NIXS data measured on graphite and the XANES spectrum extracted from it.](images/nixs.png)
 
 XDI is about how we express the mu(E) spectra extracted from the
 non-resonant inelastic scattering measurement.
