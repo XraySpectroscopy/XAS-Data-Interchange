@@ -18,7 +18,7 @@ the resulting PDF documents look lovely.
 The latex files are then compiled into PDF using
 [pdflatex](https://www.tug.org/texlive/).
 
-**To make the specification document:**
+**To make the XDI Specification document:**
 
         ~> ./maketex.sh spec
         ~> pdflatex xdi_spec.tex
@@ -29,7 +29,7 @@ pdflatex twice to get all the internal references correct.
 
 This makes a PDF file called `xdi_spec.pdf`.
 
-**To make the background document:**
+**To make the XDI Background document:**
 
         ~> ./maketex.sh background
         ~> pdflatex xdi_background.tex
@@ -37,7 +37,7 @@ This makes a PDF file called `xdi_spec.pdf`.
 
 This makes a PDF file called `xdi_background.pdf`.
 
-**To make the background document:**
+**To make the XDI Dictionary of Metadata document:**
 
         ~> ./maketex.sh dictionary
         ~> pdflatex xdi_dictionary.tex
