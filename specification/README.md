@@ -37,3 +37,11 @@ This makes a PDF file called `xdi_spec.pdf`.
 
 This makes a PDF file called `xdi_background.pdf`.
 
+**To make the background document:**
+
+        ~> ./maketex.sh dictionary
+        ~> pdflatex xdi_dictionary.tex
+        ~> pdflatex xdi_dictionary.tex
+
+This makes a PDF file called `xdi_dictionary.pdf`.
+
