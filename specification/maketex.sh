@@ -8,7 +8,7 @@ fi
 ## convert markdown to latex
 echo "converting $1"
 echo -n "markdown to latex ... "
-pandoc -f markdown -t latex $file.md > temp1.tex
+pandoc --no-wrap -f markdown -t latex $file.md > temp1.tex
 
 ## used starred sectioning on the first page
 echo -n "fixing first section, TOC, linenumbering ... "

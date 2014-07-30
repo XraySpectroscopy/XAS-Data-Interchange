@@ -62,23 +62,87 @@ the metadata name and its value.  Here is an example:
 
 ## The format of the value
 
-This section needs work.
+Some of the tags in this dictionary have formatted values as part of
+their definitions.
 
-* Specified format
-* Word/number + units, with whitespace separating the value and the unit
-* Word/number (+ units), unit may not be required
-* Free-format, test should be stored verbatim
+* _string_: A string is specifically an ASCII string representable by
+  characters in the the lower 128 of the ASCII set.  This **must** the
+  English-language representation of the value.  For example, the
+  string representing `Facility.name` for the Thai synchrotron
+  **must** be `SLRI` rather than a sequence of characters in the Thai
+  script.
 
-Decisions must be made about character sets and internationalization.  Among other decisions:
+* _free-format string_: This is a string which can contain any
+  character (save end-of-line characters) in any encoding system.  A
+  free-sormat string need not be ASCII and need not be English.
+  Because applications using XDI may not be capable of handling some
+  encoding systems, it is **recommended** that free-format strings be
+  ASCII.
 
-1. Identification of standard units and whether units must be specified in a compliant file.
-1. Representations of numerical values and special data types like timestamps.
-1. Standards for identifying facilities and beamlines
-1. Representations of deeply nested data
-1. Empty values?
-1. Define "float" -- see IEEE 754
+* _string + units_: This is a string as defined above, followed by
+  white space, followed by a string denoting the units of the previous
+  string.  As an example, a value for `Column.1` might be `energy eV`,
+  which identifies the contents of the first column in the data table
+  as containing energy values expressed in electron volt units.
 
-Explain what "free-format string" means.
+* _float_: A float is a string which is interpretable as a
+  floating-point number in the C programming language.  An integer is
+  permissable.  Values of `NaN`, `sNAN`, `qNAN`, `inf`, `+inf`, and
+  `-inf` are not allowed in XDI.  That is, a float in XDI must be
+  finite number.  See [IEEE 754-2008](http://grouper.ieee.org/groups/754/).
+
+* _float + units_: This is a float as defined above, followed by white
+  space, followed by a string identifying the units of the number.
+  For example, a value for `Sample.temperature`, which identifies the
+  tamperature at which an XAS measurement is made, might be `500 K`,
+  which identifies the temperature of the measurements in Kelvin
+  temperature units.  The selection of possible units for a tag is
+  given in the definition of the tag.
+
+* _chemical formulas_: `Sample.stoichiometry` is intended to represent
+  the elemental composition of the sample.  To make these formulas
+  interpretable by computer, this and extension fields which represent
+  chemical information **must** use the
+  [IUCr definition of a chemical formula]( http://www.iucr.org/__data/iucr/cifdic_html/1/cif_core.dic/Cchemical_formula.html).
+
+* _time_: Because of the wide variability of cultural standards in the
+  representation of time, XDI defines a strict standard for time
+  stamps in XDI files.  `Scan.start_time`, `Scan_end_time`, and any
+  extension fields dealing in time **must** use the
+  [ISO 8601 specification for combined dates and times](http://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations)
+
+* _element symbols_: `Element.symbol`, `Element.reference`, and any
+  extension fields identifying specific elements **must** use one of
+  the recognized 1, 2, or 3 letter symbols given in
+  [Defined items in the Element namespace](#defined-items-in-the-element-namespace)
+
+* _edge symbols_: `Element.edge`, `Element.ref_edge`, and any
+  extension fields identifying specific absorption edges **must** use
+  one of the recognized 1 or 2 letter symbols given in
+  [Defined items in the Element namespace](#defined-items-in-the-element-namespace).
+  Note that the subscript is represented as an Arabic numeral and not
+  as a Roman numeral.
+
+
+Some additional comments:
+
+* A tag which is in a defined family but which is not defined in this
+  dictionary **must** be interpreted as have a free-format string as its
+  value.
+
+* A tag which is present in an XDI file but which has no value or only
+  white space as its value (i.e.\ the colon is followed by zero or more
+  spaces tokens then by an end-of-line token) **must** be interpreted as
+  a zero-length string or as the value 0, as appropriate to the value
+  type.
+
+* Strings identifying facilities and beamlines **must** use whatever
+  convention is in use at the beamline.  In the case where a beamline
+  is known both by a designation and a name (for example, beamline
+  13ID at the Advanced Photon Source is also known by its name,
+  "GSECARS"), the designation is **recommended**.
+
+
 
 # The dictionary
 
@@ -127,9 +191,11 @@ below **must** be observed.
 Tags are the words used to denote a specific entry in a namespace.
 
 Tags are strings composed of a subset of the ASCII character set.  All
-characters **must** be letters, numbers, underscores, or dashes.  The
-tag **must** be interpreted as case insentitive.
+characters **must** be letters (ASCII 65 through 90, `A-Z` and ASCII
+97-122, `a-z`), numbers (ASCII 48-57, `0-9`), underscore (ASCII 95,
+`_`), or dash (ASCII 45, `-`).
 
+The tag **must** be interpreted as case insentitive.
 
 ## Required metadata
 
@@ -259,8 +325,14 @@ versions of this dictionary.
      * _Units_: none
      * _Format_: free-format string
 
-(The formatting for this namespace may require attention.  This was
-one of the areas for which James advocated the use of tables.)
+#### Outstanding issues
+
+This is one of the areas for which James advocated the use of tables
+in order to capture a full complement of information about the
+detectors.  For example, an ion chamber might be identified by by any
+or all of length, gas content, voltage, gap, gas pressure, dark
+current offset, and details (shaping time, amplification, etc.) about
+the signal chain behind the detector.
 
 
 ## Defined items in the Sample namespace
@@ -322,6 +394,8 @@ as defined fields in future versions of the XDI specification.
 * `Sample.opacity`
 * `Sample.electrochemical_potential`
 
+Almost all of these examples **should** take a float+units as its value.
+
 
 
 ## Defined items in the Scan namespace
@@ -343,9 +417,12 @@ as defined fields in future versions of the XDI specification.
      * _Format_: float + units
 
 This is the appropriate namespace for any parameters associated with
-scan parameters, such as integration times, scan boundaries, or step
-sizes.
+scan parameters, such as integration times, monochromator speed, scan
+boundaries, or step sizes.
 
+An example of a combined date and time representation is
+`2007-04-05T14:30`, which means 2:30 in the afternoon on the day of
+April 5th in the year 2007.
 
 
 
@@ -459,6 +536,24 @@ line at the beginning of the data section of the XDI file also
 | `chir_im`    |   imaginary part of FT[chi(k)]      |                               |
 
 
+A column containing some other measurement **must** be identified with
+units when appropriate.  For example, a column counting time since the
+`Scan.start_time` timestamp might be labeled as
+
+        # Column.N: elapsed_time seconds
+
+while a column containing an ongoing measure of temperature as a
+voltage on a themocouple might be labeled as
+
+        # Column.N: thermocouple millivolts
+
+#### Outstanding issues
+
+Is a file non-compliant if the `Column` fileds are missing?  Is it
+non-compliant if the number of `Column` fields is different from the
+number of columns?  Is it non-compliant if the `Column` field values
+are different from the words in the column label line at the end of
+the header?
 
 
 ## Extension fields
