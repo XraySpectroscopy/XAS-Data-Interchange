@@ -21,6 +21,10 @@ elif [ "$file" = "background" ]; then
     sed -i 's/\\section{Use cases/~\n\n\\section*{Use cases/' temp1.tex
     sed -i '/section.Conve/i \\\linenumbers\\linenumbersep=25pt\n' temp1.tex
     sed -i 's/includegraphics/includegraphics[height=100px]/' temp1.tex
+elif [ "$file" = "dictionary" ]; then
+    sed -i 's/section{Dictionary of/section*{Dictionary of Data/' temp1.tex
+    sed -i 's/subsection{XDI Working Group/\subsection*{XDI Working Group/' temp1.tex
+    sed -i '/section.Overview/i \\\tableofcontents\\thispagestyle{empty}\\newpage\\linenumbers\\linenumbersep=25pt\n\n~\n' temp1.tex
 else
     echo "$file not valid"
     exit
@@ -31,9 +35,12 @@ sed -i 's/\\hyperref\[\(.*\)\]{.*}/Sec.~\\ref{\1}/' temp1.tex
 
 echo -n "xdi and xditt commands ..."
 ## use the \xdi macro
-sed -i 's/XDI /{\\xdi} /g' temp1.tex
+sed -i 's/XDI\([ \.]\)/{\\xdi}\1/g' temp1.tex
 ## use the xditt "font"
 sed -i 's/texttt/xditt/g' temp1.tex
+
+sed -i 's/mu(E)/$\\mu(E)$/g' temp1.tex
+sed -i 's/chi(k)/$\\chi(k)$/g' temp1.tex
 
 ## clean up
 inner="_inner"

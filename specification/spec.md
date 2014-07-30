@@ -376,7 +376,7 @@ underscores, or some other way of substituting for white space is
 **required**.
 
 The column labels in the column label line **must** match the
-values of the headers in the `Column.` namespace.  See
+values of the headers in the `Column` namespace.  See
 [The column namespace](#the-column-namespace).
 
 Several common array labels are defined in the
@@ -517,7 +517,7 @@ the data section of the file.
     detection of XAS), or angle (in units of degrees, radians, or motor
     steps).  eV units are **recommended**.  If units of motor steps
     are chosen, then adequate information **must** be provided via
-    headers in the `Mono.` namespace to translate the abscissa
+    headers in the `Mono` namespace to translate the abscissa
     into energy units.
  1. The header identifying the abscissa **must** provide two
     values: the column label for the abscissa and the corresponding
@@ -581,7 +581,7 @@ The following is a summary of the required elements of an XDI file:
     information. See [Version information](#version-information).
  1. The column containing the abscissa of the data and the units of
     the abscissa **must** be identified by a header field in the
-    `Column.` namespace.  For example, if the first column of the
+    `Column` namespace.  For example, if the first column of the
     data file contains energy in eV units, the following header field
     **must** appear in the file:
 
@@ -614,7 +614,7 @@ All other content is **optional**.  When present certain content
    a combined date and time representation is
    `2007-04-05T14:30`, which means 2:30 in the afternoon on the
    day of April 5th in the year 2007.
- * Headers in the `Column.` namespace **must** use the label columns
+ * Headers in the `Column` namespace **must** use the label columns
    defined in the
    [Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
    as values identifying the column types given in that table.

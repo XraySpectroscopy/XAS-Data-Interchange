@@ -1,11 +1,11 @@
 XDI Specification Documents
 ===========================
 
- * [XDI Specification](spec.md): The XAS Data Interchange specification
+ * [XDI Specification](spec.md): The XAS Data Interchange specification [(PDF file)](xdi_spec.pdf)
 
- * [XDI background](background.md): Background on what XDI can be used for
+ * [XDI background](background.md): Background on what XDI can be used for [(PDF file)](xdi_background.pdf)
 
- * Dictionary of Metadata
+ * [Dictionary of Metadata](dictionary.md): The XDI dictionary [(PDF file)](xdi_dictionary.pdf)
 
 ## Generating PDF version of the specification documents
 
