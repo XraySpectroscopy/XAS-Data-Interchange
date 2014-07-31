@@ -26,6 +26,20 @@ Once installed, XDI files can be identified with the [file command](http://en.wi
 
 # Windows computers
 
+Modify the Windows registry to assign an icon to `.xdi` files.
+
+**PLEASE NOTE:**
+
+	      This works, but is currently an imperfect solution.  The
+		  location of the icon is hard wired in the registry file.
+		  Thus, the registry file must currently be edited by hand to
+		  point to the correct location of the icon file.
+
+	      A script that installed the icon file to a suitable
+          location, modifies the registry file, then runs the regsitry
+          edit would be a welcome contribution!
+
+
  * `xdi.ico`: Windows icon for XDI files
  * `xdi.reg`: Windows registry entry for XDI files
 
