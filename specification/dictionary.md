@@ -1,5 +1,5 @@
-Dictionary of XDI Metadata
-==========================
+Dictionary of XAS Data Interchange Metadata
+===========================================
 
 XDI Working Group
 -----------------
@@ -21,7 +21,7 @@ includes:
 1. The name representing the datum
 1. The meaning of the datum
 1. Thw units of the datum
-1. The format of representing its value
+1. The format for representing its value
 
 Words used to signify the requirements in the specification **shall**
 follow the practice of
@@ -49,13 +49,13 @@ multi-spectral datasets.
 ## The XDI syntax
 
 This dictionary has been developed along with the
-[XDI specification](spec.md).  Any examples given in this dictionary
-use the **recommended** XDI syntax.  The metadata name consists of the
-capitalized namespace, followed by a dot, followed by a tag.  Here
-is an example: `Element.symbol`.  When appearing in an XDI file to
-convey a metadata value, the line begins with a comment token and end
-with an end-of-line token.  A colon is the delimiting token between
-the metadata name and its value.  Here is an example:
+[XDI specification](spec.md).  All examples given in this dictionary
+use all recommendations of the XDI syntax.  The metadata name consists
+of the capitalized namespace, followed by a dot, followed by a tag.
+Here is an example: `Element.symbol`.  When appearing in an XDI file
+to convey a metadata value, the line begins with a comment token and
+end with an end-of-line token.  A colon is the delimiting token
+between the metadata name and its value.  Here is an example:
 
        # Element.symbol: Cu
 
@@ -74,7 +74,7 @@ their definitions.
 
 * _free-format string_: This is a string which can contain any
   character (save end-of-line characters) in any encoding system.  A
-  free-sormat string need not be ASCII and need not be English.
+  free-format string need not be ASCII and need not be English.
   Because applications using XDI may not be capable of handling some
   encoding systems, it is **recommended** that free-format strings be
   ASCII.
@@ -83,31 +83,34 @@ their definitions.
   white space, followed by a string denoting the units of the previous
   string.  As an example, a value for `Column.1` might be `energy eV`,
   which identifies the contents of the first column in the data table
-  as containing energy values expressed in electron volt units.
+  as containing energy values expressed in electron volt units.  The
+  selection of possible units for a tag is given in the definition of
+  the tag.
 
 * _float_: A float is a string which is interpretable as a
   floating-point number in the C programming language.  An integer is
   permissable.  Values of `NaN`, `sNAN`, `qNAN`, `inf`, `+inf`, and
-  `-inf` are not allowed in XDI.  That is, a float in XDI must be
-  finite number.  See [IEEE 754-2008](http://grouper.ieee.org/groups/754/).
+  `-inf` are not allowed in XDI.  That is, a float in XDI **must** be
+  a finite number.  See
+  [IEEE 754-2008](http://grouper.ieee.org/groups/754/).
 
 * _float + units_: This is a float as defined above, followed by white
   space, followed by a string identifying the units of the number.
   For example, a value for `Sample.temperature`, which identifies the
-  tamperature at which an XAS measurement is made, might be `500 K`,
-  which identifies the temperature of the measurements in Kelvin
+  temperature at which an XAS measurement is made, might be `500 K`,
+  identifying the temperature of the measurements in Kelvin
   temperature units.  The selection of possible units for a tag is
   given in the definition of the tag.
 
 * _chemical formulas_: `Sample.stoichiometry` is intended to represent
-  the elemental composition of the sample.  To make these formulas
-  interpretable by computer, this and extension fields which represent
-  chemical information **must** use the
-  [IUCr definition of a chemical formula]( http://www.iucr.org/__data/iucr/cifdic_html/1/cif_core.dic/Cchemical_formula.html).
+  the elemental composition of the sample.  To allow interpretation of
+  chemical formulas by computer, this field and extension fields which
+  represent chemical information **must** use the
+  [IUCr definition of a chemical formula](http://www.iucr.org/__data/iucr/cifdic_html/1/cif_core.dic/Cchemical_formula.html).
 
 * _time_: Because of the wide variability of cultural standards in the
   representation of time, XDI defines a strict standard for time
-  stamps in XDI files.  `Scan.start_time`, `Scan_end_time`, and any
+  stamps in XDI files.  `Scan.start_time`, `Scan.end_time`, and any
   extension fields dealing in time **must** use the
   [ISO 8601 specification for combined dates and times](http://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations)
 
@@ -125,6 +128,10 @@ their definitions.
 
 
 Some additional comments:
+
+* Locale is **not** respected when interpreting floating point numbers.
+  The decimal mark **must** be a dot (`.`, ASCII 46).  The decimal mark
+  **must not** be a comma (`,`, ASCII 44).
 
 * A tag which is in a defined family but which is not defined in this
   dictionary **must** be interpreted as have a free-format string as its
@@ -352,7 +359,7 @@ the signal chain behind the detector.
 * **Namespace:** `Sample` -- **Tag:** `stoichiometry`
      * _Description_: The stoichiometric formula of the measured sample 
      * _Units_: none
-     * _Format_: see [the CIF definition of chemical_formula](http://www.iucr.org/__data/iucr/cifdic_html/1/cif_core.dic/Cchemical_formula.html)
+     * _Format_: see [the IUCr definition of chemical_formula](http://www.iucr.org/__data/iucr/cifdic_html/1/cif_core.dic/Cchemical_formula.html)
 
 * **Namespace:** `Sample` -- **Tag:** `prep`
      * _Description_: A string summarizing the method of sample preparation
@@ -394,7 +401,7 @@ as defined fields in future versions of the XDI specification.
 * `Sample.opacity`
 * `Sample.electrochemical_potential`
 
-Almost all of these examples **should** take a float+units as its value.
+Almost all of these examples **should** take a float+units as values.
 
 
 
@@ -586,4 +593,4 @@ data acquisition, data analysis, and data archiving software.
 
 If an extension tag is not understood due its lack of defined
 semantics, the **recommended** behavior for software touching
-the data be to silently preserve the metadata.
+the data is to silently preserve the metadata.

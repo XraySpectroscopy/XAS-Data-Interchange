@@ -14,16 +14,12 @@ files containing single-scan XAS data.
 not yet been released.**
 
 
-Specification Document
-------------------------
+Specification Documents
+-----------------------
 
+ * The [XDI specification](specification/spec.md), version 1.0.
 
-The [XDI specification](specification/spec.md), version 1.0.
-
-
-The
-[metadata dictionary](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
-is also a GitHub wiki
+ * The [metadata dictionary](specification/dictionary.md), version 1.0.
 
 
 
@@ -66,9 +62,11 @@ Other files
    validate as XDI
  * The `doc/` folder contains the LaTeX source of the poster on XDI
    presented at the XAFS15 conference
- * The `magic` file can be appended to `/etc/magic` or otherwise used
-   by the Unix file determination system:
+ * The `filemagic` folder contains tools for use by the Unix file
+   determination system:
    
         ~> file -m magic data/co_metal_rt.xdi 
 		data/co_metal_rt.xdi: XAS Data Interchange file -- XDI specification 1.0
 
+   It also defines an icon and a registry entry for XDI files on
+   Windows.

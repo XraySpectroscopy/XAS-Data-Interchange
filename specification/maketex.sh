@@ -22,7 +22,7 @@ elif [ "$file" = "background" ]; then
     sed -i '/section.Conve/i \\\linenumbers\\linenumbersep=25pt\n' temp1.tex
     sed -i 's/includegraphics/includegraphics[height=100px]/' temp1.tex
 elif [ "$file" = "dictionary" ]; then
-    sed -i 's/section{Dictionary of/section*{Dictionary of Data/' temp1.tex
+    sed -i 's/section{Dictionary of/section*{Dictionary of/' temp1.tex
     sed -i 's/subsection{XDI Working Group/\subsection*{XDI Working Group/' temp1.tex
     sed -i '/section.Overview/i \\\tableofcontents\\thispagestyle{empty}\\newpage\\linenumbers\\linenumbersep=25pt\n\n~\n' temp1.tex
 else
@@ -30,8 +30,7 @@ else
     exit
 fi
 
-##sed  's/\\hyperref[(.*)]{.*}/Sec.~\\ref{$1}/' temp1.tex
-sed -i 's/\\hyperref\[\(.*\)\]{.*}/Sec.~\\ref{\1}/' temp1.tex
+sed -i 's/\\hyperref\[\([^]]*\)\]{[^}]*}/Sec.~\\ref{\1}/g' temp1.tex
 
 echo -n "xdi and xditt commands ..."
 ## use the \xdi macro

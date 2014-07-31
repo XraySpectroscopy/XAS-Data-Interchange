@@ -51,9 +51,9 @@ We are define this format to accomplish the following goals:
    multi-spectral data set).
    
  * Provide a representation of an XAS spectrum suitable for
-   deposition with a journal.
+   deposition with a journal or in a database.
 
-In short, we are trying to share data across continents, decades, and
+In short, we need to share data across continents, decades, and
 analysis toolkits.
 
 This format is intended to encode a single XAS spectrum in a data file
@@ -126,8 +126,7 @@ The header has been designed to contain arbitrary metadata describing
 the contents of the file. This metadata is organized in a way that is
 easily readable by both humans and computers. These fields, described
 below, contain information about XAS experiments which is useful for
-both users and applications. A complete list of defined headers along
-with their specifications is found in
+both users and applications.  Some headers are defined, see
 [Defined namespaces](#defined-namespaces).
 
 # Definition of the XAS Data Interchange Format
@@ -292,22 +291,29 @@ identify and version themselves.  However, a single application
 without white space. Some acceptable examples follow.  The first
 example shows an application which uses the same format as the XDI
 version rule, which is the **recommended** format for application
-versioning; the second shows the names of the data acquisition and
-data processing programs are specified by name but without the
-**recommended** version numbers; the third shows an example of a
-data acquisition program which uses non-standard versioning.
+versioning.  The second shows names of the data acquisition and data
+processing programs, each is specified by name but without the
+**recommended** version numbers.
 
 
-     # XDI/1.0 Datacollectatron/7.75
+         # XDI/1.0 Datacollectatron/7.75
 
-     # XDI/1.0 XDAC Athena
-
-     # XDI/1.0 XAS!Collect-3000
-
+         # XDI/1.0 XDAC Athena
 
 The name of the the additional applications **must** be used for
 any extension headers associated with that application (see
 [Extension headers](#extension-headers)).
+
+The following is an example of a data acquisition program with an odd
+name and which uses non-standard versioning.
+
+         # XDI/1.0 XAS!Collect-3000
+
+There are two problems with this.  The versioning information will not
+be recognized as such.  Also the requirement that the application name
+be used as the family name of any extension headers added by the
+program will result in a non-compliant family name.  The exclamation
+point is not an allowed character for family names.
 
 
 ### Header Fields
@@ -380,7 +386,7 @@ values of the headers in the `Column` namespace.  See
 [The column namespace](#the-column-namespace).
 
 Several common array labels are defined in the
-[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md)
 and **must** be used when those arrays are present in a file.
 
 ## Data Section
@@ -398,6 +404,10 @@ Blank lines in this section **must** be discarded.  The number of
 columns **must** be the same for all lines that contain data.  All
 columns, including columns containing a measurement of time, **must**
 be represented as inegers or as floating point numbers.
+
+Locale is **not** respected when interpreting floating point numbers.
+The decimal mark **must** be a dot (`.`, ASCII 46).  The decimal mark
+**must not** be a comma (`,`, ASCII 44).
 
 It is **recommended** that measurements of time be represented as a
 numerical offset relative to the value of the `Scan.start_time`
@@ -440,15 +450,11 @@ conveys characteristics of the beamline at which the data were
 measured, while the `Column` namespace explains how to
 interpret the columns in the data section.
 
-There are two kinds of
-namespaces. [Defined namespaces](#defined-namespaces) are defined in
-the
-[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata).
-Extension namespaces
-([Extension headers](#extension-headers))
-may be added by application developers to insert metadata into the
-data file.
-
+There are two kinds of namespaces. Defined namespaces (see
+[Defined namespaces](#defined-namespaces)) are defined in the
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+Extension namespaces (see [Extension headers](#extension-headers)) may be
+added by application developers to insert new metadata into the data file.
 
 Header fields are case insentitive. As an example, the following lines
 **must** be interpreted identically:
@@ -465,7 +471,7 @@ Capitalization (like the first of these examples) of the namespace is
 ## Defined namespaces
 
 See the
-[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md)
 for the current list of defined namespaces and defined metadata.
 
 Three defined fields are **required** in a valid XDI file:
@@ -482,7 +488,7 @@ Three defined fields are **required** in a valid XDI file:
 
 All other fields are **optional**, although some are **recommended**
 and constitute good practice, as explained in the
-[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata).
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 
 A header in a defined namespace **should not** appear more than once
 in a file.  When multiple occurrences of the same field are present,
@@ -506,7 +512,7 @@ the data section of the file.
     **must** be used to describe a column when that column is
     present in the data file and identified among the header fields.
     The list of defined column labels is given in the
-    [Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata).
+    [Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
  1. The abscissa of the data **must** be in the first
     (left-most) column and **must** be identified by the
     `Column.1` header.
@@ -532,7 +538,7 @@ the data section of the file.
 
 A list of column labels and their meanings along with unit definitions
 for the abscissa are defined in the
-[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata).
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 Any such array included in an XDI file must use those label
 definitions.  Along with column labels defining the abscissa and
 various detectors, labels for representing EXAFS data in various
@@ -546,27 +552,31 @@ Extension fields are fields present in the header of an XDI file that
 are not defined in the XDI specification.  Such fields **must** be
 structured by the same syntax as a defined field.  The values of
 extension fields **must** be interpreted as free-form text.  Any field
-not defined in [Defined namespaces](#defined-namespaces) **must** be
-considered an extension field.
+not defined from a defined namespace (see
+[Defined namespaces](#defined-namespaces)) **must** be considered an
+extension field.
 
 Data acquisition systems and data analysis packages may embed
 additional information in an XDI file by adding extension fields to
-the header.  Extension fields created by applications **should**
-begin with a form of the application name used in the version line,
-followed by a separator dot and an additional word.  In
-[Example XDI file](#example-xdi-file), an example of an extension field is
-`GSE.EXTRA` and takes a value of `config 1`.  Here
-`GSE` denotes the data acquisition software and `EXTRA`
-denotes a parameter relevant to that software.
+the header.  Extension fields created by applications **should** begin
+with a form of the application name used in the version line, followed
+by a separator dot and an additional word.  In the sample XDI file in
+[Example XDI file](#example-xdi-file), an example of an extension
+field is `GSE.EXTRA` and takes a value of `config 1`.  Here `GSE`
+denotes the data acquisition software and `EXTRA` denotes a parameter
+relevant to that software.
 
-Extension field namespaces **must not** collide with the defined
-namespaces.
+Extension field namespaces and tags **should not** collide with the
+defined namespaces and tags.  That is, applications which use
+extension namepaces or which define new tags in defined namespaces
+should choose words not already used in the
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 
-Applications that read XDI files **may** attempt to parse the
-values of extension fields to extract the additional information about
-the scan.  They **should** propagate these fields into output
-files they create, and **must** propagate the associated version
-information if they do so.
+Applications that read XDI files **may** attempt to parse the values
+of extension fields to extract the additional information about the
+scan.  They **should** propagate these fields into output files they
+create, and **must** propagate any associated version information (see
+[Version information](#version-information)) if they do so.
 
 Multiple occurrences of the same field are discouraged.  When present,
 the value of the last occurrence (reading linearly from the beginning
@@ -603,23 +613,10 @@ The following is a summary of the required elements of an XDI file:
     **must** be interpretable as an integer or a floating point
     number.
 
-All other content is **optional**.  When present certain content
-**must** meet further requirements.  See the
-[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata).
+All other content is **optional**.  When present, certain content
+**must** meet further requirements as explained in the
+[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 
- * Headers containing time stamps, such as `Scan.start_time`
-   and `Scan.end_time` **must** use the time stamp format
-   of ISO 8601. [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)
-   defines the exchange of date and time related data.  An example of
-   a combined date and time representation is
-   `2007-04-05T14:30`, which means 2:30 in the afternoon on the
-   day of April 5th in the year 2007.
- * Headers in the `Column` namespace **must** use the label columns
-   defined in the
-   [Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
-   as values identifying the column types given in that table.
-   Columns containing other kinds of data arrays may be labeled in a
-   free-form manner according to the rules for header values.
 
 # Example XDI File
 

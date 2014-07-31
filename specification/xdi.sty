@@ -3,26 +3,23 @@
 %% Dictionary of Metadata
 %%
 \usepackage{bera}               % font selection
-\usepackage[utf8]{inputenc}
+\usepackage[utf8]{inputenc}     % read Armando's name correctly!
 
-\usepackage{fancybox}           % shadow and oval boxes
-\usepackage{amsmath, amssymb}   % AMS mathematics
+%\usepackage{amsmath, amssymb}   % AMS mathematics
 \usepackage{graphicx}           % figures
 
 \usepackage{color}
 \usepackage{fancybox}           % shadow and oval boxes
 
                                 % hyperlinks
-\definecolor{purple}{rgb}{.48, .31, .69}
-\usepackage[colorlinks=true, linkcolor=blue, urlcolor=purple]{hyperref}
+\definecolor{redish}{rgb}{0.40,0.00,0.20}
+\usepackage[colorlinks=true, linkcolor=redish, urlcolor=blue]{hyperref}
 
 %\usepackage{highlight}         % notes to self -- this is highly non-standard
                                 % and should be commented out for
                                 % general use
 
 \usepackage{lineno}             % line numbering 
-
-\usepackage{alltt}              % a verbatim-like environment in which the meaning of slashes and curly braces is unchanged
 
 \usepackage{tocloft}            % fine control over the table of contents
 \setlength\cftparskip{-1pt}
@@ -31,10 +28,11 @@
 \setcounter{tocdepth}{2}
 
 \usepackage{longtable}       % longtable and booktabs used to
-\usepackage{booktabs}        % handle pandoc's table in the dictionary
+\usepackage{booktabs}        % handle the big table of column names in
+                             % the dictionary
 
 
-\usepackage{fullpage}
+\usepackage{fullpage}           %page size
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1.25ex plus2mm minus1mm}
 

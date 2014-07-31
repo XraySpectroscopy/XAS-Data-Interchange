@@ -4,14 +4,16 @@ Use cases for the XAS Data Interchange format
 # Conventional XAS
 
 In a conventional XAS experiment, we measure a sample somewhere
-between 2 and 10,000 scans, possibly requiring dead-time or other
+between 2 and 10,000 times, possibly requiring dead-time or other
 corrections.  Some data processing is required to correct, calibrate,
 and/or align the data.  Those scans are then merged into a single
 spectrum.
 
 ![The merge of several dozen scans at the Cd K edge on a sample dilute in Cd.](images/convxas.png)
 
-XDI is about how we express the merged spectrum.
+XDI is about how we express the merged spectrum.  In some case, XDI
+may also be a suitable format for the individual XAS measurements, as
+well.
 
 # XRF imaging experiments
 
@@ -30,16 +32,16 @@ the imaging experiment.
 # Difraction anomalous fine structure (DAFS)
 
 An anomalous scattering experiments yields energy-dependent scattering
-intensities.  Here we see (\footnote{Ravel et al. PRB 60, 778-785
-(1999)
-[doi:10.1103/PhysRevB.60.778](http://dx.doi.org/10.1103/PhysRevB.60.778)
-DAFS data measured near the Ti K and Ba L3 edges on BaTiO3.  From
-these data, mu(E) or chi(k) spectra are extracted and interpreted as
-position-selective EXAFS.
+intensities.  Here we see DAFS data measured (Ravel et al. PRB 60,
+778-785 (1999)
+[doi:10.1103/PhysRevB.60.778](http://dx.doi.org/10.1103/PhysRevB.60.778))
+near the Ti K and Ba L3 edges on BaTiO3.  From these data, mu(E) or
+chi(k) spectra are extracted and interpreted as position-selective
+EXAFS.
 
 ![A DAFS measurement on BaTiO3 and the chi(k) spectrum extracted from it.](images/dafs.png)
 
-XDI is about how we express the mu(E) or chi(k) spectra extracted from
+XDI is about how we express the mu(E) or chi(k) spectrum extracted from
 the anomalous diffraction measurement.
 
 
@@ -53,5 +55,5 @@ scattering. (Bergmann, et al. Chem. Phys. Lett. 369 184 (2003)
 
 ![NIXS data measured on graphite and the XANES spectrum extracted from it.](images/nixs.png)
 
-XDI is about how we express the mu(E) spectra extracted from the
+XDI is about how we express the mu(E) spectrum extracted from the
 non-resonant inelastic scattering measurement.
