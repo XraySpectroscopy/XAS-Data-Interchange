@@ -14,29 +14,13 @@ files containing single-scan XAS data.
 not yet been released.**
 
 
-Specification Document
-------------------------
+Specification Documents
+-----------------------
 
+ * The [XDI specification](specification/spec.md), version 1.0.
 
-The
-[XDI specification](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Xdispec)
-is maintained as a GitHub wiki
+ * The [metadata dictionary](specification/dictionary.md), version 1.0.
 
-The
-[metadata dictionary](https://github.com/XraySpectroscopy/XAS-Data-Interchange/wiki/Dictionary-of-metadata)
-is also a GitHub wiki
-
-Please note that the LaTeX version of the specification is out-of-date
-with respect to the version on the wiki.  The LaTeX will be brought
-up-to-date when the final version 1.0 specification is agreed upon by
-those involved.
-
-The specification is also provided as
-[a grammer file](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/grammar).
-In that file, the file specification is defined as an augmeted
-Backus-Naur Form (BNF) grammer.  This grammer can be used by any
-aBNF-aware tool to parse the contents of an XDI-compliant file.  This,
-too, may be out of date until the 1.0 specification is released.
 
 
 Implementations
@@ -78,9 +62,11 @@ Other files
    validate as XDI
  * The `doc/` folder contains the LaTeX source of the poster on XDI
    presented at the XAFS15 conference
- * The `magic` file can be appended to `/etc/magic` or otherwise used
-   by the Unix file determination system:
+ * The `filemagic` folder contains tools for use by the Unix file
+   determination system:
    
         ~> file -m magic data/co_metal_rt.xdi 
 		data/co_metal_rt.xdi: XAS Data Interchange file -- XDI specification 1.0
 
+   It also defines an icon and a registry entry for XDI files on
+   Windows.

@@ -2,5 +2,5 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\.xdi]
 
-[HKEY_CLASSES_ROOT\.tj\DefaultIcon]
-@="C:\\path\\to\\xdi.ico"
+[HKEY_CLASSES_ROOT\.xdi\DefaultIcon]
+@="C:\\Users\\bravel\\Documents\\GitHub\\XAS-Data-Interchange\\filemagic\\xdi.ico,0"
