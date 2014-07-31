@@ -45,3 +45,6 @@ Modify the Windows registry to assign an icon to `.xdi` files.
 
 Double click on the `xdi.reg` file to modify a computer's registry.
 Once this is done, XDI files will be displayed using the XDI icon.
+
+See http://stackoverflow.com/questions/8407066/how-do-i-associate-a-filetype-with-an-icon
+and the MSDN link on that page.
