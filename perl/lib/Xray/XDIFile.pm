@@ -8,11 +8,11 @@ our @ISA = qw(Exporter);
 # our @EXPORT_OK = (  );
 # our @EXPORT = qw(  );
 
-our $VERSION = '0.01';
+our $VERSION = '1.00';
 
 use Inline C => 'DATA',
            LIBS => '-lxdifile',
-           VERSION => '0.01',
+           VERSION => '1.00',
            NAME => 'Xray::XDIFile';
 
 1;
@@ -27,7 +27,7 @@ Xray::XDIFile - Inline::C interface to libxdifile
 
 =head1 VERSION
 
-0.01
+2.00
 
 =head1 SYNOPSIS
 
@@ -68,6 +68,21 @@ L<Inline>
 
 =head1 BUGS AND LIMITATIONS
 
+The C section of this file is mostly cargo-cult programming taken from
+the Object Oriented Inline example at
+L<https://metacpan.org/pod/Inline::C::Cookbook>.  The definition of
+Newx should have this comment block explaining it:
+
+    Allocate memory with Newx if it's available - if it's an older
+    perl that doesn't have Newx then we resort to using New.
+
+
+Regarding INT2PTR, see
+Lhttp://www.mail-archive.com/inline%40perl.org/msg02689.html>.  The
+use of PTR2IV in new was the result of trial and error, rather than
+deep understanding.
+
+
 =over 4
 
 =item *
@@ -106,22 +121,27 @@ Last update: 22 July, 2014
 
 __C__
 
+#ifndef Newx
+#  define Newx(v,n,t) New(0,v,n,t)
+#endif
+
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
-  XDIFile* xdifile;
-  long ret;
-
-  SV*      obj_ref = newSViv(0);
-  SV*      obj = newSVrv(obj_ref, class);
+  XDIFile * xdifile;
+  int       ret;
+  SV *      obj;
+  SV *      obj_ref;
 
   Newx(xdifile, 1, XDIFile);
-  xdifile = malloc(sizeof(XDIFile));
 
   ret = XDI_readfile(file, xdifile);
   sv_setiv(errcode, ret);
 
-  sv_setiv(obj, (IV)xdifile);
+  obj = newSViv((IV)PTR2IV(xdifile));
+  obj_ref = newRV_noinc(obj);
+
+  sv_bless(obj_ref, gv_stashpv(class, GV_ADD));
   SvREADONLY_on(obj);
   return obj_ref;
 }
@@ -186,46 +206,46 @@ char* _token(SV* obj, char* tok) {
 };
 
 char* _filename(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->filename;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->filename;
 }
 
 char* _xdi_libversion(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->xdi_libversion;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->xdi_libversion;
 }
 char* _xdi_version(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->xdi_version;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->xdi_version;
 }
 
 char* _extra_version(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->extra_version;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->extra_version;
 }
 
 char* _element(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->element;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->element;
 }
 
 char* _edge(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->edge;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->edge;
 }
 
 double _dspacing(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->dspacing;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->dspacing;
 }
 
 char* _comments(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->comments;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->comments;
 }
 
 long _nmetadata(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->nmetadata;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->nmetadata;
 }
 
 void _meta_families(SV* obj) {
   long i;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->nmetadata; i++) {
-    Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->meta_families[i], 0 )));
+  for (i=0; i < (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->nmetadata; i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_families[i], 0 )));
   }
   Inline_Stack_Done;
 }
@@ -234,8 +254,8 @@ void _meta_keywords(SV* obj) {
   long i;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->nmetadata; i++) {
-    Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->meta_keywords[i], 0 )));
+  for (i=0; i < (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->nmetadata; i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_keywords[i], 0 )));
   }
   Inline_Stack_Done;
 }
@@ -244,21 +264,21 @@ void _meta_values(SV* obj) {
   long i;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->nmetadata; i++) {
-    Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->meta_values[i], 0 )));
+  for (i=0; i < (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->nmetadata; i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_values[i], 0 )));
   }
   Inline_Stack_Done;
 }
 
 long _npts(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->npts;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->npts;
 }
 
 long _narrays(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->narrays;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->narrays;
 }
 long _narray_labels(SV* obj) {
-       return ((XDIFile*)SvIV(SvRV(obj)))->narray_labels;
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->narray_labels;
 }
 
 
@@ -266,8 +286,8 @@ void _array_labels(SV* obj) {
   long i;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->narrays; i++) {
-    Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->array_labels[i], 0 )));
+  for (i=0; i < (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->narrays; i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->array_labels[i], 0 )));
   }
   Inline_Stack_Done;
 }
@@ -276,8 +296,8 @@ void _array_units(SV* obj) {
   long i;
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (i=0; i < ((XDIFile*)SvIV(SvRV(obj)))->narrays; i++) {
-    Inline_Stack_Push(sv_2mortal(newSVpv( ((XDIFile*)SvIV(SvRV(obj)))->array_units[i], 0 )));
+  for (i=0; i < (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->narrays; i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->array_units[i], 0 )));
   }
   Inline_Stack_Done;
 }
@@ -288,14 +308,29 @@ void _data_array(SV* obj, long col) {
   long ret;
   double *tdat;
 
-  tdat = (double *)calloc(((XDIFile*)SvIV(SvRV(obj)))->npts, sizeof(double));
-  ret = XDI_get_array_name(((XDIFile*)SvIV(SvRV(obj))),
-		           ((XDIFile*)SvIV(SvRV(obj)))->array_labels[col], tdat);
+  tdat = (double *)calloc((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->npts, sizeof(double));
+  ret = XDI_get_array_name((INT2PTR(XDIFile*, SvIV(SvRV(obj)))),
+		           (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->array_labels[col], tdat);
 
   Inline_Stack_Vars;
   Inline_Stack_Reset;
-  for (k=0; k< ((XDIFile*)SvIV(SvRV(obj)))->npts; k++) {
+  for (k=0; k< (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->npts; k++) {
     Inline_Stack_Push(sv_2mortal(newSVnv( tdat[k] )));
   }
   Inline_Stack_Done;
+}
+
+
+void DESTROY(SV* obj) {
+  XDIFile* xdifile = INT2PTR(XDIFile*, SvIV(SvRV(obj)));
+  Safefree(xdifile->xdi_libversion);
+  Safefree(xdifile->xdi_version);
+  Safefree(xdifile->extra_version);
+  Safefree(xdifile->filename);
+  Safefree(xdifile->element);
+  Safefree(xdifile->edge);
+  Safefree(xdifile->comments);
+  Safefree(xdifile->error_line);
+  Safefree(xdifile->outer_label);
+  Safefree(xdifile);
 }

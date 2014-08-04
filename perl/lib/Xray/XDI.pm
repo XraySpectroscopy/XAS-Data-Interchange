@@ -8,7 +8,7 @@ with 'Xray::XDI::WriterPP';
 
 use List::MoreUtils qw(any uniq);
 
-our $VERSION = 1.0;
+our $VERSION = '1.00'; # Inline::MakeMake uses /^\d.\d\d$/ as the pattern for the version number -- note the two digits to the right of the dot
 
 has 'file' => (is => 'rw', isa => 'Str', default => q{},
 	       trigger => sub{$_[0]->_build_object});
@@ -204,6 +204,8 @@ sub families {
   my ($self) = @_;
   return sort(keys(%{$self->metadata}));
 };
+alias namespaces => 'families';
+
 sub keywords {
   my ($self, $family) = @_;
   my $f = ucfirst(lc($family));
@@ -211,6 +213,7 @@ sub keywords {
   return () if not $hash;
   return sort(keys(%$hash));
 };
+alias tags => 'keywords';
 
 sub get_item {
   my ($self, $family, $keyword) = @_;
@@ -219,10 +222,10 @@ sub get_item {
   return $self->metadata->{$family}->{$keyword};
 };
 
-sub set {
+sub set_item {
   my ($self, $family, $keyword, $value) = @_;
-  return q{} if not $self->metadata->{$family};
-  return q{} if not $self->metadata->{$family}->{$keyword};
+  #return q{} if not $self->metadata->{$family};
+  #return q{} if not $self->metadata->{$family}->{$keyword};
   my $rhash = $self->metadata;
   $rhash->{$family}->{$keyword} = $value;
   $self->metadata($rhash);
@@ -234,8 +237,10 @@ sub push_comment {
   my $all = $self->comments;
   foreach my $comm (@comments) {
     $comm =~ s{[\n\r]+\z}{};
-    $all .= "\n" . $comm;
+    my $leading_nl = ($all) ? "\n" : q{};
+    $all .= $leading_nl . $comm;
   };
+  $all =~ s{\A\n}{}s;
   $self->comments($all);
   return $self;
 };
@@ -275,7 +280,7 @@ Xray::XDI - Import/export of XAS Data Interchange files
 
 =head1 VERSION
 
-0.01
+1.00
 
 =head1 SYNOPSIS
 
