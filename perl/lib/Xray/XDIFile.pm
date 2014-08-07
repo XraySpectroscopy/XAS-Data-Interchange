@@ -321,16 +321,3 @@ void _data_array(SV* obj, long col) {
 }
 
 
-void DESTROY(SV* obj) {
-  XDIFile* xdifile = INT2PTR(XDIFile*, SvIV(SvRV(obj)));
-  Safefree(xdifile->xdi_libversion);
-  Safefree(xdifile->xdi_version);
-  Safefree(xdifile->extra_version);
-  Safefree(xdifile->filename);
-  Safefree(xdifile->element);
-  Safefree(xdifile->edge);
-  Safefree(xdifile->comments);
-  Safefree(xdifile->error_line);
-  Safefree(xdifile->outer_label);
-  Safefree(xdifile);
-}
