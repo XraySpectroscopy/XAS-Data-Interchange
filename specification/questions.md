@@ -62,9 +62,27 @@ Some questions:
 2. And should "inverse Angstrom" be two words with a space between, or
    a single word (either concatinated or with an underscore)?
 
-Regarding 1, I suggest recognizing `[ÅåAa]ngstr[öo]m`
+Regarding 1, I suggest recognizing `[ÅåAa]ngstr[öo]ms?`
 
 Regarding 2, The explanation of values with units in the dictionary,
 as written, is ambiguous as to whether the string explaning the units
 is a single word or may be multiple words.  I propose "inverse
 Angstrom" with the multiple spelling of Angstrom suggested above.
+
+## Fields defined in dictionary which have units
+
+Should something like `Mono.d_spacing` be
+
+      Mono.d_spacing = 3.13543 Angstroms
+
+That is, should the unit be included.  This would allow reasonable
+(and SI!) things like
+
+      Mono.d_spacing = 313.543 picometers
+      Mono.d_spacing = 0.313543 nanometers
+
+with a unitless number
+
+      Mono.d_spacing = 3.13543
+
+interpreted as being in Angstroms.
