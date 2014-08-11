@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "strutil.h"
 
@@ -32,7 +33,7 @@ int readlines(char *filename, char **textlines) {
       as char *text[MAX] */
 
   FILE *finp;
-  char *thisline ; 
+  char *thisline ;
   char *text, *c;
   long file_length, index, i, ilen;
   int  is_newline;
@@ -48,7 +49,7 @@ int readlines(char *filename, char **textlines) {
   rewind(finp);
 
   text = calloc(file_length + 1, sizeof(char));
-  thisline = calloc(MAX_LINE_LENGTH, sizeof(char)); 
+  thisline = calloc(MAX_LINE_LENGTH, sizeof(char));
 
   if (text == NULL ) {
     printf("\nnot enough memory to read file.\n");
@@ -73,7 +74,7 @@ int readlines(char *filename, char **textlines) {
       thisline[index++] = *text++;
     }
     thisline[index] = '\0';
-    thisline = strtrim(thisline); 
+    thisline = strtrim(thisline);
     ++ilen;
     textlines[ilen]= calloc(strlen(thisline) + 1, sizeof(char));
     strcpy(textlines[ilen], thisline);
