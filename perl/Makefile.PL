@@ -22,12 +22,12 @@ WriteMakefile(
 	      NAME              => 'Xray::XDI',
 	      VERSION_FROM      => 'lib/Xray/XDI.pm', # finds $VERSION
 	      PREREQ_PM         => {
-				    Inline             => 0.5,
-				    Inline::C          => 0.62,
-				    Moose              => 2.06,
-				    'MooseX::NonMoose' => 0.22,
-				    'MooseX::Aliases'  => 0.10,
-				    'MooseX::Clone'    => 0.05,
+				    Inline           => 0.5,
+				    Inline::C        => 0.62,
+				    Moose            => 2.06,
+				    MooseX::NonMoose => 0.22,
+				    MooseX::Aliases  => 0.10,
+				    MooseX::Clone    => 0.05,
 				   },
 	      ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
 	       (ABSTRACT_FROM  => 'lib/Xray/XDI.pm', # retrieve abstract from module

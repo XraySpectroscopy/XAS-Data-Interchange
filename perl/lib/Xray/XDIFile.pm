@@ -76,14 +76,16 @@ Newx should have this comment block explaining it:
     Allocate memory with Newx if it's available - if it's an older
     perl that doesn't have Newx then we resort to using New.
 
-
 Regarding INT2PTR, see
 Lhttp://www.mail-archive.com/inline%40perl.org/msg02689.html>.  The
 use of PTR2IV in new was the result of trial and error, rather than
 deep understanding.
 
-
 =over 4
+
+=item *
+
+No way to push values from perl into the stuct
 
 =item *
 

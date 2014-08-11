@@ -332,15 +332,6 @@ versions of this dictionary.
      * _Units_: none
      * _Format_: free-format string
 
-#### Outstanding issues
-
-This is one of the areas for which James advocated the use of tables
-in order to capture a full complement of information about the
-detectors.  For example, an ion chamber might be identified by by any
-or all of length, gas content, voltage, gap, gas pressure, dark
-current offset, and details (shaping time, amplification, etc.) about
-the signal chain behind the detector.
-
 
 ## Defined items in the Sample namespace
 
@@ -554,13 +545,6 @@ voltage on a themocouple might be labeled as
 
         # Column.N: thermocouple millivolts
 
-#### Outstanding issues
-
-Is a file non-compliant if the `Column` fileds are missing?  Is it
-non-compliant if the number of `Column` fields is different from the
-number of columns?  Is it non-compliant if the `Column` field values
-are different from the words in the column label line at the end of
-the header?
 
 
 ## Extension fields
