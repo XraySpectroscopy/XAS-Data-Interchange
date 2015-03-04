@@ -20,7 +20,7 @@ includedir = @includedir@
 # you may have to alter these settings
 #---------------------------------
 
-CCOPTS = -fPIC
+CCOPTS = -fPIC -g
 ## CCOPTS =  -arch i386 -arch x86_64
 
 # you shouldn't have to alter anything below this line

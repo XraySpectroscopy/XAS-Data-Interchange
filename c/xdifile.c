@@ -356,7 +356,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   for (i = nheader-2; i <= ilen; i++) {
     /* may find a header line interspersed in array data */
     COPY_STRING(line, textlines[i]);
-    xdifile->error_lineno = i; 
+    xdifile->error_lineno = i;
     COPY_STRING(xdifile->error_line, line);
 
     if (strncmp(textlines[i], TOK_COMM, 1) == 0)  {
@@ -425,4 +425,48 @@ _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
     }
   }
   return ERR_NOARR_NAME;
+}
+
+_EXPORT(void) XDI_cleanup(XDIFile *xdifile) {
+  /* one needs to explicitly free each part of the struct */
+  long j;
+  for (j = 0; j < xdifile->narrays; j++) {
+    free(xdifile->array[j]);
+    free(xdifile->array_labels[j]);
+    free(xdifile->array_units[j]);
+  }
+  free(xdifile->array);
+  free(xdifile->array_labels);
+  free(xdifile->array_units);
+
+  free(xdifile->xdi_libversion);
+  free(xdifile->xdi_version);
+  free(xdifile->extra_version);
+  free(xdifile->filename);
+  free(xdifile->element);
+  free(xdifile->edge);
+  free(xdifile->comments);
+  free(xdifile->error_line);
+
+  for (j = 0; j < xdifile->nmetadata; j++) {
+    free(xdifile->meta_families[j]);
+    free(xdifile->meta_keywords[j]);
+    free(xdifile->meta_values[j]);
+  }
+  free(xdifile->meta_families);
+  free(xdifile->meta_keywords);
+  free(xdifile->meta_values);
+
+  free(xdifile->outer_label);
+  /* for (j = 0; j < xdifile->nouter; j++) { */
+  /*   free(xdifile->outer_array[j]); */
+  /*   free(xdifile->outer_breakpts[j]); */
+  /* } */
+  free(xdifile->outer_array);
+  free(xdifile->outer_breakpts);
+
+
+
+
+  free(xdifile);
 }
