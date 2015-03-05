@@ -97,8 +97,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   char *col_labels[MAX_COLUMNS], *col_units[MAX_COLUMNS];
   char *c, *line, *fullline, *mkey,  *mval, *version_xdi, *version_extra;
   char *reword;
-  char tlabel[32];
-  char comments[1024] = "";
+  char tlabel[32] = {'\0'};
+  char comments[1025] = {'\0'};
+  char elem[3] = {'\0'};
   double dval ;
   double *outer_arr, outer_arr0;
   long   *outer_pts;
@@ -115,12 +116,20 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
   iret = 0;
 
+  strcpy(comments, " ");
+  xdifile->comments = calloc(1025, sizeof(char));
+  strcpy(xdifile->comments, comments);
+
+  strcpy(elem, "  ");
+  xdifile->element = calloc(3, sizeof(char));
+  strncpy(xdifile->element, elem, 2);
+
   COPY_STRING(xdifile->xdi_libversion, XDI_VERSION);
   COPY_STRING(xdifile->xdi_version, "");
   COPY_STRING(xdifile->extra_version, "");
-  COPY_STRING(xdifile->element, "__");
+  /* COPY_STRING(xdifile->element, "__"); */
   COPY_STRING(xdifile->edge, "_");
-  COPY_STRING(xdifile->comments, "");
+  /* COPY_STRING(xdifile->comments, comments); */
   COPY_STRING(xdifile->error_line, "");
   COPY_STRING(xdifile->outer_label, "");
   xdifile->nouter = 1;
@@ -244,7 +253,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	} else if (strcasecmp(mkey, TOK_ELEM) == 0) {
 	  for (j = 0; j < n_elems; j++) {
 	    if (strcasecmp(ValidElems[j], mval) == 0) {
-	      COPY_STRING(xdifile->element, mval);
+	      /* COPY_STRING(xdifile->element, mval); */
+	      strncpy(xdifile->element, mval, 2);
 	      break;
 	    }
 	  }
@@ -318,7 +328,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   COPY_STRING(line, textlines[i]);
   ncols = make_words(line, words, MAX_WORDS);
  
-  COPY_STRING(xdifile->comments, comments);
+  strcpy(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
 
   maxcol++;
