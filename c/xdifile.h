@@ -39,7 +39,7 @@ typedef struct {
 _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) ;
 _EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
-_EXPORT(void) XDI_cleanup(XDIFile *xdifile) ;
+_EXPORT(void) XDI_cleanup(XDIFile *xdifile, long err) ;
 
 
 /* Tokens used in XDI File */

@@ -109,7 +109,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   double *outer_arr, outer_arr0;
   long   *outer_pts;
   FILE *inpFile;
-  long  file_length, ilen, index, i, j, nx, maxcol;
+  long  file_length, ilen, index, i, j, k, nx, maxcol;
   long  npts_, ncols, icol, nheader, nwords, ndict;
   long  ignored_headerline, iret, ipt, nouter, iouter;
   int   is_newline, fnlen, mode, valid, stat;
@@ -191,8 +191,16 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
     firstline = textlines[0]; firstline++;
     firstline[strcspn(firstline, CRLF)] = '\0';
     nwords = make_words(firstline, cwords, 2);
-    if (nwords < 1) { return ERR_NOTXDI; }
+    if (nwords < 1) {
+      for (j=0; j<=ilen; j++) {
+	free(textlines[j]);
+      }
+      return ERR_NOTXDI;
+    }
     if (strncasecmp(cwords[0], TOK_VERSION, strlen(TOK_VERSION)) != 0)  {
+      for (j=0; j<=ilen; j++) {
+	free(textlines[j]);
+      }
       return ERR_NOTXDI;
     } else {
       firstline = firstline+5;
@@ -247,24 +255,36 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	   */
 	  regex_status = slre_match(1, FAMILYNAME, words[0], strlen(words[0]));
 	  if (regex_status != NULL) {
-	    free(mval);
+	    xdifile->nmetadata = ndict+1;
+	    free(mkey);
+	    for (k=0; k<=ilen; k++) {
+	      free(textlines[k]);
+	    }
 	    return ERR_META_FAMNAME;
 	  }
 
 	  regex_status = slre_match(1, KEYNAME,  words[1], strlen(words[1]));
 	  if (regex_status != NULL) {
-	    free(mval);
+	    xdifile->nmetadata = ndict+1;
+	    free(mkey);
+	    for (k=0; k<=ilen; k++) {
+	      free(textlines[k]);
+	    }
 	    return ERR_META_KEYNAME;
 	  }
 
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
 	} else {
-	  free(mval);
+	  xdifile->nmetadata = ndict+1;
+	  free(mkey);
+	  for (k=0; k<=ilen; k++) {
+	    free(textlines[k]);
+	  }
 	  return ERR_META_FORMAT;
 	}
 	/* printf(" metadata:  %ld | %s | %s\n", ndict, mkey, mval); */
-	/* ndict,  words[0], words[1],  xdifile->meta_values[ndict]);*/
+	/* ndict,  words[0], words[1],  xdifile->meta_valuesn[dict]);*/
 	if (strncasecmp(mkey, TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(mkey+7)-1;
 	  if ((j > -1) && (j < MAX_COLUMNS)) {
@@ -293,7 +313,14 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  }
 	/* MONO D-SPACING */
 	} else if (strcasecmp(mkey, TOK_DSPACE) == 0) {
-	  if (0 != xdi_strtod(mval, &dval)) {  free(mval); return ERR_NONNUMERIC;}
+	  if (0 != xdi_strtod(mval, &dval)) {
+	    xdifile->nmetadata = ndict+1;
+	    free(mkey);
+	    for (k=0; k<=ilen; k++) {
+	      free(textlines[k]);
+	    }
+	    return ERR_NONNUMERIC;
+	  }
 	  xdifile->dspacing = dval;
 	/* OUTER ARRAY NAME */
 	} else if (strcasecmp(mkey, TOK_OUTER_NAME) == 0) {
@@ -304,7 +331,14 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  outer_arr0 = dval ;
 	} else if (strcasecmp(mkey, TOK_TIMESTAMP) == 0) {
 	  j = xdi_is_datestring(mval);
-	  if (0 != j) { free(mval); return j;}
+	  if (0 != j) {
+	    xdifile->nmetadata = ndict+1;
+	    free(mkey);
+	    for (k=0; k<=ilen; k++) {
+	      free(textlines[k]);
+	    }
+	    return j;
+	  }
 	}
 	/* free(mval); */
       } else if (strncasecmp(mkey, TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
@@ -321,6 +355,11 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	}
 	strncat(comments, fullline, sizeof(comments) - strlen(comments) - 1);
       } else if (mode == 0) {
+	xdifile->nmetadata = ndict+1;
+	free(mkey);
+	for (k=0; k<=ilen; k++) {
+	  free(textlines[k]);
+	}
 	return ERR_META_FORMAT;
       }
       free(mkey);
@@ -492,47 +531,56 @@ _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   return ERR_NOARR_NAME;
 }
 
+
 _EXPORT(void)
-XDI_cleanup(XDIFile *xdifile) {
-  /* one needs to explicitly free each part of the struct */
+XDI_cleanup(XDIFile *xdifile, long err) {
+  /* free each part of the struct, mindful of the error code reported by the library */
   long j;
-  for (j = 0; j < xdifile->narrays; j++) {
-    free(xdifile->array[j]);
-    free(xdifile->array_labels[j]);
-    free(xdifile->array_units[j]);
-  }
-  free(xdifile->array);
-  free(xdifile->array_labels);
-  free(xdifile->array_units);
 
   free(xdifile->xdi_libversion);
   free(xdifile->xdi_version);
   free(xdifile->extra_version);
-  free(xdifile->filename);
   free(xdifile->element);
   free(xdifile->edge);
   free(xdifile->comments);
   free(xdifile->error_line);
-
-  for (j = 0; j < xdifile->nmetadata; j++) {
-    free(xdifile->meta_families[j]);
-    free(xdifile->meta_keywords[j]);
-    free(xdifile->meta_values[j]);
-  }
-  free(xdifile->meta_families);
-  free(xdifile->meta_keywords);
-  free(xdifile->meta_values);
-
   free(xdifile->outer_label);
-  /* for (j = 0; j < xdifile->nouter; j++) { */
-  /*   free(xdifile->outer_array[j]); */
-  /*   free(xdifile->outer_breakpts[j]); */
-  /* } */
-  free(xdifile->outer_array);
-  free(xdifile->outer_breakpts);
 
+  if ((err != -32) && (err != -128) && (err != -128)) {
+    free(xdifile->filename);
+  };
 
+  if ((err < -1) || (err == 0)) {
 
+    if ((err == 0) || (err < -128)) {
+      for (j = 0; j < xdifile->narrays; j++) {
+	free(xdifile->array[j]);
+	free(xdifile->array_labels[j]);
+	free(xdifile->array_units[j]);
+      }
+      free(xdifile->array);
+      free(xdifile->array_labels);
+      free(xdifile->array_units);
+    };
+
+    for (j = 0; j < xdifile->nmetadata; j++) {
+      free(xdifile->meta_families[j]);
+      free(xdifile->meta_keywords[j]);
+      free(xdifile->meta_values[j]);
+    }
+    free(xdifile->meta_families);
+    free(xdifile->meta_keywords);
+    free(xdifile->meta_values);
+
+    /* for (j = 0; j < xdifile->nouter; j++) { */
+    /*   free(xdifile->outer_array[j]); */
+    /*   free(xdifile->outer_breakpts[j]); */
+    /* } */
+    if (err == 0) {
+      free(xdifile->outer_array);
+      free(xdifile->outer_breakpts);
+    };
+  }
 
   free(xdifile);
 }
