@@ -33,10 +33,11 @@ int readlines(char *filename, char **textlines) {
       as char *text[MAX] */
 
   FILE *finp;
-  char *thisline ;
-  char *text, *c;
+  char *thisline;
+  char *text;
   long file_length, index, i, ilen;
   int  is_newline;
+  char *orig_text, *orig_thisline;
 
   finp = fopen(filename, "r");
   if (finp == NULL) {
@@ -50,6 +51,9 @@ int readlines(char *filename, char **textlines) {
 
   text = calloc(file_length + 1, sizeof(char));
   thisline = calloc(MAX_LINE_LENGTH, sizeof(char));
+  /* need to save a pointers to the beginning of the original strings so they can be freed at the end of this function */
+  orig_text = text;
+  orig_thisline = thisline;
 
   if (text == NULL ) {
     printf("\nnot enough memory to read file.\n");
@@ -83,6 +87,11 @@ int readlines(char *filename, char **textlines) {
       return -EFBIG;
     }
   }
+  /* free strings */
+  text = orig_text;
+  thisline = orig_thisline;
+  free(text);
+  free(thisline);
   return ilen;
 }
 

@@ -82,6 +82,7 @@ int main(int argc, char **argv) {
     }
     printf("\n");
   }
+  free(tdat);
   XDI_cleanup(xdifile);
   return 0;
 }
