@@ -95,11 +95,16 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   char *header[MAX_LINES];
   char *words[MAX_WORDS], *cwords[2];
   char *col_labels[MAX_COLUMNS], *col_units[MAX_COLUMNS];
-  char *c, *line, *fullline, *mkey,  *mval, *version_xdi, *version_extra;
+  char *c, *line, *fullline, *mkey,  *mval;
   char *reword;
   char tlabel[32] = {'\0'};
   char comments[1025] = {'\0'};
   char elem[3] = {'\0'};
+  char edge[3] = {'\0'};
+  char version_xdi[8] = {'\0'};
+  char version_extra[MAX_LINE_LENGTH] = {'\0'};
+  char errline[MAX_LINE_LENGTH] = {'\0'};
+  char outerlabel[MAX_WORD_LENGTH] = {'\0'};
   double dval ;
   double *outer_arr, outer_arr0;
   long   *outer_pts;
@@ -116,6 +121,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
   iret = 0;
 
+
+  /* initialize string attributes of thr XDIFile struct */
+
   strcpy(comments, " ");
   xdifile->comments = calloc(1025, sizeof(char));
   strcpy(xdifile->comments, comments);
@@ -124,14 +132,43 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   xdifile->element = calloc(3, sizeof(char));
   strncpy(xdifile->element, elem, 2);
 
-  COPY_STRING(xdifile->xdi_libversion, XDI_VERSION);
-  COPY_STRING(xdifile->xdi_version, "");
-  COPY_STRING(xdifile->extra_version, "");
+  strcpy(edge, "  ");
+  xdifile->edge = calloc(3, sizeof(char));
+  strncpy(xdifile->edge, edge, 2);
+
+  xdifile->xdi_libversion = calloc(8, sizeof(char));
+  strncpy(xdifile->xdi_libversion, XDI_VERSION, 7);
+
+  strcpy(version_xdi, " ");
+  xdifile->xdi_version = calloc(8, sizeof(char));
+  strncpy(xdifile->xdi_version, version_xdi, 7);
+
+  strcpy(version_extra, " ");
+  xdifile->extra_version = calloc(MAX_LINE_LENGTH+1, sizeof(char));
+  strncpy(xdifile->extra_version, version_extra, MAX_LINE_LENGTH);
+
+
+  strcpy(errline, " ");
+  xdifile->error_line = calloc(MAX_LINE_LENGTH+1, sizeof(char));
+  strncpy(xdifile->error_line, errline, MAX_LINE_LENGTH);
+
+  strcpy(outerlabel, " ");
+  xdifile->outer_label = calloc(MAX_LINE_LENGTH+1, sizeof(char));
+  strncpy(xdifile->outer_label, outerlabel, MAX_LINE_LENGTH);
+
+
+  /* COPY_STRING(xdifile->xdi_libversion, XDI_VERSION); */
+  /* COPY_STRING(xdifile->xdi_version, ""); */
+  /* COPY_STRING(xdifile->extra_version, ""); */
   /* COPY_STRING(xdifile->element, "__"); */
-  COPY_STRING(xdifile->edge, "_");
+  /* COPY_STRING(xdifile->edge, "_"); */
   /* COPY_STRING(xdifile->comments, comments); */
-  COPY_STRING(xdifile->error_line, "");
-  COPY_STRING(xdifile->outer_label, "");
+  /* COPY_STRING(xdifile->error_line, ""); */
+  /* COPY_STRING(xdifile->outer_label, ""); */
+
+
+  /* initialize numeric attributes of thr XDIFile struct */
+
   xdifile->nouter = 1;
   xdifile->error_lineno = -1;
   xdifile->dspacing = -1.0;
@@ -158,7 +195,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
     return ilen;
   }
 
-  /* check fist line for XDI header, get version info */
+  /* check first line for XDI header, get version info */
   if (strncmp(textlines[0], TOK_COMM, 1) == 0)  {
     line = textlines[0]; line++;
     line[strcspn(line, CRLF)] = '\0';
@@ -168,10 +205,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       return ERR_NOTXDI;
     } else {
       line = line+5;
-      COPY_STRING(xdifile->xdi_version, line)
+      strcpy(xdifile->xdi_version, line);
     }
     if (nwords > 1) { /* extra version tags */
-      COPY_STRING(xdifile->extra_version, cwords[1]);
+      strcpy(xdifile->extra_version, cwords[1]);
     }
   }
 
@@ -245,7 +282,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	} else if (strcasecmp(mkey, TOK_EDGE) == 0) {
 	  for (j = 0; j < n_edges; j++) {
 	    if (strcasecmp(ValidEdges[j], mval) == 0) {
-	      COPY_STRING(xdifile->edge, mval);
+	      strcpy(xdifile->edge, mval);
 	      break;
 	    }
 	  }
@@ -396,7 +433,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   }
   /* success */
   xdifile->error_lineno = 0; 
-  COPY_STRING(xdifile->error_line, "");
+  strcpy(xdifile->error_line, "");
 
   xdifile->npts = ipt;
   xdifile->nouter = iouter;
@@ -437,7 +474,8 @@ _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   return ERR_NOARR_NAME;
 }
 
-_EXPORT(void) XDI_cleanup(XDIFile *xdifile) {
+_EXPORT(void)
+XDI_cleanup(XDIFile *xdifile) {
   /* one needs to explicitly free each part of the struct */
   long j;
   for (j = 0; j < xdifile->narrays; j++) {
