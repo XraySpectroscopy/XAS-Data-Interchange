@@ -431,7 +431,17 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   xdifile->array = calloc(ncols, sizeof(double *));
   for (j = 0; j < ncols; j++) {
     xdifile->array[j] = calloc(npts_+1, sizeof(double));
-    if (0 != xdi_strtod(words[j], &dval)) {  return ERR_NONNUMERIC;}
+    if (0 != xdi_strtod(words[j], &dval)) {
+      free(line);
+      free(outer_arr);
+      free(outer_pts);
+      xdifile->narrays = ncols;
+      xdifile->nmetadata = ndict+1;
+      for (j=0; j<=ilen; j++) {
+	free(textlines[j]);
+      }
+      return ERR_NONNUMERIC;
+    }
     xdifile->array[j][0] = dval;
   }
 
@@ -465,15 +475,27 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       /* COPY_STRING(line, textlines[i]); */
       icol = make_words(textlines[i], words, MAX_WORDS);
       if (icol != ncols) {
+	free(line);
 	free(outer_arr);
 	free(outer_pts);
+	xdifile->narrays = ncols;
+	xdifile->nmetadata = ndict+1;
+	for (j=0; j<=ilen; j++) {
+	  free(textlines[j]);
+	}
 	return ERR_NCOLS_CHANGE;
       }
       icol = min(ncols, icol);
       for (j = 0; j < icol; j++) {
 	if (0 != xdi_strtod(words[j], &dval)) {
+	  free(line);
 	  free(outer_arr);
 	  free(outer_pts);
+	  xdifile->narrays = ncols;
+	  xdifile->nmetadata = ndict+1;
+	  for (j=0; j<=ilen; j++) {
+	    free(textlines[j]);
+	  }
 	  return ERR_NONNUMERIC;
 	}
 	xdifile->array[j][ipt] = dval;
