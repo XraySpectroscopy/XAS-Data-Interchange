@@ -148,7 +148,6 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   xdifile->extra_version = calloc(MAX_LINE_LENGTH+1, sizeof(char));
   strncpy(xdifile->extra_version, version_extra, MAX_LINE_LENGTH);
 
-
   strcpy(errline, " ");
   xdifile->error_line = calloc(MAX_LINE_LENGTH+1, sizeof(char));
   strncpy(xdifile->error_line, errline, MAX_LINE_LENGTH);
@@ -171,9 +170,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
   for (i = 0; i < MAX_COLUMNS; i++) {
     sprintf(tlabel, "col%ld", i+1);
-    /* COPY_STRING(col_labels[i], tlabel); */
+    COPY_STRING(col_labels[i], tlabel);
     /* COPY_STRING(col_units[i], ""); */
-    col_labels[i] = tlabel;
+    /* col_labels[i] = tlabel; */
     col_units[i] = "";
   }
 
@@ -196,11 +195,17 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       for (j=0; j<=ilen; j++) {
 	free(textlines[j]);
       }
+      for (i = 0; i < MAX_COLUMNS; i++) {
+	free(col_labels[i]);
+      }
       return ERR_NOTXDI;
     }
     if (strncasecmp(cwords[0], TOK_VERSION, strlen(TOK_VERSION)) != 0)  {
       for (j=0; j<=ilen; j++) {
 	free(textlines[j]);
+      }
+      for (i = 0; i < MAX_COLUMNS; i++) {
+	free(col_labels[i]);
       }
       return ERR_NOTXDI;
     } else {
@@ -261,6 +266,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    for (k=0; k<=ilen; k++) {
 	      free(textlines[k]);
 	    }
+	    for (i = 0; i < MAX_COLUMNS; i++) {
+	      free(col_labels[i]);
+	    }
 	    return ERR_META_FAMNAME;
 	  }
 
@@ -270,6 +278,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    free(mkey);
 	    for (k=0; k<=ilen; k++) {
 	      free(textlines[k]);
+	    }
+	    for (i = 0; i < MAX_COLUMNS; i++) {
+	      free(col_labels[i]);
 	    }
 	    return ERR_META_KEYNAME;
 	  }
@@ -282,6 +293,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  for (k=0; k<=ilen; k++) {
 	    free(textlines[k]);
 	  }
+	  for (i = 0; i < MAX_COLUMNS; i++) {
+	    free(col_labels[i]);
+	  }
 	  return ERR_META_FORMAT;
 	}
 	/* printf(" metadata:  %ld | %s | %s\n", ndict, mkey, mval); */
@@ -290,7 +304,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  j = atoi(mkey+7)-1;
 	  if ((j > -1) && (j < MAX_COLUMNS)) {
 	    ncols = make_words(mval, cwords, 2);
-	    col_labels[j] = cwords[0];
+	    free(col_labels[j]);
+	    COPY_STRING(col_labels[j], cwords[0]);
 	    if (ncols == 2) {
 	      col_units[j] = cwords[1];
 	    }
@@ -320,6 +335,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    for (k=0; k<=ilen; k++) {
 	      free(textlines[k]);
 	    }
+	    for (i = 0; i < MAX_COLUMNS; i++) {
+	      free(col_labels[i]);
+	    }
 	    return ERR_NONNUMERIC;
 	  }
 	  xdifile->dspacing = dval;
@@ -337,6 +355,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    free(mkey);
 	    for (k=0; k<=ilen; k++) {
 	      free(textlines[k]);
+	    }
+	    for (i = 0; i < MAX_COLUMNS; i++) {
+	      free(col_labels[i]);
 	    }
 	    return j;
 	  }
@@ -360,6 +381,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	free(mkey);
 	for (k=0; k<=ilen; k++) {
 	  free(textlines[k]);
+	}
+	for (i = 0; i < MAX_COLUMNS; i++) {
+	  free(col_labels[i]);
 	}
 	return ERR_META_FORMAT;
       }
@@ -441,6 +465,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       for (j=0; j<=ilen; j++) {
 	free(textlines[j]);
       }
+      for (i = 0; i < MAX_COLUMNS; i++) {
+	free(col_labels[i]);
+      }
       return ERR_NONNUMERIC;
     }
     xdifile->array[j][0] = dval;
@@ -484,6 +511,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	for (j=0; j<=ilen; j++) {
 	  free(textlines[j]);
 	}
+	for (i = 0; i < MAX_COLUMNS; i++) {
+	  free(col_labels[i]);
+	}
 	return ERR_NCOLS_CHANGE;
       }
       icol = min(ncols, icol);
@@ -496,6 +526,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	  xdifile->nmetadata = ndict+1;
 	  for (j=0; j<=ilen; j++) {
 	    free(textlines[j]);
+	  }
+	  for (i = 0; i < MAX_COLUMNS; i++) {
+	    free(col_labels[i]);
 	  }
 	  return ERR_NONNUMERIC;
 	}
@@ -526,6 +559,9 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   /* this was the space used to hold the lines of the file, allocated in readlines */
   for (j=0; j<=ilen; j++) {
     free(textlines[j]);
+  }
+  for (i = 0; i < MAX_COLUMNS; i++) {
+    free(col_labels[i]);
   }
   return iret;
 
