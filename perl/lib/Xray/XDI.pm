@@ -5,45 +5,49 @@ use MooseX::NonMoose;
 use MooseX::Aliases;
 extends 'Xray::XDIFile';
 with 'Xray::XDI::WriterPP';
+with 'MooseX::Clone';
 
 use List::MoreUtils qw(any uniq);
 
-our $VERSION = 1.0;
+our $VERSION = '1.00'; # Inline::MakeMake uses /^\d.\d\d$/ as the
+                       # pattern for the version number -- note the
+                       # two digits to the right of the dot
 
-has 'file' => (is => 'rw', isa => 'Str', default => q{},
+has 'file' => (is => 'rw', isa => 'Str', traits => [qw(Clone)], default => q{},
 	       trigger => sub{$_[0]->_build_object});
 
 has 'xdifile' => (
 		  is        => 'ro',
+		  traits => [qw(NoClone)],
 		  isa       => 'Xray::XDIFile',
 		  init_arg  => undef,
 		  lazy      => 1,
 		  builder   => '_build_object',
 		 );
 # no need to fiddle with inline_constructor here
-has 'ok'             => (is => 'rw', isa => 'Bool', default => 0);
-has 'warning'        => (is => 'rw', isa => 'Bool', default => 0);
-has 'errorcode'      => (is => 'rw', isa => 'Int',  default => 0);
-has 'error'          => (is => 'rw', isa => 'Str',  default => q{});
+has 'ok'             => (is => 'rw', isa => 'Bool',     traits => [qw(NoClone)], default => 0);
+has 'warning'        => (is => 'rw', isa => 'Bool',     traits => [qw(NoClone)], default => 0);
+has 'errorcode'      => (is => 'rw', isa => 'Int',      traits => [qw(NoClone)], default => 0);
+has 'error'          => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
 
-has 'filename'       => (is => 'rw', isa => 'Str', default => q{});
-has 'xdi_libversion' => (is => 'rw', isa => 'Str', default => q{});
-has 'xdi_version'    => (is => 'rw', isa => 'Str', default => q{});
-has 'extra_version'  => (is => 'rw', isa => 'Str', default => q{});
-has 'element'        => (is => 'rw', isa => 'Str', default => q{});
-has 'edge'           => (is => 'rw', isa => 'Str', default => q{});
-has 'dspacing'       => (is => 'rw', isa => 'Num', default => 0);
-has 'comments'       => (is => 'rw', isa => 'Str', default => q{});
-has 'nmetadata'      => (is => 'rw', isa => 'Int', default => 0);
-has 'npts'           => (is => 'rw', isa => 'Int', default => 0);
-has 'narrays'        => (is => 'rw', isa => 'Int', default => 0);
-has 'narray_labels'  => (is => 'rw', isa => 'Int', default => 0);
+has 'filename'       => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
+has 'xdi_libversion' => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'xdi_version'    => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'extra_version'  => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'element'        => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'edge'           => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'dspacing'       => (is => 'rw', isa => 'Num',      traits => [qw(Clone)],   default => 0);
+has 'comments'       => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'nmetadata'      => (is => 'rw', isa => 'Int',      traits => [qw(Clone)],   default => 0);
+has 'npts'           => (is => 'rw', isa => 'Int',      traits => [qw(Clone)],   default => 0);
+has 'narrays'        => (is => 'rw', isa => 'Int',      traits => [qw(Clone)],   default => 0);
+has 'narray_labels'  => (is => 'rw', isa => 'Int',      traits => [qw(Clone)],   default => 0);
 
-has 'array_labels'   => (is => 'rw', isa => 'ArrayRef', default => sub{[]});
-has 'array_units'    => (is => 'rw', isa => 'ArrayRef', default => sub{[]});
+has 'array_labels'   => (is => 'rw', isa => 'ArrayRef', traits => [qw(Clone)],   default => sub{[]});
+has 'array_units'    => (is => 'rw', isa => 'ArrayRef', traits => [qw(Clone)],   default => sub{[]});
 
 has 'metadata'       => (
-			 traits    => ['Hash'],
+			 traits    => ['Hash', 'Clone'],
 			 is        => 'rw',
 			 isa       => 'HashRef',
 			 default   => sub { {} },
@@ -55,18 +59,18 @@ has 'metadata'       => (
 				      },
 			);
 
-has 'data'      => (
-		    traits    => ['Hash'],
-		    is        => 'rw',
-		    isa       => 'HashRef',
-		    default   => sub { {} },
-		    handles   => {
-				  'exists_in_data' => 'exists',
-				  'ids_in_data'    => 'keys',
-				  'get_data'       => 'get',
-				  'set_data'       => 'set',
-				 },
-		   );
+has 'data'           => (
+			 traits    => ['Hash', 'NoClone'],
+			 is        => 'rw',
+			 isa       => 'HashRef',
+			 default   => sub { {} },
+			 handles   => {
+				       'exists_in_data' => 'exists',
+				       'ids_in_data'    => 'keys',
+				       'get_data'       => 'get',
+				       'set_data'       => 'set',
+				      },
+			);
 
 sub _build_object {
   my ($self) = @_;
@@ -204,6 +208,8 @@ sub families {
   my ($self) = @_;
   return sort(keys(%{$self->metadata}));
 };
+alias namespaces => 'families';
+
 sub keywords {
   my ($self, $family) = @_;
   my $f = ucfirst(lc($family));
@@ -211,6 +217,7 @@ sub keywords {
   return () if not $hash;
   return sort(keys(%$hash));
 };
+alias tags => 'keywords';
 
 sub get_item {
   my ($self, $family, $keyword) = @_;
@@ -219,12 +226,20 @@ sub get_item {
   return $self->metadata->{$family}->{$keyword};
 };
 
-sub set {
+sub set_item {
   my ($self, $family, $keyword, $value) = @_;
-  return q{} if not $self->metadata->{$family};
-  return q{} if not $self->metadata->{$family}->{$keyword};
+  #return q{} if not $self->metadata->{$family};
+  #return q{} if not $self->metadata->{$family}->{$keyword};
   my $rhash = $self->metadata;
   $rhash->{$family}->{$keyword} = $value;
+  $self->metadata($rhash);
+  return $self;
+};
+
+sub delete_item {
+  my ($self, $family, $keyword) = @_;
+  my $rhash = $self->metadata;
+  delete $rhash->{$family}->{$keyword};
   $self->metadata($rhash);
   return $self;
 };
@@ -234,8 +249,10 @@ sub push_comment {
   my $all = $self->comments;
   foreach my $comm (@comments) {
     $comm =~ s{[\n\r]+\z}{};
-    $all .= "\n" . $comm;
+    my $leading_nl = ($all) ? "\n" : q{};
+    $all .= $leading_nl . $comm;
   };
+  $all =~ s{\A\n}{}s;
   $self->comments($all);
   return $self;
 };
@@ -264,6 +281,17 @@ sub token {
 };
 
 
+sub serialize {
+  my ($self) = @_;
+  my $copy = $self->clone;
+  $copy->data({});
+  local $Data::Dumper::Indent = 0;
+  my $string = $copy->dump(3);
+  undef $copy;
+  return $string;
+};
+
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 1;
@@ -275,7 +303,7 @@ Xray::XDI - Import/export of XAS Data Interchange files
 
 =head1 VERSION
 
-0.01
+1.00
 
 =head1 SYNOPSIS
 

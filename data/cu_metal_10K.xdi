@@ -1,36 +1,32 @@
-# XDI/1.0 GSE/1.0
+# XDI/1.0 EDC/5.02
+# Beamline.collimation: none
+# Beamline.focusing: no
+# Beamline.harmonic_rejection: detuned mono
+# Beamline.name: X11A
+# Beamline.table_translation: no
 # Column.1: energy eV
 # Column.2: mutrans
+# EDC.DEL: 10.020 .483 .050K
+# EDC.GAINS: 8 7 10
+# EDC.OFFSETS: 51284 50016 48319
+# EDC.SRB: -193.7 -43.5 30.0 2381.3
 # Element.edge: K
 # Element.symbol: Cu
-# Scan.edge_energy: 8980.0
-# Mono.name: Si 111
-# Mono.d_spacing: 3.13525
-# Beamline.name: NSLS X11-A
-# Beamline.collimation: none
-# Beamline.focusing: No
-# Beamline.harmonic_rejection: detuned
-# Facility.xray_source: NSLS bending magnet
+# Facility.energy: 2.584 GeV
+# Facility.name: NSLS
+# Facility.source: bend magnet
+# Mono.d_spacing: 3.135301
+# Mono.name: Si(111)
+# Mono.stpdeg: 6400
 # Sample.name: Cu
 # Sample.sample: Cu metal foil, 99.999%
 # Sample.prep: foil rolled, annealled, rolled ~12 micron
 # Sample.temperature: 10 K
+# Scan.edge_energy: 8980.0
+# Scan.start_time: 1992-09-15T01:52:53
 # ///
-# Original raw data lost, Original Comments:
-# data taken at NSLS beamline X-11A Sept 1992
-#      by M Newville, B Ravel, and Y Zhang
-# foil of 99.999% Cu rolled and annealled to ~12 microns
-#      sample prepared by M Newville
-# From X-11A :
-# 2-SI111 HC/2D= 1977.260 STPDEG=6400. STPMMZ= 40.
-# FOCUS=F TRANSLT=F  E0= 8980.0 NREG= 3 NPTS= 611 NSCLRS= 3 EF= .0
-# SRB=     -193.7    -43.5     30.0   2381.3
-# DEL=         10.020     .483     .050K
-# SEC=             1.000    1.000    1.000
-# DETECTORSI0      I       If
-# GAINS           8       7      10
-# OFFSETS     51284   50016   48319
-#--------------------------------------------------------------
+# Cu foil, 10K, rolled and annealled foil by matt
+#------------------------
 #     energy          mutrans
    .8786204E+04    .1013661E+01
    .8796258E+04    .9949864E+00

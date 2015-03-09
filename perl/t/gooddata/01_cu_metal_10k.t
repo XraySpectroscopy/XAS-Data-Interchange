@@ -27,21 +27,21 @@ ok( (($labels[0] eq 'energy') and
      ($labels[1] eq 'mutrans')),                                  'labels: label names');
 
 my @families = $xdi->families;
-ok($#families == 6,                                               'families: number of families');
+ok($#families == 7,                                               'families: number of families');
 ok( (($families[0] eq 'Beamline') and
      ($families[1] eq 'Column')   and
-     ($families[2] eq 'Element')),                                'famlies: family names');
+     ($families[3] eq 'Element')),                                'famlies: family names');
 
 my @keywords = $xdi->keywords('Beamline');
-ok($#keywords == 3,                                               'keywords: number of keywords');
+ok($#keywords == 4,                                               'keywords: number of keywords');
 ok( (($keywords[0] eq 'collimation')          and
      ($keywords[2] eq 'harmonic_rejection')   and
      ($keywords[1] eq 'focusing')),                               'keywords: keyword names');
 
 
 ##### test get_item #############################################
-ok($xdi->get_item(qw(Mono name)) eq 'Si 111',                     'get_item: fetching Mono.name');
-ok($xdi->get_item(qw(Facility xray_source)) eq 'NSLS bending magnet',      'get_item: fetching Facility.xray_source');
+ok($xdi->get_item(qw(Mono name)) eq 'Si(111)',                     'get_item: fetching Mono.name');
+ok($xdi->get_item(qw(Facility source)) eq 'bend magnet',           'get_item: fetching Facility.xray_source');
 
 ##### test get_array and get_iarray ##############################
 my @values = (.8856322E+04, .9656931E+00);
