@@ -32,7 +32,7 @@ Xray::XDIFile - Inline::C interface to libxdifile
 =head1 SYNOPSIS
 
 This is a slight rewrite of the xdi_reader example that comes with the
-linxdifile source code.  It uses L<Inline> to map perl scalars onto
+libxdifile source code.  It uses L<Inline> to map perl scalars onto
 the data structures in libxdifile.
 
 Import an XDI file:
@@ -146,6 +146,10 @@ SV* new(char* class, char* file, SV* errcode) {
   sv_bless(obj_ref, gv_stashpv(class, GV_ADD));
   SvREADONLY_on(obj);
   return obj_ref;
+}
+
+void _cleanup(SV* obj, long err) {
+  XDI_cleanup((INT2PTR(XDIFile*, SvIV(SvRV(obj)))), err);
 }
 
 char* _errorstring(SV* obj, int code) {

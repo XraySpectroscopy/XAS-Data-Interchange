@@ -2,9 +2,9 @@
 
 use strict;
 use warnings;
+use Test::More tests => 45;
 
-
-print "Testing good files\n";
+## good data
 foreach my $file (qw(co_metal_rt.xdi
 		     cu_metal_10K.xdi
 		     cu_metal_rt.xdi
@@ -23,28 +23,15 @@ foreach my $file (qw(co_metal_rt.xdi
 		   )) {
   my $command = "valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all ./xdi_reader ../baddata/$file 2>&1";
   my $x = `$command`;
-  printf "\t%-17s:  ", $file;
-  if ($x =~ m{All heap blocks were freed}) {
-    print "ok\n";
-  } else {
-    print "not ok\n";
-  };
-
+  ok(($x =~ m{All heap blocks were freed}), $file);
 };
 
-
-print "\nTesting bad files\n";
+## bad data
 foreach my $i (0 .. 29) {
   my $n = sprintf("%2.2d", $i);
   my $command = "valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all ./xdi_reader ../baddata/bad_$n.xdi 2>&1";
-  #print $command, $/;
   my $x = `$command`;
-  printf "\tbad_%s.xdi:  ", $n;
-  if ($x =~ m{All heap blocks were freed}) {
-    print "ok\n";
-  } else {
-    print "not ok\n";
-  };
+  ok(($x =~ m{All heap blocks were freed}), "bad_$n.xdi");
 };
 
 

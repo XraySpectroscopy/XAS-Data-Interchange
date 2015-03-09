@@ -9,7 +9,9 @@ with 'MooseX::Clone';
 
 use List::MoreUtils qw(any uniq);
 
-our $VERSION = '1.00'; # Inline::MakeMake uses /^\d.\d\d$/ as the pattern for the version number -- note the two digits to the right of the dot
+our $VERSION = '1.00'; # Inline::MakeMake uses /^\d.\d\d$/ as the
+                       # pattern for the version number -- note the
+                       # two digits to the right of the dot
 
 has 'file' => (is => 'rw', isa => 'Str', traits => [qw(Clone)], default => q{},
 	       trigger => sub{$_[0]->_build_object});

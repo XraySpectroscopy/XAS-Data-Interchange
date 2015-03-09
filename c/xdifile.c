@@ -18,7 +18,8 @@
 #include "xdifile.h"
 
 /* error string interpretation */
-_EXPORT(char*) XDI_errorstring(int errcode) {
+_EXPORT(char*)
+XDI_errorstring(int errcode) {
   if (errcode == 0) { return ""; }
   if (errcode == ERR_NOTXDI) {
     return "not an XDI file";
@@ -530,7 +531,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
 }
 
-_EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
+_EXPORT(int)
+XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
   /* get array by index (starting at 0) from an XDIFile structure */
   long j;
   if (n < xdifile->narrays) {
@@ -542,7 +544,8 @@ _EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
   return ERR_NOARR_INDEX;
 }
 
-_EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
+_EXPORT(int)
+XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   /* get array by name from an XDIFile structure */
   long i;
   for (i = 0; i < xdifile->narrays; i++) {
