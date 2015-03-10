@@ -58,7 +58,17 @@ int main(int argc, char **argv) {
 	   xdifile->meta_families[i],
 	   xdifile->meta_keywords[i],
 	   xdifile->meta_values[i]);
+
+    j = XDI_validate_item(xdifile, xdifile->meta_families[i], xdifile->meta_keywords[i], xdifile->meta_values[i]);
+    if (j!=0) {
+      printf("-- Warning for %s.%s: %s\t(error code = %ld)\n\t%s\n",
+	     xdifile->meta_families[i], xdifile->meta_keywords[i], xdifile->meta_values[i], j, xdifile->error_message);
+    }
   }
+
+  j = XDI_required_metadata(xdifile);
+  printf("-- required metadata check -- (requirement code %ld):\n%s\n", j, xdifile->error_message);
+
 
   nout = min(4, xdifile->npts - 2);
   printf("# Arrays Index, Name, Values: (%ld points total): \n", xdifile->npts);

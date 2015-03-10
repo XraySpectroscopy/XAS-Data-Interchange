@@ -24,6 +24,7 @@ typedef struct {
   char *edge;            /* name of absorption edge: "K", "L1", ... */
   char *comments;        /* multi-line, user-supplied comment */
   char *error_line;      /* text of line with any existing error */
+  char *error_message;
   char **array_labels;   /* labels for arrays */
   char *outer_label;     /* labels for outer array */
   char **array_units;    /* units for arrays */
@@ -39,26 +40,30 @@ typedef struct {
 _EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) ;
 _EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 _EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
-_EXPORT(void) XDI_cleanup(XDIFile *xdifile, long err) ;
-
+_EXPORT(int) XDI_required_metadata(XDIFile *xdifile);
+_EXPORT(int) XDI_defined_family(XDIFile *xdifile, char *family);
+_EXPORT(int) XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value);
+_EXPORT(void) XDI_cleanup(XDIFile *xdifile, long err);
 
 /* Tokens used in XDI File */
 
-#define TOK_VERSION  "XDI/"           /* version marker in file -- required on line 1 */
-#define TOK_COMM     "#"              /* comment character, at start of line */
-#define TOK_DELIM    ":"              /* delimiter between metadata name and value */
-#define TOK_DOT      "."              /* delimiter between metadata family and key */
-#define TOK_EDGE     "element.edge"   /* absorbption edge name */
-#define TOK_ELEM     "element.symbol" /* atomic symbol of absorbing element */
-#define TOK_COLUMN   "column."        /* column label (followed by integer <= 64) */
-#define TOK_DSPACE   "mono.d_spacing" /* mono d_spacing, in Angstroms */
+#define TOK_VERSION    "XDI/"            /* version marker in file -- required on line 1 */
+#define TOK_COMM       "#"               /* comment character, at start of line */
+#define TOK_DELIM      ":"               /* delimiter between metadata name and value */
+#define TOK_DOT        "."               /* delimiter between metadata family and key */
+#define TOK_EDGE       "element.edge"    /* absorbption edge name */
+#define TOK_ELEM       "element.symbol"  /* atomic symbol of absorbing element */
+#define TOK_COLUMN     "column."         /* column label (followed by integer <= 64) */
+#define TOK_DSPACE     "mono.d_spacing"  /* mono d_spacing, in Angstroms */
 #define TOK_TIMESTAMP  "scan.start_time" /* scan time */
-#define TOK_USERCOM_0 "///"           /* start multi-line user comment */
-#define TOK_USERCOM_1 "---"           /* end multi-line user comment */
-#define TOK_COL_ENERGY "energy"       /* name of energy column */
-#define TOK_COL_ANGLE  "angle"        /* name of angle column */
-#define TOK_OUTER_VAL  "outer.value"  /* value for outer scan position */
-#define TOK_OUTER_NAME "outer.name"   /* name for outer scan position */
+#define TOK_TIMESTART  "scan.start_time" /* scan time */
+#define TOK_TIMEEND    "scan.end_time"   /* scan time */
+#define TOK_USERCOM_0  "///"             /* start multi-line user comment */
+#define TOK_USERCOM_1  "---"             /* end multi-line user comment */
+#define TOK_COL_ENERGY "energy"          /* name of energy column */
+#define TOK_COL_ANGLE  "angle"           /* name of angle column */
+#define TOK_OUTER_VAL  "outer.value"     /* value for outer scan position */
+#define TOK_OUTER_NAME "outer.name"      /* name for outer scan position */
 
 #define FAMILYNAME "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
 #define KEYNAME    "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
@@ -100,11 +105,18 @@ static char *ValidElems[] =
   = 0  all OK.
   > 0  data file is valid but may be incomplete as XAFS data
 */
+#define REQ_ELEM              1
+#define REQ_EDGE              2
+#define REQ_DSPACING          4
+
 #define ERR_NOELEM            1
 #define ERR_NOEDGE            2
 #define ERR_NODSPACE          4
 #define ERR_NOMINUSLINE       8
 #define ERR_IGNOREDMETA      16
+#define ERR_REFELEM          32
+#define ERR_REFEDGE          64
+#define ERR_NOEXTRA         128
 
 #define ERR_NOTXDI           -1
 #define ERR_NOARR_NAME       -2

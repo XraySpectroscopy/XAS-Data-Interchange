@@ -24,9 +24,15 @@ XDI_errorstring(int errcode) {
   if (errcode == ERR_NOTXDI) {
     return "not an XDI file";
   } else if (errcode == ERR_NOELEM) {
-    return "no element.symbol given";
+    return "element.symbol not given or not valid";
   } else if (errcode == ERR_NOEDGE) {
-    return "no element.edge given";
+    return "element.edge not given or not valid";
+  } else if (errcode == ERR_REFELEM) {
+    return "element.reference not valid";
+  } else if (errcode == ERR_REFEDGE) {
+    return "element.ref_edge not valid";
+  } else if (errcode == ERR_NOEXTRA) {
+    return "extension fields used without versioning information";
   } else if (errcode == ERR_NODSPACE) {
     return "no mono.d_spacing given with angle array";
   } else if (errcode == ERR_META_FAMNAME) {
@@ -51,6 +57,7 @@ XDI_errorstring(int errcode) {
   return "";
 }
 
+
 /* */
 int xdi_strtod(char* inp, double *dval) {
   /* converts string containing number (double) to double
@@ -65,31 +72,6 @@ int xdi_strtod(char* inp, double *dval) {
   return *end != '\0';
 }
 
-int xdi_is_datestring(char *inp) {
-  /* tests if input string is a valid datetime timestamp.
-     This uses regular expression to check format and validates
-     range of values, though not exhaustively.
-  */
-  const char *regex_status;
-  int year, month, day, hour, minute, sec;
-  regex_status = slre_match(1, "^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[T ](\\d\\d?):(\\d\\d):(\\d\\d).*$",
-			    inp, strlen(inp),
-			    SLRE_INT, sizeof(sec), &year,
-			    SLRE_INT, sizeof(sec), &month,
-			    SLRE_INT, sizeof(sec), &day,
-			    SLRE_INT, sizeof(sec), &hour,
-			    SLRE_INT, sizeof(sec), &minute,
-			    SLRE_INT, sizeof(sec), &sec);
-
-  if (regex_status != NULL) { return ERR_DATE_FORMAT;}
-  if ((year < 1900) || (month < 1) || (month > 12) ||
-      (day < 1) || (day > 31) ||  (hour < 0) || (hour > 23) ||
-      (minute < 0) || (minute > 59) ||  (sec < 0) || (sec > 59)) {
-    return ERR_DATE_RANGE;
-  }
-  return 0;
-}
-
 _EXPORT(int)
 XDI_readfile(char *filename, XDIFile *xdifile) {
   char *textlines[MAX_LINES];
@@ -100,11 +82,12 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   char *reword;
   char tlabel[32] = {'\0'};
   char comments[1025] = {'\0'};
-  char elem[3] = {'\0'};
+  char elem[4] = {'\0'};
   char edge[3] = {'\0'};
   char version_xdi[8] = {'\0'};
   char version_extra[MAX_LINE_LENGTH] = {'\0'};
   char errline[MAX_LINE_LENGTH] = {'\0'};
+  char errmessage[2048] = {'\0'};
   char outerlabel[MAX_WORD_LENGTH] = {'\0'};
   double dval ;
   double *outer_arr, outer_arr0;
@@ -112,7 +95,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   FILE *inpFile;
   long  file_length, ilen, index, i, j, k, nx, maxcol;
   long  npts_, ncols, icol, nheader, nwords, ndict;
-  long  ignored_headerline, iret, ipt, nouter, iouter;
+  long  ignored_headerline, iret, code, ipt, nouter, iouter;
   int   is_newline, fnlen, mode, valid, stat;
   int   has_minusline, has_angle, has_energy;
   const char *regex_status;
@@ -130,8 +113,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   strcpy(xdifile->comments, comments);
 
   strcpy(elem, "  ");
-  xdifile->element = calloc(3, sizeof(char));
-  strncpy(xdifile->element, elem, 2);
+  xdifile->element = calloc(4, sizeof(char));
+  strncpy(xdifile->element, elem, 3);
 
   strcpy(edge, "  ");
   xdifile->edge = calloc(3, sizeof(char));
@@ -151,6 +134,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   strcpy(errline, " ");
   xdifile->error_line = calloc(MAX_LINE_LENGTH+1, sizeof(char));
   strncpy(xdifile->error_line, errline, MAX_LINE_LENGTH);
+
+  strcpy(errmessage, " ");
+  xdifile->error_message = calloc(2049, sizeof(char));
+  strncpy(xdifile->error_message, errmessage, 2048);
 
   strcpy(outerlabel, " ");
   xdifile->outer_label = calloc(MAX_LINE_LENGTH+1, sizeof(char));
@@ -311,22 +298,15 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    }
 	    maxcol =  max(maxcol, j);
 	  }
+
+	/* ELEMENT EDGE (accept any twwo characters, validate later) */
 	} else if (strcasecmp(mkey, TOK_EDGE) == 0) {
-	  for (j = 0; j < n_edges; j++) {
-	    if (strcasecmp(ValidEdges[j], mval) == 0) {
-	      strcpy(xdifile->edge, mval);
-	      break;
-	    }
-	  }
-	/* ELEMENT NAME */
+	  strncpy(xdifile->edge, mval, 2);
+
+	/* ELEMENT NAME (accept any three characters, validate later) */
 	} else if (strcasecmp(mkey, TOK_ELEM) == 0) {
-	  for (j = 0; j < n_elems; j++) {
-	    if (strcasecmp(ValidElems[j], mval) == 0) {
-	      /* COPY_STRING(xdifile->element, mval); */
-	      strncpy(xdifile->element, mval, 2);
-	      break;
-	    }
-	  }
+	  strncpy(xdifile->element, mval, 3);
+
 	/* MONO D-SPACING */
 	} else if (strcasecmp(mkey, TOK_DSPACE) == 0) {
 	  if (0 != xdi_strtod(mval, &dval)) {
@@ -341,28 +321,37 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    return ERR_NONNUMERIC;
 	  }
 	  xdifile->dspacing = dval;
+
 	/* OUTER ARRAY NAME */
 	} else if (strcasecmp(mkey, TOK_OUTER_NAME) == 0) {
 	  strcpy(xdifile->outer_label, mval);
+
 	/* OUTER ARRAY VALUE */
 	} else if (strcasecmp(mkey, TOK_OUTER_VAL) == 0) {
 	  if (0 != xdi_strtod(mval, &dval)) {  free(mval); return ERR_NONNUMERIC;}	
 	  outer_arr0 = dval ;
-	} else if (strcasecmp(mkey, TOK_TIMESTAMP) == 0) {
-	  j = xdi_is_datestring(mval);
-	  if (0 != j) {
-	    xdifile->nmetadata = ndict+1;
-	    free(mkey);
-	    for (k=0; k<=ilen; k++) {
-	      free(textlines[k]);
-	    }
-	    for (i = 0; i < MAX_COLUMNS; i++) {
-	      free(col_labels[i]);
-	    }
-	    return j;
-	  }
+
+	/* /\* time stamp *\/ */
+	/* } else if ((strcasecmp(mkey, TOK_TIMESTART) == 0) || (strcasecmp(mkey, TOK_TIMEEND) == 0)) { */
+	/*   if (strcasecmp(mkey, TOK_TIMESTART) == 0) { */
+	/*     j = XDI_validate_item(xdifile, "scan", "start_time", mval); */
+	/*   } else { */
+	/*     j = XDI_validate_item(xdifile, "scan", "end_time", mval); */
+	/*   } */
+	/*   /\* j = xdi_is_datestring(mval); *\/ */
+	/*   if (0 != j) { */
+	/*     xdifile->nmetadata = ndict+1; */
+	/*     free(mkey); */
+	/*     for (k=0; k<=ilen; k++) { */
+	/*       free(textlines[k]); */
+	/*     } */
+	/*     for (i = 0; i < MAX_COLUMNS; i++) { */
+	/*       free(col_labels[i]); */
+	/*     } */
+	/*     return j; */
+	/*   } */
 	}
-	/* free(mval); */
+
       } else if (strncasecmp(mkey, TOK_USERCOM_0, strlen(TOK_USERCOM_0)) == 0) {
 	mode = 1;
       } else if (strncasecmp(mkey, TOK_USERCOM_1, strlen(TOK_USERCOM_1)) == 0) {
@@ -398,23 +387,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   if (has_minusline == 0)     { iret = ERR_NOMINUSLINE; }
 
   /* check edge, element, return error code if invalid */
-  valid = 0;
-  for (j = 0; j < n_edges; j++) {
-    if (strcasecmp(ValidEdges[j], xdifile->edge) == 0) {
-      valid = 1;
-      break;
-    }
-  }
-  if (valid == 0) {  iret = ERR_NOEDGE; }
-
-  valid = 0;
-  for (j = 0; j < n_elems; j++) {
-    if (strcasecmp(ValidElems[j], xdifile->element) == 0) {
-      valid = 1;
-      break;
-    }
-  }
-  if (valid == 0) { iret =  ERR_NOELEM;}
+  /* code = XDI_validate_item(xdifile, "element", "edge", xdifile->edge); */
+  /* if (code != 0) { iret = code; } */
+  /* code = XDI_validate_item(xdifile, "element", "symbol", xdifile->element); */
+  /* if (code != 0) { iret = code; } */
 
   npts_ = ilen - nheader + 1;
 
@@ -592,6 +568,202 @@ XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
   return ERR_NOARR_NAME;
 }
 
+_EXPORT(int)
+XDI_defined_family(XDIFile *xdifile, char *family) {
+  if ((strcasecmp(family, "facility") == 0) ||
+      (strcasecmp(family, "beamline") == 0) ||
+      (strcasecmp(family, "mono")     == 0) ||
+      (strcasecmp(family, "detector") == 0) ||
+      (strcasecmp(family, "sample")   == 0) ||
+      (strcasecmp(family, "scan")     == 0) ||
+      (strcasecmp(family, "element")  == 0) ||
+      (strcasecmp(family, "column")   == 0)) {
+    return 1;
+  } else {
+    return 0;
+  };
+}
+
+_EXPORT(int)
+XDI_required_metadata(XDIFile *xdifile) {
+  int ret = 0;
+  int j;
+  char dsp[10];
+
+  j = XDI_validate_item(xdifile, "element", "symbol", xdifile->element);
+  if (j > 0) {
+    ret = ret + REQ_ELEM;
+  }
+
+  j = XDI_validate_item(xdifile, "element", "edge", xdifile->edge);
+  if (j > 0) {
+    ret = ret + REQ_EDGE;
+  }
+
+  sprintf(dsp, "%.5f", xdifile->dspacing);
+  j = XDI_validate_item(xdifile, "mono", "d_spacing", dsp);
+  if (j > 0) {
+    ret = ret + REQ_DSPACING;
+  }
+
+  strcpy(xdifile->error_message, "");
+  if (ret & REQ_ELEM)     { strcat(xdifile->error_message, "\tElement.symbol not given or not valid\n"); }
+  if (ret & REQ_EDGE)     { strcat(xdifile->error_message, "\tElement.edge not given or not valid\n"); }
+  if (ret & REQ_DSPACING) { strcat(xdifile->error_message, "\tMono.d_spacing not given or not valid\n"); }
+
+  return ret;
+}
+
+
+_EXPORT(int)
+XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
+  const char *regex_status;
+  int err, j;
+  int n_edges = sizeof(ValidEdges)/sizeof(char*);
+  int n_elems = sizeof(ValidElems)/sizeof(char*);
+
+  /* printf("======== %s %s %s\n", family, name, value); */
+
+  if (strcasecmp(family, "facility") == 0) {
+    err = 0;
+
+  } else if (strcasecmp(family, "beamline") == 0) {
+    err = 0;
+
+  } else if (strcasecmp(family, "mono") == 0) {
+    err = 0;
+
+  } else if (strcasecmp(family, "detector") == 0) {
+    err = 0;
+
+  } else if (strcasecmp(family, "sample") == 0) {
+    err = 0;
+
+  } else if (strcasecmp(family, "scan") == 0) {
+    err = XDI_validate_scan(xdifile, name, value);
+
+  } else if (strcasecmp(family, "element") == 0) {
+    err = XDI_validate_element(xdifile, name, value);
+
+  } else if (strcasecmp(family, "column") == 0) {
+    err = 0;
+
+  } else {
+    err = 0;
+    regex_status = slre_match(1, family, xdifile->extra_version, strlen(xdifile->extra_version));
+    if (regex_status != NULL) {
+      err = ERR_NOEXTRA;
+      strcpy(xdifile->error_message, "extension fields used without versioning information");
+    };
+  }
+
+  return err;
+}
+
+
+int xdi_is_datestring(char *inp) {
+  /* tests if input string is a valid datetime timestamp.
+     This uses regular expression to check format and validates
+     range of values, though not exhaustively.
+  */
+  const char *regex_status;
+  int year, month, day, hour, minute, sec;
+  regex_status = slre_match(1, "^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[T ](\\d\\d?):(\\d\\d):(\\d\\d).*$",
+			    inp, strlen(inp),
+			    SLRE_INT, sizeof(sec), &year,
+			    SLRE_INT, sizeof(sec), &month,
+			    SLRE_INT, sizeof(sec), &day,
+			    SLRE_INT, sizeof(sec), &hour,
+			    SLRE_INT, sizeof(sec), &minute,
+			    SLRE_INT, sizeof(sec), &sec);
+
+  if (regex_status != NULL) { return ERR_DATE_FORMAT;}
+  if ((year < 1900) || (month < 1) || (month > 12) ||
+      (day < 1) || (day > 31) ||  (hour < 0) || (hour > 23) ||
+      (minute < 0) || (minute > 59) ||  (sec < 0) || (sec > 59)) {
+    return ERR_DATE_RANGE;
+  }
+  return 0;
+}
+
+int XDI_validate_scan(XDIFile *xdifile, char *name, char *value) {
+  int err;
+
+  /* printf("======== %s %s\n", name, value); */
+
+  if (strcasecmp(name, "start_time") == 0) {
+    err = xdi_is_datestring(value); 
+    if (err==ERR_DATE_FORMAT) { strcpy(xdifile->error_message, "invalid timestamp: format should be YYYY-MM-DD HH:MM:SS"); }
+    if (err==ERR_DATE_RANGE)  { strcpy(xdifile->error_message, "invalid timestamp: date out of valid range"); }
+
+  } else if (strcasecmp(name, "end_time") == 0) {
+    err = xdi_is_datestring(value);
+    if (err==ERR_DATE_FORMAT) { strcpy(xdifile->error_message, "invalid timestamp: format should be YYYY-MM-DD HH:MM:SS"); }
+    if (err==ERR_DATE_RANGE)  { strcpy(xdifile->error_message, "invalid timestamp: date out of valid range"); }
+
+  } else {
+    err = 0;
+    strcpy(xdifile->error_message, "");
+  }
+
+  return err;
+}
+
+int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
+  int err, j;
+  int n_edges = sizeof(ValidEdges)/sizeof(char*);
+  int n_elems = sizeof(ValidElems)/sizeof(char*);
+
+  if (strcasecmp(name, "symbol") == 0) {
+    err = ERR_NOELEM;
+    for (j = 0; j < n_elems; j++) {
+      if (strcasecmp(ValidElems[j], value) == 0) {
+	err = 0;
+	break;
+      }
+    }
+    if (err>0) { strcpy(xdifile->error_message, "element.symbol not given or not valid"); }
+
+  } else if (strcasecmp(name, "edge") == 0) {
+    err = ERR_NOEDGE;
+    for (j = 0; j < n_edges; j++) {
+      if (strcasecmp(ValidEdges[j], value) == 0) {
+	err = 0;
+	break;
+      }
+    }
+    if (err!=0) { strcpy(xdifile->error_message, "element.edge not given or not valid"); }
+
+  } else if (strcasecmp(name, "reference") == 0) {
+    err = ERR_REFELEM;
+    for (j = 0; j < n_elems; j++) {
+      if (strcasecmp(ValidElems[j], value) == 0) {
+	err = 0;
+	break;
+      }
+    }
+    if (err!=0) { strcpy(xdifile->error_message, "element.reference not given or not valid"); }
+
+  } else if (strcasecmp(name, "ref_edge") == 0) {
+    err = ERR_REFEDGE;
+    for (j = 0; j < n_edges; j++) {
+      if (strcasecmp(ValidEdges[j], value) == 0) {
+	err = 0;
+	break;
+      }
+    }
+    if (err!=0) { strcpy(xdifile->error_message, "element.ref_edge not given or not valid"); }
+
+  } else {
+    err = 0;
+    strcpy(xdifile->error_message, "");
+  }
+
+  return err;
+}
+
+
+
 
 _EXPORT(void)
 XDI_cleanup(XDIFile *xdifile, long err) {
@@ -605,6 +777,7 @@ XDI_cleanup(XDIFile *xdifile, long err) {
   free(xdifile->edge);
   free(xdifile->comments);
   free(xdifile->error_line);
+  free(xdifile->error_message);
   free(xdifile->outer_label);
 
   if ((err != -32) && (err != -128) && (err != -128)) {
