@@ -1,8 +1,29 @@
+/* This file is free and unencumbered software released into the public domain. */
+/*                                                                              */
+/* Anyone is free to copy, modify, publish, use, compile, sell, or              */
+/* distribute this software, either in source code form or as a compiled        */
+/* binary, for any purpose, commercial or non-commercial, and by any            */
+/* means.                                                                       */
+/*                                                                              */
+/* In jurisdictions that recognize copyright laws, the author or authors        */
+/* of this software dedicate any and all copyright interest in the              */
+/* software to the public domain.                                               */
+/*                                                                              */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,              */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF           */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.       */
+/* IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR            */
+/* OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,        */
+/* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR        */
+/* OTHER DEALINGS IN THE SOFTWARE.                                              */
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #define _EXPORT(a) __declspec(dllexport) a _stdcall
 #else
 #define _EXPORT(a) a
 #endif
+
+#include <math.h>
 
 #define XDI_VERSION  "1.1.0"   /* XDI version marker */
 
@@ -68,7 +89,10 @@ _EXPORT(void) XDI_cleanup(XDIFile *xdifile, long err);
 #define FAMILYNAME "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
 #define KEYNAME    "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
 
-#define DATALINE "^[ \t]*[0123456789.]"
+/* #define FAMILYNAME "(?i)^[a-z_][a-z0-9_]+$" */
+/* #define KEYNAME    "(?i)^[a-z0-9_]+$" */
+
+#define DATALINE "^([ \\t]*[0-9\\.])"
 
 /* Notes:
    1. The absorption edge must be one of those listed in ValidEdges below
@@ -100,34 +124,35 @@ static char *ValidElems[] =
    "Uut", "Fl", "Uup", "Lv", "Uus", "Uuo"};
 
 
-/* error codes   
-  < 0  data file is not valid
-  = 0  all OK.
-  > 0  data file is valid but may be incomplete as XAFS data
-*/
+/* errors in XDI_required_metadata */
 #define REQ_ELEM              1
 #define REQ_EDGE              2
-#define REQ_DSPACING          4
+#define REQ_NO_DSPACING       4
+#define REQ_INVALID_DSPACING  8
 
-#define ERR_NOELEM            1
-#define ERR_NOEDGE            2
-#define ERR_NODSPACE          4
-#define ERR_NOMINUSLINE       8
-#define ERR_IGNOREDMETA      16
-#define ERR_REFELEM          32
-#define ERR_REFEDGE          64
-#define ERR_NOEXTRA         128
+/* warnings from reading the XDI file */
+#define WRN_NODSPACE          1
+#define WRN_NOMINUSLINE       2
+#define WRN_IGNOREDMETA       4
+/* warnings from metadata value validation */
+#define WRN_NOELEM            8
+#define WRN_NOEDGE           16
+#define WRN_REFELEM          32
+#define WRN_REFEDGE          64
+#define WRN_NOEXTRA         128
+#define WRN_BAD_COL1        256
+#define WRN_DATE_FORMAT     512
+#define WRN_DATE_RANGE     1024
+#define WRN_BAD_DSPACING   2048
 
-#define ERR_NOTXDI           -1
-#define ERR_NOARR_NAME       -2
-#define ERR_NOARR_INDEX      -4
-#define ERR_META_FAMNAME     -8
-#define ERR_META_KEYNAME    -16
-#define ERR_META_FORMAT     -32
-#define ERR_DATE_FORMAT     -64
-#define ERR_DATE_RANGE     -128
-#define ERR_NCOLS_CHANGE   -256
-#define ERR_NONNUMERIC     -512
-#define ERR_MEMERROR      -1024
+/* errors reading the XDI file */
+#define ERR_NOTXDI           -1	/* used */
+#define ERR_META_FAMNAME     -2	/* used */
+#define ERR_META_KEYNAME     -4	/* used */
+#define ERR_META_FORMAT      -8	/* used */
+#define ERR_NCOLS_CHANGE    -16	/* used */
+#define ERR_NONNUMERIC      -32	/* used */
+#define ERR_MEMERROR        -64	/* NOT used */
 
-_EXPORT(char*) XDI_errorstring(int errcode);
+
+/* _EXPORT(char*) XDI_errorstring(int errcode); */

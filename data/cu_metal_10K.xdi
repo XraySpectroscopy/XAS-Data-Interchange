@@ -14,7 +14,7 @@
 # Element.symbol: Cu
 # Facility.energy: 2.584 GeV
 # Facility.name: NSLS
-# Facility.source: bend magnet
+# Facility.xray_source: bend magnet
 # Mono.d_spacing: 3.135301
 # Mono.name: Si(111)
 # Mono.stpdeg: 6400

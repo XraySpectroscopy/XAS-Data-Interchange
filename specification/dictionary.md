@@ -207,16 +207,16 @@ The tag **must** be interpreted as case insentitive.
 ## Required metadata
 
 Three items are essential to the interchange and successful
-interpretation of XAS data. These are **required** in all files using
-the [XDI specification](spec.md).
+interpretation of XAS data. These are **required** for a file to be a
+compliant XDI file.
 
  * `Element.symbol`: The element of the absorbing atom. The periodic
    table is replete with examples of atoms that have absorption edges
    with very similar edge energies.  For example, the tabulated values
-   of the Cr K edge and the Ba L1 edge are both 5989 eV.  Without
-   identification of the species of the absorbing atom and of the
-   absorption edge measured, some data cannot cannot be unambiguously
-   identified.
+   of the Cr K edge and the Ba L1 edge are both 5989 eV, while Se K
+   and Tl L3 are both at 12658.  Without identification of the species
+   of the absorbing atom and of the absorption edge measured, some
+   data cannot cannot be unambiguously identified.
 
  * `Element.edge`: The absorption edge measured.  See above.
 
@@ -254,7 +254,7 @@ value to the interpretation of the data.
      * _Units_: mA, A
      * _Format_: float + units
 
-* **Namespace:** `Facility` -- **Tag:** `source`
+* **Namespace:** `Facility` -- **Tag:** `xray_source`
      * _Description_: A string identifying the source of the X-rays,
        such as "bend magnet", "undulator", or "rotating copper
        anode". This is **recommended** for use in all XDI files.
