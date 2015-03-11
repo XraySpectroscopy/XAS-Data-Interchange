@@ -133,14 +133,14 @@ translation of a table of error messages into another language.
 
 ### XDI_readfile error codes
 
- | code | message                                                      |
- | ---- | ------------------------------------------------------------ |
- |  -1  | not an XDI file, no XDI versioning information in first line |
- |  -2  | <word> -- invalid family name in metadata                    |
- |  -4  | <word> -- invalid keyword name in metadata                   |
- |  -8  | <word> -- not formatted as Family.Key: Value                 |
- | -16  | number of columns changes in data table                      |
- | -32  | non-numeric value in data table: <word>                      |
+| code | message                                                      |
+| ---- | ------------------------------------------------------------ |
+|  -1  | not an XDI file, no XDI versioning information in first line |
+|  -2  | <word> -- invalid family name in metadata                    |
+|  -4  | <word> -- invalid keyword name in metadata                   |
+|  -8  | <word> -- not formatted as Family.Key: Value                 |
+| -16  | number of columns changes in data table                      |
+| -32  | non-numeric value in data table: <word>                      |
 
 Here `<word>` will be the the text that triggered the error.
 
