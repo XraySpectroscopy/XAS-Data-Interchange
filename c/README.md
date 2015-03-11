@@ -134,7 +134,7 @@ translation of a table of error messages into another language.
 ### XDI_readfile error codes
 
  | code | message                                                      |
- |------|--------------------------------------------------------------|
+ | ---- | ------------------------------------------------------------ |
  |  -1  | not an XDI file, no XDI versioning information in first line |
  |  -2  | <word> -- invalid family name in metadata                    |
  |  -4  | <word> -- invalid keyword name in metadata                   |
@@ -147,7 +147,7 @@ Here `<word>` will be the the text that triggered the error.
 ### XDI_readfile warning codes
 
  |  code | message                                                      |
- |-------|--------------------------------------------------------------|
+ | ----- | ------------------------------------------------------------ |
  |    1  | no mono.d_spacing given with angle array                     |
  |    2  | no line of minus signs '#-----' separating header from data  |
  |    4  | contains unrecognized header lines                           |
@@ -168,7 +168,7 @@ bitwise.  That is, a return code of 7 means that all three required
 metadata fields were missing.
 
  | code | message                             |
- |------|-------------------------------------|
+ | ---- | ----------------------------------- |
  |  1   | Element.symbol missing or not valid |
  |  2   | Element.edge missing or not valid   |
  |  4   | Mono.d\_spacing missing             |
@@ -181,7 +181,7 @@ bitwise.  That is, a return code of 7 means that the first three
 recommendation metadata fields were missing.
 
  | code | message                                             |
- |------|-----------------------------------------------------|
+ | ---- | --------------------------------------------------- |
  |  1   | Missing recommended metadata field: Facility.name   |
  |  2   | Missing recommended metadata field: Facility.source |
  |  4   | Missing recommended metadata field: Beamline.name   |
