@@ -58,12 +58,12 @@ typedef struct {
 
 } XDIFile;
 
-_EXPORT(int) XDI_readfile(char *filename, XDIFile *xdifile) ;
-_EXPORT(int) XDI_get_array_index(XDIFile *xdifile, long n, double *out);
-_EXPORT(int) XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
-_EXPORT(int) XDI_required_metadata(XDIFile *xdifile);
-_EXPORT(int) XDI_defined_family(XDIFile *xdifile, char *family);
-_EXPORT(int) XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value);
+_EXPORT(int)  XDI_readfile(char *filename, XDIFile *xdifile) ;
+_EXPORT(int)  XDI_get_array_index(XDIFile *xdifile, long n, double *out);
+_EXPORT(int)  XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
+_EXPORT(int)  XDI_required_metadata(XDIFile *xdifile);
+_EXPORT(int)  XDI_defined_family(XDIFile *xdifile, char *family);
+_EXPORT(int)  XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value);
 _EXPORT(void) XDI_cleanup(XDIFile *xdifile, long err);
 
 /* Tokens used in XDI File */

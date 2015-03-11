@@ -611,7 +611,7 @@ XDI_defined_family(XDIFile *xdifile, char *family) {
       (strcasecmp(family, "sample")   == 0) ||
       (strcasecmp(family, "scan")     == 0) ||
       (strcasecmp(family, "element")  == 0) ||
-      (strcasecmp(family, "column")   == 0)) {
+      (strcasecmp(family, "column")   == 0))  {
     return 1;
   } else {
     return 0;
@@ -662,11 +662,11 @@ XDI_required_metadata(XDIFile *xdifile) {
 }
 
 
-/* Facility.name:            1     */
-/* Facility.source:          2     */
-/* Beamline.name:            4     */
-/* Scan.start_time:          8     */
-/* Column.1=(energy|angle): 16, 32 */
+/* Facility.name:             1 */
+/* Facility.source:           2 */
+/* Beamline.name:             4 */
+/* Scan.start_time:           8 */
+/* Column.1: (energy|angle): 16 */
 
 _EXPORT(int)
 XDI_recommended_metadata(XDIFile *xdifile) {
@@ -706,7 +706,6 @@ XDI_recommended_metadata(XDIFile *xdifile) {
   if (ret & 16) { strcat(xdifile->error_message, "Missing recommended metadata field: Column.1\n"); }
 
   return ret;
-
 }
 
 
@@ -830,6 +829,7 @@ int XDI_validate_scan(XDIFile *xdifile, char *name, char *value) {
 
   /* printf("======== %s %s\n", name, value); */
 
+  err = 0;
   strcpy(xdifile->error_message, "");
 
   if (strcasecmp(name, "start_time") == 0) {
@@ -854,6 +854,7 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
 
+  err = 0;
   strcpy(xdifile->error_message, "");
 
   if (strcasecmp(name, "symbol") == 0) {

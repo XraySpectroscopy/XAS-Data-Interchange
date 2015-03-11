@@ -3,12 +3,49 @@
 This is a C implementation of the XDI specification.  While the XDI
 specification is not difficult to implement correctly, we encourage
 people implementing XDI readers in other languages to base their
-implementation on `libxdifile`.  That way, the behaviour of XDI
+implementation on `libxdifile`.  That way, the behavior of XDI
 readers in different languages is guaranteed to be identical (or at
 least very similar).
 
 See `xdi_reader.c` for an example of a C program using `libxdifile` to
 import and interpret XDI-formatted data.
+
+`libxdifile` was written by Matt Newville and Bruce Ravel.
+
+## XDIFile struct
+
+This is the content of the XDIFile struct.  It will contain the entire
+contents of the XDI file along with a few particularly important items
+(d-spaing, element, and edge).
+
+| attribute       | type               | explanation |
+| --------------- | ------------------ | ----------- |
+| nmetadata       | long               | number of metadata fields |
+| narrays         | long               | number of arrays in data table |
+| npts            | long               | number of rows in data table  |
+| narray\_labels  | long               | number of array labels |
+| error\_lineno   | long               | the line number of a line returning an error |
+| dspacing        | double             | the Mono.d-spacing value              |
+| xdi\_libversion | char*              | the `libxdifile` version number |
+| xdi\_version    | char*              | the XDI file specification version number from the file |
+| extra\_version  | char*              | versioning information for extension fields |
+| filename        | char*              | the name of the XDI file |
+| element         | char*              | the 1, 2, or 3 letter symbol of the element |
+| edge            | char*              | the 1 or 2 letter symbol of the edge |
+| comments        | char*              | the user supplied comments from the XDI file |
+| error\_line     | char*              | the line returning an error  |
+| error\_message  | char*              | the error message |
+| array\_labels   | array of char*     | array of labels for arrays in the data table |
+| array\_units    | array of char*     | array of units for arrays in the data table |
+| meta\_families  | array of char*     | array of family names found among the metadata, indexed to nmetadata |
+| meta\_keywords  | array of char*     | array of keyword names found among the metadata, indexed to nmetadata |
+| meta\_values    | array of char*     | array of values found among the metadata, indexed to nmetadata |
+| array           | of array of double | the data table |
+| nouter          | long               | |
+| outer\_label    | array char*        | |
+| outer\_array    | array of double    | |
+| outer\_breakpts | array of long      | |
+
 
 ## API
 
@@ -65,7 +102,7 @@ If `XDI_required_metadata` returns a non-zero value, the file is
 	}
 ```
 
-Run `xdi_reader` agains `baddata/bad_30.xdi` for an example of a
+Run `xdi_reader` against `baddata/bad_30.xdi` for an example of a
 file which is non-compliant because of missing **required** metadata.
 
 ### Test for recommended metadata
@@ -83,7 +120,7 @@ highly useful to the interchange of the data contained in the file.
 	}
 ```
 
-Run `xdi_reader` agains `baddata/bad_32.xdi` for an example of a
+Run `xdi_reader` against `baddata/bad_32.xdi` for an example of a
 file which is missing **recommended** metadata.
 
 
@@ -125,6 +162,20 @@ table.  The return value is -1 if the array cannot be retrieved.
 
 The array names are held in the `Column.N` metadata fields.
 
+### Destroy and deallocate the XDIFile struct
+
+To deallocate the memory from the XDIFile struct, do this:
+
+```C
+	XDI_cleanup(xdifile, ret);
+```
+
+Here, the second argument is the return code from the call to
+XDI_readfile.  That is needed so that the cleanup method knows how
+much stuff needs to be freed.
+
+
+
 ## Error codes
 
 Here is a list of all error codes and their English explanation.  An
@@ -134,20 +185,20 @@ translation of a table of error messages into another language.
 ### XDI_readfile error codes
 
 | code | message                                                      |
-| ---- | ------------------------------------------------------------ |
+| ---: | ------------------------------------------------------------ |
 |  -1  | not an XDI file, no XDI versioning information in first line |
-|  -2  | `<word>` -- invalid family name in metadata                    |
-|  -4  | `<word>` -- invalid keyword name in metadata                   |
-|  -8  | `<word>` -- not formatted as Family.Key: Value                 |
+|  -2  | `<word>` -- invalid family name in metadata                  |
+|  -4  | `<word>` -- invalid keyword name in metadata                 |
+|  -8  | `<word>` -- not formatted as Family.Key: Value               |
 | -16  | number of columns changes in data table                      |
-| -32  | non-numeric value in data table: `<word>`                      |
+| -32  | non-numeric value in data table: `<word>`                    |
 
 Here `<word>` will be the the text that triggered the error.
 
 ### XDI_readfile warning codes
 
 |  code | message                                                      |
-| ----- | ------------------------------------------------------------ |
+| ----: | ------------------------------------------------------------ |
 |    1  | no mono.d_spacing given with angle array                     |
 |    2  | no line of minus signs '#-----' separating header from data  |
 |    4  | contains unrecognized header lines                           |
@@ -158,7 +209,7 @@ Here `<word>` will be the the text that triggered the error.
 |  128  | extension field used without versioning information          |
 |  256  | Column.1 is not "energy" or "angle"                          |
 |  512  | invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS) |
-| 1024  | invalid timestamp: date out of valuid range                  |
+| 1024  | invalid timestamp: date out of valid range                   |
 
 
 ### XDI_required_metadata return codes
@@ -168,7 +219,7 @@ bitwise.  That is, a return code of 7 means that all three required
 metadata fields were missing.
 
 | code | message                             |
-| ---- | ----------------------------------- |
+| ---: | ----------------------------------- |
 |  1   | Element.symbol missing or not valid |
 |  2   | Element.edge missing or not valid   |
 |  4   | Mono.d\_spacing missing             |
@@ -181,7 +232,7 @@ bitwise.  That is, a return code of 7 means that the first three
 recommendation metadata fields were missing.
 
 | code | message                                             |
-| ---- | --------------------------------------------------- |
+| ---: | --------------------------------------------------- |
 |  1   | Missing recommended metadata field: Facility.name   |
 |  2   | Missing recommended metadata field: Facility.source |
 |  4   | Missing recommended metadata field: Beamline.name   |
