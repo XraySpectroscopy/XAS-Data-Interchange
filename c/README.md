@@ -20,27 +20,27 @@ contents of the XDI file along with a few particularly important items
 
 | attribute       | type               | explanation |
 | --------------- | ------------------ | ----------- |
-| nmetadata       | long               | number of metadata fields |
-| narrays         | long               | number of arrays in data table |
-| npts            | long               | number of rows in data table  |
-| narray\_labels  | long               | number of array labels |
-| error\_lineno   | long               | the line number of a line returning an error |
-| dspacing        | double             | the Mono.d-spacing value              |
-| xdi\_libversion | char*              | the `libxdifile` version number |
-| xdi\_version    | char*              | the XDI file specification version number from the file |
-| extra\_version  | char*              | versioning information for extension fields |
 | filename        | char*              | the name of the XDI file |
-| element         | char*              | the 1, 2, or 3 letter symbol of the element |
-| edge            | char*              | the 1 or 2 letter symbol of the edge |
-| comments        | char*              | the user supplied comments from the XDI file |
-| error\_line     | char*              | the line returning an error  |
-| error\_message  | char*              | the error message |
-| array\_labels   | array of char*     | array of labels for arrays in the data table |
-| array\_units    | array of char*     | array of units for arrays in the data table |
+| nmetadata       | long               | number of metadata fields |
 | meta\_families  | array of char*     | array of family names found among the metadata, indexed to nmetadata |
 | meta\_keywords  | array of char*     | array of keyword names found among the metadata, indexed to nmetadata |
 | meta\_values    | array of char*     | array of values found among the metadata, indexed to nmetadata |
+| narrays         | long               | number of arrays in data table |
+| npts            | long               | number of rows in data table  |
 | array           | of array of double | the data table |
+| narray\_labels  | long               | number of array labels |
+| array\_labels   | array of char*     | array of labels for arrays in the data table |
+| array\_units    | array of char*     | array of units for arrays in the data table |
+| comments        | char*              | the user supplied comments from the XDI file |
+| xdi\_libversion | char*              | the `libxdifile` version number |
+| xdi\_version    | char*              | the XDI file specification version number from the file |
+| extra\_version  | char*              | versioning information for extension fields |
+| dspacing        | double             | the Mono.d-spacing value              |
+| element         | char*              | the Element.symbol value, the 1, 2, or 3 letter symbol of the element |
+| edge            | char*              | the Element.edge value, the the 1 or 2 letter symbol of the edge |
+| error\_lineno   | long               | the line number of a line returning an error |
+| error\_line     | char*              | the line returning an error  |
+| error\_message  | char*              | the error message |
 | nouter          | long               | |
 | outer\_label    | array char*        | |
 | outer\_array    | array of double    | |
