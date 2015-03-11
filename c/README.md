@@ -27,7 +27,7 @@ contents of the XDI file along with a few particularly important items
 | meta\_values    | array of char*     | array of values found among the metadata, indexed to nmetadata |
 | narrays         | long               | number of arrays in data table |
 | npts            | long               | number of rows in data table  |
-| array           | of array of double | the data table |
+| array           | 2D array of double | the data table |
 | narray\_labels  | long               | number of array labels |
 | array\_labels   | array of char*     | array of labels for arrays in the data table |
 | array\_units    | array of char*     | array of units for arrays in the data table |
@@ -147,7 +147,7 @@ Validation tests do not exist for all items in the metadata dictionary
     }
 ```
 
-### Examine arrays from the data table
+### Extract named arrays from the data table
 
 ```C
 	double *enarray, *muarray;
@@ -218,18 +218,18 @@ The return code from `XDI_required_metadata` can be interpreted
 bitwise.  That is, a return code of 7 means that all three required
 metadata fields were missing.
 
-| code | message                             |
-| ---: | ----------------------------------- |
-|  1   | Element.symbol missing or not valid |
-|  2   | Element.edge missing or not valid   |
-|  4   | Mono.d\_spacing missing             |
-|  8   | Mono.d\_spacing not valid           |
+| code | message                                |
+| ---: | -------------------------------------- |
+|  1   | Element.symbol missing or not valid    |
+|  2   | Element.edge missing or not valid      |
+|  4   | Mono.d\_spacing missing                |
+|  8   | Non-numeric value for Mono.d\_spacing  |
 
 ### XDI_recommended_metadata return codes
 
 The return code from `XDI_recommended_metadata` can be interpreted
 bitwise.  That is, a return code of 7 means that the first three
-recommendation metadata fields were missing.
+recommended metadata fields were missing.
 
 | code | message                                             |
 | ---: | --------------------------------------------------- |

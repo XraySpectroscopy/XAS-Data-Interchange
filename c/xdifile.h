@@ -144,6 +144,7 @@ static char *ValidElems[] =
 #define WRN_DATE_FORMAT     512
 #define WRN_DATE_RANGE     1024
 #define WRN_BAD_DSPACING   2048
+#define WRN_BAD_SAMPLE     4096
 
 /* errors reading the XDI file */
 #define ERR_NOTXDI           -1	/* used */

@@ -656,7 +656,7 @@ XDI_required_metadata(XDIFile *xdifile) {
   if (ret & REQ_ELEM)             { strcat(xdifile->error_message, "Element.symbol missing or not valid\n"); }
   if (ret & REQ_EDGE)             { strcat(xdifile->error_message, "Element.edge missing or not valid\n"); }
   if (ret & REQ_NO_DSPACING)      { strcat(xdifile->error_message, "Mono.d_spacing missing\n"); }
-  if (ret & REQ_INVALID_DSPACING) { strcat(xdifile->error_message, "Mono.d_spacing not valid\n"); }
+  if (ret & REQ_INVALID_DSPACING) { strcat(xdifile->error_message, "Non-numerical value fo Mono.d_spacing\n"); }
 
   return ret;
 }
@@ -732,7 +732,7 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
     err = 0;
 
   } else if (strcasecmp(family, "sample") == 0) {
-    err = 0;
+    err = XDI_validate_sample(xdifile, name, value);
 
   } else if (strcasecmp(family, "scan") == 0) {
     err = XDI_validate_scan(xdifile, name, value);
@@ -780,6 +780,26 @@ int XDI_validate_mono(XDIFile *xdifile, char *name, char *value) {
   return err;
 }
 
+int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
+  int err;
+  int regex_status;
+  struct slre_cap caps[2];
+
+  err = 0;
+  strcpy(xdifile->error_message, "");
+
+  if (strcasecmp(name, "temperature") == 0) {
+    regex_status = slre_match("^\\d(\\.\\d)?\\s+[CcFfKk].*$", value, strlen(value), caps, 2, 0);
+    if (regex_status < 0) {
+      strcpy(xdifile->error_message, "Sample.temperature not interpretable as a temperature");
+      err = WRN_BAD_SAMPLE;
+    }
+  }
+
+  return err;
+}
+
+
 int xdi_is_datestring(char *inp) {
   /* tests if input string is a valid datetime timestamp.
      This uses regular expression to check format and validates
@@ -823,6 +843,7 @@ int xdi_is_datestring(char *inp) {
   }
   return 0;
 }
+
 
 int XDI_validate_scan(XDIFile *xdifile, char *name, char *value) {
   int err;
