@@ -203,7 +203,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
     firstline[strcspn(firstline, CRLF)] = '\0';
     nwords = make_words(firstline, cwords, 2);
     if (nwords < 1) {
-      strcpy(xdifile->error_message, "not an XDI file, no versioning information in first line");
+      strcpy(xdifile->error_message, "not an XDI file, no XDI versioning information in first line");
       for (j=0; j<=ilen; j++) {
 	free(textlines[j]);
       }
@@ -213,7 +213,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       return ERR_NOTXDI;
     }
     if (strncasecmp(cwords[0], TOK_VERSION, strlen(TOK_VERSION)) != 0)  {
-      strcpy(xdifile->error_message, "not an XDI file, missing \"XDI/\" token in first line");
+      strcpy(xdifile->error_message, "not an XDI file, no XDI versioning information in first line");
       for (j=0; j<=ilen; j++) {
 	free(textlines[j]);
       }
@@ -653,10 +653,10 @@ XDI_required_metadata(XDIFile *xdifile) {
   }
 
   strcpy(xdifile->error_message, "");
-  if (ret & REQ_ELEM)             { strcat(xdifile->error_message, "\tElement.symbol missing or not valid (1)\n"); }
-  if (ret & REQ_EDGE)             { strcat(xdifile->error_message, "\tElement.edge missing or not valid (2)\n"); }
-  if (ret & REQ_NO_DSPACING)      { strcat(xdifile->error_message, "\tMono.d_spacing missing (4)\n"); }
-  if (ret & REQ_INVALID_DSPACING) { strcat(xdifile->error_message, "\tMono.d_spacing not valid (8)\n"); }
+  if (ret & REQ_ELEM)             { strcat(xdifile->error_message, "Element.symbol missing or not valid\n"); }
+  if (ret & REQ_EDGE)             { strcat(xdifile->error_message, "Element.edge missing or not valid\n"); }
+  if (ret & REQ_NO_DSPACING)      { strcat(xdifile->error_message, "Mono.d_spacing missing\n"); }
+  if (ret & REQ_INVALID_DSPACING) { strcat(xdifile->error_message, "Mono.d_spacing not valid\n"); }
 
   return ret;
 }
@@ -864,7 +864,7 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
 	break;
       }
     }
-    if (err>0) { strcpy(xdifile->error_message, "element.symbol not given or not valid"); }
+    if (err>0) { strcpy(xdifile->error_message, "element.symbol missing or not valid"); }
 
   } else if (strcasecmp(name, "edge") == 0) {
     err = WRN_NOEDGE;
@@ -874,7 +874,7 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
 	break;
       }
     }
-    if (err!=0) { strcpy(xdifile->error_message, "element.edge not given or not valid"); }
+    if (err!=0) { strcpy(xdifile->error_message, "element.edge missing or not valid"); }
 
   } else if (strcasecmp(name, "reference") == 0) {
     err = WRN_REFELEM;
@@ -884,7 +884,7 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
 	break;
       }
     }
-    if (err!=0) { strcpy(xdifile->error_message, "element.reference not given or not valid"); }
+    if (err!=0) { strcpy(xdifile->error_message, "element.reference not valid"); }
 
   } else if (strcasecmp(name, "ref_edge") == 0) {
     err = WRN_REFEDGE;
@@ -894,7 +894,7 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
 	break;
       }
     }
-    if (err!=0) { strcpy(xdifile->error_message, "element.ref_edge not given or not valid"); }
+    if (err!=0) { strcpy(xdifile->error_message, "element.ref_edge not valid"); }
 
   } else {
     err = 0;

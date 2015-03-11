@@ -12,7 +12,7 @@ import and interpret XDI-formatted data.
 
 ## API
 
-### read an XDI file
+### Read an XDI file
 
 Read an XDI file, store it's content in an XDIFile struct, and return
 an integer return code.
@@ -25,9 +25,9 @@ an integer return code.
 	ret = XDI_readfile("mydata.xdi", xdifile);
 ```
 
-### interpret the XDI_readfile error code
+### Interpret the XDI_readfile error code
 
-Interpret the return code by printing teh corresponding error massage
+Interpret the return code by printing the corresponding error message
 to the screen:
 
 ```C
@@ -51,7 +51,7 @@ or warning message from the most recent action.  If an error code
 returns as non-zero, the content of `xdifile->error_message` will
 explain the meaning of the error code in English.
 
-### test for required metadata
+### Test for required metadata
 
 Test whether the **required** metadata was present in the XDI file.
 If `XDI_required_metadata` returns a non-zero value, the file is
@@ -59,15 +59,16 @@ If `XDI_required_metadata` returns a non-zero value, the file is
 
 ```C
 	j = XDI_required_metadata(xdifile);
-	if (j != 0) {
-		printf("\n# check for required metadata -- (requirement code %ld):\n%s\n", j, xdifile->error_message);
+	if (j != 0 ) {
+		printf("\n# check for required metadata -- (requirement code %ld):\n%s\n",
+			j, xdifile->error_message);
 	}
 ```
 
 Run `xdi_reader` agains `baddata/bad_30.xdi` for an example of a
 file which is non-compliant because of missing **required** metadata.
 
-### test for recommended metadata
+### Test for recommended metadata
 
 Test whether the **recommended** metadata was present in the XDI file.
 If `XDI_required_metadata` returns a non-zero value, the file is
@@ -76,8 +77,9 @@ highly useful to the interchange of the data contained in the file.
 
 ```C
 	j = XDI_recommended_metadata(xdifile);
-	if (j != ) {
-		printf("\n# check for recommended metadata -- (recommendation code %ld):\n%s\n", j, xdifile->error_message);
+	if (j != 0 ) {
+		printf("\n# check for recommended metadata -- (recommendation code %ld):\n%s\n",
+			j, xdifile->error_message);
 	}
 ```
 
@@ -131,14 +133,33 @@ translation of a table of error messages into another language.
 
 ### XDI_readfile error codes
 
-| code | message |
-|  -1  | |
-|  -2  | |
+ | code | message                                                      |
+ |------|--------------------------------------------------------------|
+ |  -1  | not an XDI file, no XDI versioning information in first line |
+ |  -2  | <word> -- invalid family name in metadata                    |
+ |  -4  | <word> -- invalid keyword name in metadata                   |
+ |  -8  | <word> -- not formatted as Family.Key: Value                 |
+ | -16  | number of columns changes in data table                      |
+ | -32  | non-numeric value in data table: <word>                      |
+
+Here `<word>` will be the the text that triggered the error.
 
 ### XDI_readfile warning codes
 
-|  1  | |
-|  2  | |
+ |  code | message                                                      |
+ |-------|--------------------------------------------------------------|
+ |    1  | no mono.d_spacing given with angle array                     |
+ |    2  | no line of minus signs '#-----' separating header from data  |
+ |    4  | contains unrecognized header lines                           |
+ |    8  | element.symbol missing or not valid                          |
+ |   16  | element.edge missing or not valid                            |
+ |   32  | element.reference not valid                                  |
+ |   64  | element.ref\_edge  not valid                                 |
+ |  128  | extension field used without versioning information          |
+ |  256  | Column.1 is not "energy" or "angle"                          |
+ |  512  | invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS) |
+ | 1024  | invalid timestamp: date out of valuid range                  |
+
 
 ### XDI_required_metadata return codes
 
@@ -146,9 +167,12 @@ The return code from `XDI_required_metadata` can be interpreted
 bitwise.  That is, a return code of 7 means that all three required
 metadata fields were missing.
 
-|  1  | |
-|  2  | |
-|  4  | |
+ | code | message                             |
+ |------|-------------------------------------|
+ |  1   | Element.symbol missing or not valid |
+ |  2   | Element.edge missing or not valid   |
+ |  4   | Mono.d\_spacing missing             |
+ |  4   | Mono.d\_spacing not valid           |
 
 ### XDI_recommended_metadata return codes
 
@@ -156,8 +180,11 @@ The return code from `XDI_recommended_metadata` can be interpreted
 bitwise.  That is, a return code of 7 means that the first three
 recommendation metadata fields were missing.
 
-|  1  | |
-|  2  | |
-|  4  | |
-|  8  | |
-| 16  | |
+ | code | message                                             |
+ |------|-----------------------------------------------------|
+ |  1   | Missing recommended metadata field: Facility.name   |
+ |  2   | Missing recommended metadata field: Facility.source |
+ |  4   | Missing recommended metadata field: Beamline.name   |
+ |  8   | Missing recommended metadata field: Scan.start_time |
+ | 16   | Missing recommended metadata field: Column.1        |
+
