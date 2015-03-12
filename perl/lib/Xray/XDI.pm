@@ -19,7 +19,7 @@ has 'file' => (is => 'rw', isa => 'Str', traits => [qw(Clone)], default => q{},
 has 'xdifile' => (
 		  is        => 'ro',
 		  traits => [qw(NoClone)],
-		  isa       => 'Xray::XDIFile',
+		  #isa       => 'Xray::XDIFile'|'Undef',
 		  init_arg  => undef,
 		  lazy      => 1,
 		  builder   => '_build_object',
@@ -72,22 +72,32 @@ has 'data'           => (
 				      },
 			);
 
+sub DEMOLISH {
+  my ($self) = @_;
+  return if $self->errorcode;	# is this right?  or does the errorcode need to be passed to _cleanup?
+  return if not defined($self->xdifile);
+  $self->xdifile->_cleanup(0);
+};
+
 sub _build_object {
   my ($self) = @_;
   $self->error(q{});
   $self->ok(1);
   $self->warning(0);
   if (not -e $self->file) {
+    $self->errorcode(1);
     $self->error('The file '.$self->file.' does not exist as XDI');
     $self->ok(0);
     return undef;
   };
   if (not -r $self->file) {
+    $self->errorcode(1);
     $self->error('The file '.$self->file.' cannot be read as XDI');
     $self->ok(0);
     return undef;
   };
   if (-d $self->file) {
+    $self->errorcode(1);
     $self->error($self->file.' is a folder (i.e. not an XDI file)');
     $self->ok(0);
     return undef;

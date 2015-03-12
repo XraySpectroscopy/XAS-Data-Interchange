@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
     printf("Error reading XDI file '%s':\n     %s\t(error code = %ld)\n",
 	   argv[1], xdifile->error_message, ret);
     XDI_cleanup(xdifile, ret);
+    free(xdifile);
     return 1;
   }
 
@@ -106,5 +107,6 @@ int main(int argc, char **argv) {
   /* free memory before leaving */
   free(tdat);
   XDI_cleanup(xdifile, 0);
+  free(xdifile);
   return 0;
 }

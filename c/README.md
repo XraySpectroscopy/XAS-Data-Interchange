@@ -73,6 +73,7 @@ to the screen:
 		printf("Error reading XDI file '%s':\n     %s\t(error code = %ld)\n",
 			argv[1], xdifile->error_message, ret);
 		XDI_cleanup(xdifile, ret);
+		free(xdifile);
 		return 1;
 	}
 
@@ -168,6 +169,7 @@ To deallocate the memory from the XDIFile struct, do this:
 
 ```C
 	XDI_cleanup(xdifile, ret);
+	free(xdifile);
 ```
 
 Here, the second argument is the return code from the call to

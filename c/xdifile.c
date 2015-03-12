@@ -972,7 +972,7 @@ XDI_cleanup(XDIFile *xdifile, long err) {
       (err != ERR_META_KEYNAME) &&
       (err != ERR_META_FORMAT))    {
     free(xdifile->filename);
-  };
+  }
 
   if ((err < -1) || (err == 0)) {
 
@@ -985,7 +985,7 @@ XDI_cleanup(XDIFile *xdifile, long err) {
       free(xdifile->array);
       free(xdifile->array_labels);
       free(xdifile->array_units);
-    };
+    }
 
     for (j = 0; j < xdifile->nmetadata; j++) {
       free(xdifile->meta_families[j]);
@@ -1003,8 +1003,6 @@ XDI_cleanup(XDIFile *xdifile, long err) {
     if (err == 0) {
       free(xdifile->outer_array);
       free(xdifile->outer_breakpts);
-    };
+    }
   }
-
-  free(xdifile);
 }
