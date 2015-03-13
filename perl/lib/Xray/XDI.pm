@@ -25,10 +25,7 @@ has 'xdifile' => (
 		  builder   => '_build_object',
 		 );
 # no need to fiddle with inline_constructor here
-has 'ok'             => (is => 'rw', isa => 'Bool',     traits => [qw(NoClone)], default => 0);
-has 'warning'        => (is => 'rw', isa => 'Bool',     traits => [qw(NoClone)], default => 0);
 has 'errorcode'      => (is => 'rw', isa => 'Int',      traits => [qw(NoClone)], default => 0);
-has 'error'          => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
 has 'errormessage'   => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
 
 has 'filename'       => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
@@ -83,30 +80,24 @@ sub DEMOLISH {
 sub _build_object {
   my ($self) = @_;
   $self->errormessage(q{});
-  $self->ok(1);
-  $self->warning(0);
   if (not $self->file) {
     $self->errorcode(1);
     $self->errormessage('No file specified');
-    $self->ok(0);
     return undef;
   };
   if (not -e $self->file) {
     $self->errorcode(1);
     $self->errormessage('The file '.$self->file.' does not exist');
-    $self->ok(0);
     return undef;
   };
   if (not -r $self->file) {
     $self->errorcode(1);
     $self->errormessage('The file '.$self->file.' cannot be read');
-    $self->ok(0);
     return undef;
   };
   if (-d $self->file) {
     $self->errorcode(1);
     $self->errormessage($self->file.' is a folder (i.e. not an XDI file)');
-    $self->ok(0);
     return undef;
   };
   my $errcode = 0;
@@ -116,34 +107,8 @@ sub _build_object {
 
   return $obj if ($errcode < 0);
 
-  #print $self->file, $/;
-  #$self->trace;
-  #print '>>>>>', $errcode, $/;
-
-  ##### see xdifile.h for error codes
-  ##### see xdifile.c (line 23 and following) for error messages
-  # if ($errcode < 0) {
-  #   my @errors = ();
-  #   foreach my $i (0 .. 10) {
-  #     push @errors, $obj->_errorstring(-1*2**$i) if (abs($errcode) & 2**$i);
-  #   };
-  #   $self->error(join(", ", @errors));
-  #   $self->ok(0);
-  #   return $obj;
-  # };
-  # if ($errcode > 0) {
-  #   my @errors = ();
-  #   foreach my $i (0 .. 4) {
-  #     push @errors, $obj->_errorstring(2**$i) if ($errcode & 2**$i);
-  #   };
-  #   $self->error(join(", ", @errors));
-  #   $self->ok(1);
-  #   $self->warning(1);
-  # };
-
   if (not defined $obj->_filename) {
-    $self->error('unknown problem reading '.$self->file.' as an XDI file');
-    $self->ok(0);
+    $self->errormessage('unknown problem reading '.$self->file.' as an XDI file');
     return $obj;
   };
 
@@ -356,10 +321,10 @@ Import an XDI file:
 
   use Xray::XDI;
   my $xdi = Xray::XDI->new(file=>'data.dat');
-  if ($xdi->ok) {
+  if ($xdi->errorcode == 0) {
     # do stuff
   } else {
-    print "Uh oh! ", $xdi->error, $/;
+    print "Uh oh! ", $xdi->errormessage, $/;
   };
 
 Export an XDI file:
@@ -376,16 +341,17 @@ The fully resolved path to the XDI file.  Setting this triggers the
 importing of the file and the setting of all other attributes from the
 contents of the file.
 
-=item C<ok>
-
-This is true when C<file> is properly imported.  When false, the
-problem will be recorded in the C<error> attribute.
-
-=item C<error>
+=item C<errormessage>
 
 When an XDI file is imported properly, this is an empty string.  When
-import runs into a problem, the explanation will be stroed here as a
-string.
+import or validation runs into a problem, the explanation will be
+stroed here as a string.
+
+=item C<errorcode>
+
+The numeric code returned by C<libxdifile> when a problem is
+encountered.  The C<errorcode> always corresponds to the
+C<errormessage>.
 
 =item C<xdifile>
 
@@ -410,6 +376,10 @@ The element of the absorber.
 =item C<edge>
 
 The absorption edge at which the data were measured.
+
+=item C<dspacing>
+
+The d-spacing (or line spacing) of the mono used in the measurement.
 
 =item C<comments>
 
@@ -466,6 +436,31 @@ Alternately,
   my $xdi = Xray::XDI->new();
   ## later....
   $xdi -> file('/path/to/file');
+
+=item C<required>
+
+Test the XDIFile object for whether it contains the metadata items
+B<required> by the XDI spec, C<Mono.d_spacing>, C<Element.symbol>, and
+C<Element.edge>.
+
+  my $code = $xdi->required;
+  print $xdi->error_message, $/ if ($code);
+
+=item C<recommended>
+
+Test the XDIFile object for whether it contains the metadata items
+B<recommended> by the XDI spec.
+
+  my $code = $xdi->recommended;
+  print $xdi->error_message, $/ if ($code);
+
+=item C<validate>
+
+Validate a sepcific metadata item against its definition in the XDI
+dictionary.
+
+  my $code = $xdi->validate($family, $name, $value);
+  print $xdi->error_message, $/ if ($code);
 
 =item C<labels>
 
@@ -567,17 +562,6 @@ in brackets.
 
 =back
 
-=head1 VALIDATION
-
-If the sole intent is to validate an XDI file, i.e. to determine
-whether or not it conforms to the specification, it should be adequate
-to do something like the following:
-
-  $xdi = Xray::XDI->new('somefile.dat');
-  $is_valid = $xdi->ok;
-  $problem = $xdi->error if not $is_valid;
-  undef $xdi;
-  print "okee dokee!\n" if $is_valid;
 
 =head1 DIAGNOSTICS
 
@@ -607,6 +591,11 @@ L<Moose>, L<MooseX::NonMoose>
 =head1 BUGS AND LIMITATIONS
 
 =over 4
+
+=iten *
+
+need a validate method that reads, runs required and recommend, and
+validates all metadata, returning true if no problems found.
 
 =item *
 

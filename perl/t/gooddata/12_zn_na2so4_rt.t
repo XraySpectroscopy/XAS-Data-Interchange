@@ -17,7 +17,7 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'data', 'zn_znse_rt.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok($xdi->ok,                                                      'file imported properly');
+ok($xdi->errorcode == 0,                                          'file imported properly');
 
 ##### test things that return arrays of strings #################
 

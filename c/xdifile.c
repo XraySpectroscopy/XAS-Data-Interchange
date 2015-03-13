@@ -570,16 +570,22 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 /* ============================================================================ */
 /* array management section                                                     */
 
+#define ENOUGH ((8 * sizeof(int) - 1) / 3 + 2)
+
 _EXPORT(int)
 XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
   /* get array by index (starting at 0) from an XDIFile structure */
   long j;
+  char str[ENOUGH];
   if (n < xdifile->narrays) {
     for (j = 0; j < xdifile->npts; j++) {
       out[j] = xdifile->array[n][j];
     }
     return 0;
   }
+  strcpy(xdifile->error_message, "no array of index ");
+  sprintf(str, "%ld", n);
+  strcat(xdifile->error_message, str);
   return -1;
 }
 
@@ -592,6 +598,8 @@ XDI_get_array_name(XDIFile *xdifile, char *name, double *out) {
       return XDI_get_array_index(xdifile, i, out);
     }
   }
+  strcpy(xdifile->error_message, "no array of name ");
+  strcat(xdifile->error_message, name);
   return -1;
 }
 
@@ -780,6 +788,9 @@ int XDI_validate_mono(XDIFile *xdifile, char *name, char *value) {
   return err;
 }
 
+/* all tests in the Sample familty should return WRN_BAD_SAMPLE if the */
+/* value does not match the definition.  error_message should explain  */
+/* the problem in a way that is appropruiate to the metadata item */
 int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
   int err;
   int regex_status;

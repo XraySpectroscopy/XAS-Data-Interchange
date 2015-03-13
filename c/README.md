@@ -49,6 +49,66 @@ contents of the XDI file along with a few particularly important items
 
 ## API
 
+The API is intended to separate, as much as possible, the chores of
+parsing the file and validating its content.
+
+The main point of entry is the function `XDI_readfile` which creates
+an `XDIFile` struct, then opens and parses a file for XDI content.
+This function will signal an error and issue a useful error message in
+the even that some content of the file precludes its being understood
+as XDI data.  These situations include such things as
+
+ * Missing XDI versioning information in the first line of the file
+ * Non-numeric content in the data table
+ * Variable number of columns in the data table
+ * Headers that cannot be interpreted as XDI metadata
+
+Certain conditions that are non-conforming with the XDI specification
+but which do not preclude partial interpretation of the XDI file
+result in warning messages at this time.
+
+Validating the content of the XDI metadata is treated as a separate
+step.  There are three main functions for this purpose:
+
+* `XDI_required_metadata`: This function tests that the pieces of
+  metadata which are **required** by the specification are present in
+  the file and intepretable.  These three metadata items are
+  `Mono.d_spacing`, `Element.symbol`, and `Element.edge`.  If not
+  present, this function returns a non-zero error code and issues an
+  explanatory error message.
+
+* `XDI_recommended_metadata`: This function tests that the pieces of
+  metadata which are **recommended** by the specification are present
+  in the file and intepretable.  The absence of these items does not
+  make the file non-compliant with the XDI specification, but their
+  absence impacts the utility and quality of the data.  If not
+  present, this function returns a non-zero warning code and issues an
+  explanatory error message.
+
+* `XDI_validate_item`: This tests a specific metadata item to see if
+  its value is interpretable according to its description in the XDI
+  dictionary.  Not all items defined in the dictionary have validation
+  tests.  If the value does not conform to its dictionary definition a
+  non-zero warning code is returned and an explanatory error message
+  is issued.  The purpose of this validation tool is to aid in
+  automated quality assurance.  For example, data by a user for
+  consideration in a curated standards database might require that all
+  automated validation tests pass before the data are passed along to
+  a human for further consideration.
+
+All error messages are returned in English as the content of the
+`error_message` attribute of the `XDIFile` struct.  The
+`error_message` attribute always contains a description of the error
+condition of the most recently performed action.  The relation between
+the returned error/warning codes and teh error messages are tabulated
+below.
+
+The value of separating most validation chores from the parsing of the
+file is that it allows an application to choose to accept structurally
+compliant data then to perform the level of validation appropriate to
+the task at hand.
+
+
 ### Read an XDI file
 
 Read an XDI file, store it's content in an XDIFile struct, and return
@@ -59,7 +119,7 @@ an integer return code.
 	int ret;
 
 	xdifile = malloc(sizeof(XDIFile));
-	ret = XDI_readfile("mydata.xdi", xdifile);
+	ret = XDI_readfile(xdifile, "mydata.xdi");
 ```
 
 ### Interpret the XDI_readfile error code
@@ -162,6 +222,20 @@ The return value is 0 if an array by that name was found in the data
 table.  The return value is -1 if the array cannot be retrieved.
 
 The array names are held in the `Column.N` metadata fields.
+
+### Extract indexed arrays from the data table
+
+```C
+	double *enarray, *muarray;
+	enarray = (double *)calloc(xdifile->npts, sizeof(double));
+	muarray = (double *)calloc(xdifile->npts, sizeof(double));
+    ret = XDI_get_array_index(xdifile, 1, enarray);
+    ret = XDI_get_array_index(xdifile, 2, muarray);
+```
+
+The return value is 0 if an array with that index is in the data
+table.  That is, the index argument must be smaller than the `narrays`
+attribute. The return value is -1 if the array cannot be retrieved.
 
 ### Destroy and deallocate the XDIFile struct
 

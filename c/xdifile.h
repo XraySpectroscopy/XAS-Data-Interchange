@@ -155,5 +155,4 @@ static char *ValidElems[] =
 #define ERR_NONNUMERIC      -32	/* used */
 #define ERR_MEMERROR        -64	/* NOT used */
 
-
 /* _EXPORT(char*) XDI_errorstring(int errcode); */

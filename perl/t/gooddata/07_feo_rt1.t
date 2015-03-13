@@ -17,7 +17,7 @@ BEGIN { use_ok('Xray::XDI') };
 my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'data', 'feo_rt1.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
-ok($xdi->ok,                                                      'file imported properly');
+ok($xdi->errorcode == 0,                                          'file imported properly');
 
 
 ##### test things that return arrays of strings #################
