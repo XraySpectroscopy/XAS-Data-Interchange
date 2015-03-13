@@ -17,20 +17,20 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_15.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_15.xdi flagged as failing to import');
-ok(($xdi->error =~ m{non-numeric value}), 'correctly identified NaN as a problem');
+ok(($xdi->errorcode<0), 'bad_15.xdi flagged as failing to import');
+ok(($xdi->errormessage =~ m{non-numeric value}), 'correctly identified NaN as a problem');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_16.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_16.xdi flagged as failing to import');
-ok(($xdi->error =~ m{non-numeric value}), 'correctly identified string as a problem');
+ok(($xdi->errorcode<0), 'bad_16.xdi flagged as failing to import');
+ok(($xdi->errormessage =~ m{non-numeric value}), 'correctly identified string as a problem');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_17.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_17.xdi flagged as failing to import');
-ok(($xdi->error =~ m{non-numeric value}), 'correctly identified 1.2.3 as a problem');
+ok(($xdi->errorcode<0), 'bad_17.xdi flagged as failing to import');
+ok(($xdi->errormessage =~ m{non-numeric value}), 'correctly identified 1.2.3 as a problem');
 
 
 open(my $COV, '>>', 'coverage.txt');

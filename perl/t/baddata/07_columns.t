@@ -15,26 +15,30 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_07.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->ok), 'bad_07.xdi flagged as ok');
-ok((not $xdi->error), 'no column labels');
+$xdi->recommended;
+ok(($xdi->errorcode>1), 'bad_07.xdi flagged as ok');
+ok(($xdi->errormessage =~ m{Column.1}), 'no column labels');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_08.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->ok), 'bad_08.xdi flagged as ok');
-ok((not $xdi->error), 'to few column labels');
+$xdi->recommended;
+ok(($xdi->errorcode == 0), 'bad_08.xdi flagged as ok');
+ok(($xdi->errormessage =~ m{\A\s*\z}), 'to few column labels');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_09.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->ok), 'bad_09.xdi flagged as ok');
-ok((not $xdi->error), 'to many column labels');
+$xdi->recommended;
+ok(($xdi->errorcode == 0), 'bad_09.xdi flagged as ok');
+ok(($xdi->errormessage =~ m{\A\s*\z}), 'to many column labels');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_10.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->ok), 'bad_10.xdi flagged as ok');
-ok((not $xdi->error), 'column indeces not continuous');
+$xdi->recommended;
+ok(($xdi->errorcode == 0), 'bad_10.xdi flagged as ok');
+ok(($xdi->errormessage =~ m{\A\s*\z}), 'column indeces not continuous');
 
 
 open(my $COV, '>>', 'coverage.txt');

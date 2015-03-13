@@ -17,8 +17,8 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_06.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->warning and $xdi->ok), 'bad_06.xdi flagged with warning');
-ok(($xdi->error =~ m{no line of minus signs}), 'correctly identified lack of minus signs ');
+ok(($xdi->errorcode>0), 'bad_06.xdi flagged with warning');
+ok(($xdi->errormessage =~ m{no line of minus signs}), 'correctly identified lack of minus signs ');
 
 
 open(my $COV, '>>', 'coverage.txt');

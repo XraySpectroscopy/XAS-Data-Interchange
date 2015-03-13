@@ -17,8 +17,8 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_11.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->warning and $xdi->ok), 'bad_11.xdi flagged as failing to import');
-ok(($xdi->error =~ m{contains unrecognized header lines}), 'correctly identified bad comment character in metadata line');
+ok(($xdi->errorcode>0), 'bad_11.xdi flagged with warning on import');
+ok(($xdi->errormessage =~ m{contains unrecognized header lines}), 'correctly identified bad comment character in metadata line');
 
 
 open(my $COV, '>>', 'coverage.txt');

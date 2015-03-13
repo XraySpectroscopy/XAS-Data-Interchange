@@ -15,14 +15,16 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_28.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_28.xdi flagged as failing to import');
-ok(($xdi->error =~ m{invalid timestamp}), 'correctly identified invalid timestamp format');
+ok(($xdi->errorcode == 0), 'bad_28.xdi imports ok');
+$xdi->validate('Scan', 'start_time', $xdi->metadata->{Scan}->{start_time});
+ok(($xdi->errormessage =~ m{invalid timestamp}), 'correctly identified invalid timestamp format');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_29.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_29.xdi flagged as failing to import');
-ok(($xdi->error =~ m{invalid timestamp}), 'correctly identified invalid timestamp month range');
+ok(($xdi->errorcode == 0), 'bad_29.xdi imports ok');
+$xdi->validate('Scan', 'start_time', $xdi->metadata->{Scan}->{start_time});
+ok(($xdi->errormessage =~ m{invalid timestamp}), 'correctly identified invalid timestamp month range');
 
 open(my $COV, '>>', 'coverage.txt');
 print $COV 28, $/;

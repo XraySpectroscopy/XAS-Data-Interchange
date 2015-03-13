@@ -29,6 +29,7 @@ has 'ok'             => (is => 'rw', isa => 'Bool',     traits => [qw(NoClone)],
 has 'warning'        => (is => 'rw', isa => 'Bool',     traits => [qw(NoClone)], default => 0);
 has 'errorcode'      => (is => 'rw', isa => 'Int',      traits => [qw(NoClone)], default => 0);
 has 'error'          => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
+has 'errormessage'   => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
 
 has 'filename'       => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)], default => q{});
 has 'xdi_libversion' => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
@@ -81,30 +82,39 @@ sub DEMOLISH {
 
 sub _build_object {
   my ($self) = @_;
-  $self->error(q{});
+  $self->errormessage(q{});
   $self->ok(1);
   $self->warning(0);
+  if (not $self->file) {
+    $self->errorcode(1);
+    $self->errormessage('No file specified');
+    $self->ok(0);
+    return undef;
+  };
   if (not -e $self->file) {
     $self->errorcode(1);
-    $self->error('The file '.$self->file.' does not exist as XDI');
+    $self->errormessage('The file '.$self->file.' does not exist');
     $self->ok(0);
     return undef;
   };
   if (not -r $self->file) {
     $self->errorcode(1);
-    $self->error('The file '.$self->file.' cannot be read as XDI');
+    $self->errormessage('The file '.$self->file.' cannot be read');
     $self->ok(0);
     return undef;
   };
   if (-d $self->file) {
     $self->errorcode(1);
-    $self->error($self->file.' is a folder (i.e. not an XDI file)');
+    $self->errormessage($self->file.' is a folder (i.e. not an XDI file)');
     $self->ok(0);
     return undef;
   };
   my $errcode = 0;
   my $obj = Xray::XDIFile->new($self->file, $errcode);
   $self->errorcode($errcode);
+  $self->errormessage($obj->_error_message);
+
+  return $obj if ($errcode < 0);
 
   #print $self->file, $/;
   #$self->trace;
@@ -112,24 +122,24 @@ sub _build_object {
 
   ##### see xdifile.h for error codes
   ##### see xdifile.c (line 23 and following) for error messages
-  if ($errcode < 0) {
-    my @errors = ();
-    foreach my $i (0 .. 10) {
-      push @errors, $obj->_errorstring(-1*2**$i) if (abs($errcode) & 2**$i);
-    };
-    $self->error(join(", ", @errors));
-    $self->ok(0);
-    return $obj;
-  };
-  if ($errcode > 0) {
-    my @errors = ();
-    foreach my $i (0 .. 4) {
-      push @errors, $obj->_errorstring(2**$i) if ($errcode & 2**$i);
-    };
-    $self->error(join(", ", @errors));
-    $self->ok(1);
-    $self->warning(1);
-  };
+  # if ($errcode < 0) {
+  #   my @errors = ();
+  #   foreach my $i (0 .. 10) {
+  #     push @errors, $obj->_errorstring(-1*2**$i) if (abs($errcode) & 2**$i);
+  #   };
+  #   $self->error(join(", ", @errors));
+  #   $self->ok(0);
+  #   return $obj;
+  # };
+  # if ($errcode > 0) {
+  #   my @errors = ();
+  #   foreach my $i (0 .. 4) {
+  #     push @errors, $obj->_errorstring(2**$i) if ($errcode & 2**$i);
+  #   };
+  #   $self->error(join(", ", @errors));
+  #   $self->ok(1);
+  #   $self->warning(1);
+  # };
 
   if (not defined $obj->_filename) {
     $self->error('unknown problem reading '.$self->file.' as an XDI file');
@@ -288,6 +298,31 @@ sub get_iarray {
 sub token {
   my ($self, $tok) = @_;
   return $self->xdifile->_token($tok);
+};
+
+## methods for validation
+
+sub required {
+  my ($self) = @_;
+  my $i = $self->xdifile->_required_metadata;
+  $self->errorcode($i);
+  $self->errormessage($self->xdifile->_error_message);
+  return $i;
+};
+sub recommended {
+  my ($self) = @_;
+  my $i = $self->xdifile->_recommended_metadata;
+  $self->errorcode($i);
+  $self->errormessage($self->xdifile->_error_message);
+  return $i;
+};
+
+sub validate {
+  my ($self, $family, $name, $value) = @_;
+  my $i = $self->xdifile->_validate_item($family, $name, $value);
+  $self->errorcode($i);
+  $self->errormessage($self->xdifile->_error_message);
+  return $i;
 };
 
 

@@ -41,7 +41,7 @@ ok( (($keywords[0] eq 'collimation')          and
 
 ##### test get_item #############################################
 ok($xdi->get_item(qw(Mono name)) eq 'Si(111)',                     'get_item: fetching Mono.name');
-ok($xdi->get_item(qw(Facility source)) eq 'bend magnet',           'get_item: fetching Facility.xray_source');
+ok($xdi->get_item(qw(Facility xray_source)) eq 'bend magnet',           'get_item: fetching Facility.xray_source');
 
 ##### test get_array and get_iarray ##############################
 my @values = (.8856322E+04, .9656931E+00);

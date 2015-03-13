@@ -342,10 +342,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
 	/* MONO D-SPACING */
 	} else if (strcasecmp(mkey, TOK_DSPACE) == 0) {
-	  if (0 != xdi_strtod(mval, &dval)) {
+	  if (0 == xdi_strtod(mval, &dval)) {
 	    xdifile->dspacing = dval;
 	  } else {
-	    xdifile->dspacing = -1;
+	    xdifile->dspacing = -1.0;
 	  };
 
 	/* OUTER ARRAY NAME */
