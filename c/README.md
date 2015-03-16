@@ -8,7 +8,9 @@ readers in different languages is guaranteed to be identical (or at
 least very similar).
 
 See `xdi_reader.c` for an example of a C program using `libxdifile` to
-import and interpret XDI-formatted data.
+import and interpret XDI-formatted data.  See the python and perl
+wrappers for examples of language specific implementations which use
+`libxdifile`.
 
 `libxdifile` was written by Matt Newville and Bruce Ravel.
 
@@ -16,7 +18,7 @@ import and interpret XDI-formatted data.
 
 This is the content of the XDIFile struct.  It will contain the entire
 contents of the XDI file along with a few particularly important items
-(d-spaing, element, and edge).
+(d-spacing, element, and edge).
 
 | attribute       | type               | explanation |
 | --------------- | ------------------ | ----------- |
@@ -100,7 +102,7 @@ All error messages are returned in English as the content of the
 `error_message` attribute of the `XDIFile` struct.  The
 `error_message` attribute always contains a description of the error
 condition of the most recently performed action.  The relation between
-the returned error/warning codes and teh error messages are tabulated
+the returned error/warning codes and the error messages are tabulated
 below.
 
 The value of separating most validation chores from the parsing of the
