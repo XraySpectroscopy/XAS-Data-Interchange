@@ -19,8 +19,8 @@ my $xdi  = Xray::XDI->new(file=>$file);
 #my $xdi  = Xray::XDI->new;
 #$xdi->file($file);
 
-ok((not $xdi->ok), 'bad_01.xdi flagged as failing to import');
-ok(($xdi->error =~ m{not an XDI}), 'correctly identified problem');
+ok(($xdi->errorcode<0), 'bad_01.xdi flagged as failing to import');
+ok(($xdi->errormessage =~ m{not an XDI}), 'correctly identified problem');
 
 open(my $COV, '>', 'coverage.txt');
 print $COV 1, $/;

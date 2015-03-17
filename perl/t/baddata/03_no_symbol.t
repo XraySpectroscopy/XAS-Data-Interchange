@@ -17,14 +17,16 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_03.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->warning and $xdi->ok), 'bad_03.xdi flagged with a warning');
-ok(($xdi->error =~ m{no element.symbol}), 'correctly identified missing element symbol');
+$xdi->required;
+ok(($xdi->errorcode>0), 'bad_03.xdi flagged with a warning');
+ok(($xdi->errormessage =~ m{Element.symbol missing}), 'correctly identified missing element symbol');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_05.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok(($xdi->warning and $xdi->ok), 'bad_05.xdi flagged with a warning');
-ok(($xdi->error =~ m{no element.symbol}), 'correctly identified invalid element symbol');
+$xdi->required;
+ok(($xdi->errorcode>0), 'bad_05.xdi flagged with a warning');
+ok(($xdi->errormessage =~ m{Element.symbol missing}), 'correctly identified invalid element symbol');
 
 
 open(my $COV, '>>', 'coverage.txt');

@@ -31,8 +31,11 @@ bad_24.xdi   error msg      Y     Header 'Family.Key: Value' -- Family starts wi
 bad_25.xdi   file read(5)   Y     No extra version given
 bad_26.xdi   file read(6)   Y     No user comment
 bad_27.xdi   file read(6)   Y     Line of '////', but no user comment
-bad_28.xdi   error msg      Y     incorrectly format date-time
-bad_29.xdi   error msg      Y     date-time has invalid range (month > 12)
+bad_28.xdi   file read(1)   Y     incorrectly format date-time
+bad_29.xdi   file read(1)   Y     date-time has invalid range (month > 12)
+bad_30.xdi   file read(1)   Y     Invalid element.edge and element.symbol, test accumulation in XDI_required_metadata
+bad_31.xdi   file read(1)   Y     Invalid value for d-spacing, trigger error in XDI_required_metadata
+bad_32.xdi   file read(7)   Y     Missing recommended fields
 
 Notes:
   1. files read, return value > 0, indicating Warning  
@@ -41,3 +44,4 @@ Notes:
   4. keys are allowed to start with a number...
   5. extra version is left as empty string ''
   6. user comment is left as empty string ''
+  7. files read, XDI_recommended_metadata returns non-0

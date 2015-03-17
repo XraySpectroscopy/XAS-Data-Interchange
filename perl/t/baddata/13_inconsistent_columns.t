@@ -17,14 +17,14 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_13.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_13.xdi flagged as failing to import');
-ok(($xdi->error =~ m{number of columns changes}), 'correctly identified too few columns');
+ok(($xdi->errorcode<0), 'bad_13.xdi flagged as failing to import');
+ok(($xdi->errormessage =~ m{number of columns changes}), 'correctly identified too few columns');
 
 $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_14.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
-ok((not $xdi->ok), 'bad_14.xdi flagged as failing to import');
-ok(($xdi->error =~ m{number of columns changes}), 'correctly identified too many columns');
+ok(($xdi->errorcode<0), 'bad_14.xdi flagged as failing to import');
+ok(($xdi->errormessage =~ m{number of columns changes}), 'correctly identified too many columns');
 
 
 open(my $COV, '>>', 'coverage.txt');

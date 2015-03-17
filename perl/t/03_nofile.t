@@ -14,9 +14,9 @@ BEGIN { use_ok('Xray::XDI') };
 my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', 'data', 'co_metal_rt.xdiX');
 my $xdi  = Xray::XDI->new(file=>$file);
-ok($xdi->error =~ m{does not exist},                        'file not exist');
+ok($xdi->errormessage =~ m{does not exist},                        'file not exist');
 
 $file = File::Spec->catfile($here, '..', '..', 'data');
 $xdi  = Xray::XDI->new(file=>$file);
-ok($xdi->error =~ m{is a folder},                           'is a folder');
+ok($xdi->errormessage =~ m{is a folder},                           'is a folder');
 

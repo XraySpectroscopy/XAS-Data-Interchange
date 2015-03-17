@@ -148,13 +148,31 @@ SV* new(char* class, char* file, SV* errcode) {
   return obj_ref;
 }
 
+int _validate_item(SV* obj, char* family, char *name, char *value) {
+  int ret;
+  ret = XDI_validate_item((INT2PTR(XDIFile*, SvIV(SvRV(obj)))), family, name, value);
+  return ret;
+}
+
+int _required_metadata(SV* obj) {
+  int ret;
+  ret = XDI_required_metadata((INT2PTR(XDIFile*, SvIV(SvRV(obj)))));
+  return ret;
+}
+
+int _recommended_metadata(SV* obj) {
+  int ret;
+  ret = XDI_recommended_metadata((INT2PTR(XDIFile*, SvIV(SvRV(obj)))));
+  return ret;
+}
+
 void _cleanup(SV* obj, long err) {
   XDI_cleanup((INT2PTR(XDIFile*, SvIV(SvRV(obj)))), err);
 }
 
-char* _errorstring(SV* obj, int code) {
-  return XDI_errorstring(code);
-}
+/* char* _errorstring(SV* obj, int code) { */
+/*  return XDI_errorstring(code); */
+/* } */
 
 void _valid_edges(SV* obj) {
   long i;
@@ -240,6 +258,10 @@ double _dspacing(SV* obj) {
 
 char* _comments(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->comments;
+}
+
+char* _error_message(SV* obj) {
+       return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->error_message;
 }
 
 long _nmetadata(SV* obj) {

@@ -17,8 +17,8 @@ my $here = dirname($0);
 my $file = File::Spec->catfile($here, '..', '..', 'data', 'co_metal_rt.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 ok($xdi =~ m{Xray::XDI},                           'created Xray::XDI object');
-ok($xdi->ok,                                       'ok flag is true');
-ok($xdi->error eq '',                              'error text is empty');
+ok(($xdi->errorcode == 0),                         'errorcode 0');
+ok(($xdi->errormessage =~ m{\A\s*\z}),             'error text is empty');
 
 ok( $xdi->token('comment') eq '#',                 'token: comment');
 ok( $xdi->token('delimiter') eq ':',               'token: delimiter');
