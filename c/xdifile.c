@@ -678,40 +678,38 @@ XDI_required_metadata(XDIFile *xdifile) {
 
 _EXPORT(int)
 XDI_recommended_metadata(XDIFile *xdifile) {
-  int ret, i;
+  int ret, i, n, errcode, found;
+  int n_rec = sizeof(RecommendedMetadata)/sizeof(char*);
+  char *words[2];
+  char thisword[100] = {'\0'};
+  int nwords;
 
-  ret = pow(2,5)-1;
+  /* ret = pow(2,n_rec+1)-1; */
+  ret = (1<<(n_rec)) - 1;
   strcpy(xdifile->error_message, "");
 
-  for (i=0; i < xdifile->nmetadata; i++) {
-    if ((strcasecmp(xdifile->meta_families[i], "facility") == 0) && (strcasecmp(xdifile->meta_keywords[i], "name") == 0)) {
-      ret = ret-1;		/* 2^0 */
-      continue;
+
+  for (n=0; n<n_rec; n++) {
+    found = 0;
+    /* errcode = pow(2,n); */
+    errcode = 1<<n;
+    /* printf("%d  %d  %s\n", ret, errcode, RecommendedMetadata[n]); */
+    strcpy(thisword, RecommendedMetadata[n]);
+    nwords = split_on(thisword, TOK_DOT, words);
+
+    for (i=0; i < xdifile->nmetadata; i++) {
+      if ((strcasecmp(xdifile->meta_families[i], words[0]) == 0) && (strcasecmp(xdifile->meta_keywords[i], words[1]) == 0)) {
+    	ret = ret-errcode;
+	found = 1;
+    	break;
+      }
     }
-    if ((strcasecmp(xdifile->meta_families[i], "facility") == 0) && (strcasecmp(xdifile->meta_keywords[i], "xray_source") == 0)) {
-      ret = ret-2;		/* 2^1 */
-      continue;
-    }
-    if ((strcasecmp(xdifile->meta_families[i], "beamline") == 0) && (strcasecmp(xdifile->meta_keywords[i], "name") == 0)) {
-      ret = ret-4;		/* 2^2 */
-      continue;
-    }
-    if ((strcasecmp(xdifile->meta_families[i], "scan") == 0)     && (strcasecmp(xdifile->meta_keywords[i], "start_time") == 0)) {
-      ret = ret-8;		/* 2^3 */
-      continue;
-    }
-    if ((strcasecmp(xdifile->meta_families[i], "column") == 0)   && (strcasecmp(xdifile->meta_keywords[i], "1") == 0)) {
-      ret = ret-16;		/* 2^4 */
-      continue;
+    if (found == 0) {
+      strcat(xdifile->error_message, "Missing recommended metadata field: ");
+      strcat(xdifile->error_message, RecommendedMetadata[n]);
+      strcat(xdifile->error_message, "\n");
     }
   }
-  /* printf("%d\n", ret); */
-
-  if (ret &  1) { strcat(xdifile->error_message, "Missing recommended metadata field: Facility.name\n"); }
-  if (ret &  2) { strcat(xdifile->error_message, "Missing recommended metadata field: Facility.source\n"); }
-  if (ret &  4) { strcat(xdifile->error_message, "Missing recommended metadata field: Beamline.name\n"); }
-  if (ret &  8) { strcat(xdifile->error_message, "Missing recommended metadata field: Scan.start_time\n"); }
-  if (ret & 16) { strcat(xdifile->error_message, "Missing recommended metadata field: Column.1\n"); }
 
   return ret;
 }
