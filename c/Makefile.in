@@ -38,7 +38,7 @@ LINKXDIF = -L$(libdir) -L. -lxdifile
 
 all: $(READER) $(LIBXDIF_STATIC) $(LIBXDIF_SHARED)
 
-$(READER).o: $(READER).c
+$(READER).o: $(READER).c $(XDIHEADERS)
 
 .PHONY: clean install default
 
