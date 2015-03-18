@@ -156,3 +156,14 @@ static char *ValidElems[] =
 #define ERR_MEMERROR        -64	/* NOT used */
 
 /* _EXPORT(char*) XDI_errorstring(int errcode); */
+
+
+/* List of recommended metadata items */
+static char *RecommendedMetadata[] =
+  {                             /* these are the bits of the errorcode returned by XDI_recommended_metadata */
+    "Facility.name",		/* 2^0 */
+    "Facility.xray_source",	/* 2^1 */
+    "Beamline.name",		/* 2^2 */
+    "Scan.start_time",		/* 2^3 */
+    "Column.1",			/* 2^4 */
+  };
