@@ -721,8 +721,9 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
   struct slre_cap caps[1];
-  /* char* fam, ev; */
-  char regex[20] = {'\0'};
+  char fam[20] = {'\0'};
+  char ev[100] = {'\0'};
+  /* char regex[20] = {'\0'}; */
 
   /* printf("======== %s %s %s\n", family, name, value); */
 
@@ -752,8 +753,18 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
 
   } else {
     err = 0;
-    sprintf(regex, "%s", family);
-    regex_status = slre_match(regex, xdifile->extra_version, strlen(xdifile->extra_version), caps, 1, 0);
+    /* I can't figure out how to get SLRE's (?i) to work, so let's do this instead ... */
+    strcpy(fam, family);
+    for (i = 0; fam[i]; i++){
+      fam[i] = tolower(fam[i]);
+    }
+    strcpy(ev, xdifile->extra_version);
+    for (i = 0; ev[i]; i++){
+      ev[i] = tolower(ev[i]);
+    }
+    regex_status = slre_match(fam, ev, strlen(ev), caps, 1, 0);
+    /* sprintf(regex, "(?i)%s", family); */
+    /* regex_status = slre_match(regex, xdifile->extra_version, strlen(xdifile->extra_version), caps, 1, 0); */
     if (regex_status < 0) {
       err = WRN_NOEXTRA;
       strcpy(xdifile->error_message, "extension field used without versioning information");
