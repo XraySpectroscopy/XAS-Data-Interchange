@@ -32,7 +32,7 @@ has 'filename'       => (is => 'rw', isa => 'Str',      traits => [qw(NoClone)],
 has 'xdi_libversion' => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
 has 'xdi_version'    => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
 has 'extra_version'  => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
-has 'element'        => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
+has 'element'        => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{}); #, trigger => sub{pushback(@_, 'element' )},);
 has 'edge'           => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
 has 'dspacing'       => (is => 'rw', isa => 'Num',      traits => [qw(Clone)],   default => 0);
 has 'comments'       => (is => 'rw', isa => 'Str',      traits => [qw(Clone)],   default => q{});
@@ -153,6 +153,23 @@ sub _build_object {
   return $obj;
 };
 
+
+sub pushback {
+  my ($self, $new, $old, $which) = @_;
+  #return if (any {$_ eq $which} qw(nleg ne edge gam_ch kf mu rnorman version exch rs_int vint));
+  my $method = '_set_' . lc($which);
+  if ($self->meta->get_attribute($which)->type_constraint eq 'Num') {
+    $self->xdifile->$method(1.0*$new);
+  } elsif ($self->meta->get_attribute($which)->type_constraint eq 'Bool') {
+    my $val = ($new) ? 1 : 0;
+    $self->xdifile->$method($val);
+    $self->phpad($self->phpad); # what the hell? why does this get unset when setting a boolean????
+  } else {
+    $self->xdifile->$method($new);
+  };
+};
+
+
 # use Term::ANSIColor qw(:constants);
 # sub trace {
 #   my ($self) = @_;
@@ -178,11 +195,19 @@ sub _build_object {
 
 sub valid_edges {
   my ($self) = @_;
-  return $self->xdifile->_valid_edges;
+  return Xray::XDIFile->_valid_edges;
 };
 sub valid_elements {
   my ($self) = @_;
-  return $self->xdifile->_valid_elements;
+  return Xray::XDIFile->_valid_elements;
+};
+sub required_metadata {
+  my ($self) = @_;
+  return qw(Mono.d_spacing Element.symbol Element.edge);
+};
+sub recommended_metadata {
+  my ($self) = @_;
+  return Xray::XDIFile->_recommended_metadata_list;
 };
 
 sub labels {
@@ -285,6 +310,7 @@ sub recommended {
 sub validate {
   my ($self, $family, $name, $value) = @_;
   my $i = $self->xdifile->_validate_item($family, $name, $value);
+  ##print join("|", $i, $family,  $name,  $value, '<'), $/;
   $self->errorcode($i);
   $self->errormessage($self->xdifile->_error_message);
   return $i;
@@ -296,6 +322,16 @@ sub serialize {
   my $copy = $self->clone;
   $copy->data({});
   local $Data::Dumper::Indent = 0;
+  my $string = $copy->dump(3);
+  undef $copy;
+  return $string;
+};
+
+sub serialization {
+  my ($self) = @_;
+  my $copy = $self->clone;
+  $copy->data({});
+  local $Data::Dumper::Indent = 1;
   my $string = $copy->dump(3);
   undef $copy;
   return $string;

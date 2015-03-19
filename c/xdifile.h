@@ -167,3 +167,6 @@ static char *RecommendedMetadata[] =
     "Scan.start_time",		/* 2^3 */
     "Column.1",			/* 2^4 */
   };
+
+static char *DefinedFamilies[] =
+  { "facility", "beamline", "mono", "detector", "sample", "scan", "element", "column" };

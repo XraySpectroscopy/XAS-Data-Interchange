@@ -584,7 +584,6 @@ XDI_get_array_index(XDIFile *xdifile, long n, double *out) {
     return 0;
   }
   strcpy(xdifile->error_message, "no array of index ");
-  sprintf(str, "%ld", n);
   strcat(xdifile->error_message, str);
   return -1;
 }
@@ -718,10 +717,12 @@ XDI_recommended_metadata(XDIFile *xdifile) {
 _EXPORT(int)
 XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
   int regex_status;
-  int err, j;
+  int err, i, j;
   int n_edges = sizeof(ValidEdges)/sizeof(char*);
   int n_elems = sizeof(ValidElems)/sizeof(char*);
   struct slre_cap caps[1];
+  /* char* fam, ev; */
+  char regex[20] = {'\0'};
 
   /* printf("======== %s %s %s\n", family, name, value); */
 
@@ -751,7 +752,8 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
 
   } else {
     err = 0;
-    regex_status = slre_match(family, xdifile->extra_version, strlen(xdifile->extra_version), caps, 1, 0);
+    sprintf(regex, "%s", family);
+    regex_status = slre_match(regex, xdifile->extra_version, strlen(xdifile->extra_version), caps, 1, 0);
     if (regex_status < 0) {
       err = WRN_NOEXTRA;
       strcpy(xdifile->error_message, "extension field used without versioning information");
@@ -935,16 +937,20 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
 }
 
 int XDI_validate_column(XDIFile *xdifile, char *name, char *value) {
-  int err, re1, re2;
+  int err, re, i;
   struct slre_cap caps[2];
 
   err = 0;
   strcpy(xdifile->error_message, "");
 
   if (strcasecmp(name, "1") == 0) {
-    re1 = slre_match("energy", value, strlen(value), caps, 2, 0);
-    re2 = slre_match("angle",  value, strlen(value), caps, 2, 0);
-    if ((re1 < 0) && (re2 < 0)) {
+    /* convert value to lower case for this comparison, does SLRE's case insensitive token ever work? */
+    for (i = 0; value[i]; i++){
+      value[i] = tolower(value[i]);
+    }
+    re = slre_match("(energy|angle)", value, strlen(value), caps, 2, 0);
+    /* re = slre_match("(?i)(energy|angle)",  value, strlen(value), caps, 2, 0); */
+    if (re < 0) {
       err = err + WRN_BAD_COL1;
       strcpy(xdifile->error_message, "Column.1 is not \"energy\" or \"angle\"");
     }

@@ -127,6 +127,7 @@ __C__
 #  define Newx(v,n,t) New(0,v,n,t)
 #endif
 
+#include <string.h>
 #include "xdifile.h"
 
 SV* new(char* class, char* file, SV* errcode) {
@@ -148,7 +149,7 @@ SV* new(char* class, char* file, SV* errcode) {
   return obj_ref;
 }
 
-int _validate_item(SV* obj, char* family, char *name, char *value) {
+int _validate_item(SV* obj, char* family, char* name, char* value) {
   int ret;
   ret = XDI_validate_item((INT2PTR(XDIFile*, SvIV(SvRV(obj)))), family, name, value);
   return ret;
@@ -192,6 +193,15 @@ void _valid_elements(SV* obj) {
   }
   Inline_Stack_Done;
 }
+void _recommended_metadata_list(SV* obj) {
+  long i;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  for (i=0; i < sizeof(RecommendedMetadata)/sizeof(RecommendedMetadata[0]); i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( RecommendedMetadata[i], 0 )));
+  }
+  Inline_Stack_Done;
+}
 
 char* _token(SV* obj, char* tok) {
   if (strncmp(tok, "comment", 3) == 0) {
@@ -232,6 +242,10 @@ char* _token(SV* obj, char* tok) {
 char* _filename(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->filename;
 }
+void _set_filename(SV* obj, char* c) {
+       strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->filename, c);
+}
+
 
 char* _xdi_libversion(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->xdi_libversion;
@@ -243,21 +257,36 @@ char* _xdi_version(SV* obj) {
 char* _extra_version(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->extra_version;
 }
+void _set_extra_version(SV* obj, char* c) {
+       strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->extra_version, c);
+}
 
 char* _element(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->element;
+}
+void _set_element(SV* obj, char* c) {
+       strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->element, c);
 }
 
 char* _edge(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->edge;
 }
+void _set_edge(SV* obj, char* c) {
+       strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->edge, c);
+}
 
 double _dspacing(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->dspacing;
 }
+void _set_dspacing(SV* obj, double d) {
+       (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->dspacing = d;
+}
 
 char* _comments(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->comments;
+}
+void _set_comments(SV* obj, char* c) {
+       strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->comments, c);
 }
 
 char* _error_message(SV* obj) {
@@ -266,6 +295,9 @@ char* _error_message(SV* obj) {
 
 long _nmetadata(SV* obj) {
        return (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->nmetadata;
+}
+void _set_nmetadata(SV* obj, long n) {
+       (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->nmetadata = n;
 }
 
 void _meta_families(SV* obj) {
@@ -277,6 +309,9 @@ void _meta_families(SV* obj) {
   }
   Inline_Stack_Done;
 }
+void _set_meta_family(SV* obj, int i, char* c) {
+  strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_families[i], c);
+}
 
 void _meta_keywords(SV* obj) {
   long i;
@@ -287,6 +322,9 @@ void _meta_keywords(SV* obj) {
   }
   Inline_Stack_Done;
 }
+void _set_meta_keyword(SV* obj, int i, char* c) {
+  strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_keywords[i], c);
+}
 
 void _meta_values(SV* obj) {
   long i;
@@ -296,6 +334,9 @@ void _meta_values(SV* obj) {
     Inline_Stack_Push(sv_2mortal(newSVpv( (INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_values[i], 0 )));
   }
   Inline_Stack_Done;
+}
+void _set_meta_value(SV* obj, int i, char* c) {
+  strcpy((INT2PTR(XDIFile*, SvIV(SvRV(obj))))->meta_values[i], c);
 }
 
 long _npts(SV* obj) {
