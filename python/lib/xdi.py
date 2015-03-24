@@ -6,13 +6,9 @@ import os
 import ctypes
 import ctypes.util
 
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
-try:
-    from numpy import array, exp, log, sin, arcsin
-    HAS_NUMPY = True
-except ImportError:
-    HAS_NUMPY = False
+from numpy import array, exp, log, sin, arcsin
 
 PI = 3.14159265358979323846
 RAD2DEG  = 180.0/PI
@@ -38,8 +34,9 @@ class XDIFileStruct(ctypes.Structure):
                 ('edge',          ctypes.c_char_p),
                 ('comments',      ctypes.c_char_p),
                 ('error_line',    ctypes.c_char_p),
+                ('error_message', ctypes.c_char_p),
                 ('array_labels',  ctypes.c_void_p),
-                ('outer_label',   ctypes.c_char_p),                
+                ('outer_label',   ctypes.c_char_p),
                 ('array_units',   ctypes.c_void_p),
                 ('meta_families', ctypes.c_void_p),
                 ('meta_keywords', ctypes.c_void_p),
@@ -62,7 +59,6 @@ def get_xdilib():
     """make initial connection to XDI dll"""
     global XDILIB
     if XDILIB is None:
-        add_dot2path()
         dllpath  = ctypes.util.find_library('xdifile')
         load_dll = ctypes.cdll.LoadLibrary
         if os.name == 'nt':
@@ -70,6 +66,7 @@ def get_xdilib():
         XDILIB = load_dll(dllpath)
         XDILIB.XDI_errorstring.restype   = ctypes.c_char_p
     return XDILIB
+
 
 class XDIFileException(Exception):
     """XDI File Exception: General Errors"""
@@ -107,29 +104,36 @@ class XDIFile(object):
 
     def write(self, filename):
         "write out an XDI File"
-        print 'Writing XDI file not currently supported'
+        print( 'Writing XDI file not currently supported')
 
     def read(self, filename=None):
         """read validate and parse an XDI datafile into python structures
         """
         if filename is None and self.filename is not None:
             filename = self.filename
-
         pxdi = ctypes.pointer(XDIFileStruct())
         self.status = out = self.xdilib.XDI_readfile(filename, pxdi)
         if out < 0:
-            msg = self.xdilib.XDI_errorstring(out)
+            msg =  self.xdilib.XDI_errorstring(out)
+            self.xdilib.XDI_cleanup(pxdi, out)
             msg = 'Error reading XDIFile %s\n%s' % (filename, msg)
             raise XDIFileException(msg)
 
         xdi = pxdi.contents
         for attr in dict(xdi._fields_):
             setattr(self, attr, getattr(xdi, attr))
-
         pchar = ctypes.c_char_p
         self.array_labels = (self.narrays*pchar).from_address(xdi.array_labels)[:]
-        self.array_units  = (self.narrays*pchar).from_address(xdi.array_units)[:]
-        
+        arr_units  = (self.narrays*pchar).from_address(xdi.array_units)[:]
+        self.array_units = []
+        self.array_addrs = []
+        for unit in arr_units:
+            addr = ''
+            if '||' in unit:
+                unit, addr = [x.strip() for x in unit.split('||', 1)]
+            self.array_units.append(unit)
+            self.array_addrs.append(addr)
+
         mfams = (self.nmetadata*pchar).from_address(xdi.meta_families)[:]
         mkeys = (self.nmetadata*pchar).from_address(xdi.meta_keywords)[:]
         mvals = (self.nmetadata*pchar).from_address(xdi.meta_values)[:]
@@ -143,7 +147,7 @@ class XDIFile(object):
 
         parrays = (xdi.narrays*ctypes.c_void_p).from_address(xdi.array)[:]
         rawdata = [(xdi.npts*ctypes.c_double).from_address(p)[:] for p in parrays]
-        
+
         nout = xdi.nouter
         outer, breaks = [], []
         if nout > 1:
@@ -153,17 +157,16 @@ class XDIFile(object):
             delattr(self, attr)
         self.outer_array    = array(outer)
         self.outer_breakpts = array(breaks)
-        
-        
-        if HAS_NUMPY:
-            rawdata = array(rawdata)
-            rawdata.shape = (self.narrays, self.npts)
+
+
+        rawdata = array(rawdata)
+        rawdata.shape = (self.narrays, self.npts)
         self.rawdata = rawdata
         self._assign_arrays()
-
         for attr in ('nmetadata', 'narray_labels', 'meta_families',
                      'meta_keywords', 'meta_values', 'array'):
             delattr(self, attr)
+        self.xdilib.XDI_cleanup(pxdi, 0)
 
     def _assign_arrays(self):
         """assign data arrays for principle data attributes:
@@ -173,14 +176,10 @@ class XDIFile(object):
         xunits = 'eV'
         xname = None
         ix = -1
-        if HAS_NUMPY:
-            self.rawdata = array(self.rawdata)
+        self.rawdata = array(self.rawdata)
 
         for idx, name in enumerate(self.array_labels):
-            if HAS_NUMPY:
-                dat = self.rawdata[idx,:]
-            else:
-                dat = [d[idx] for d in self.rawdata]
+            dat = self.rawdata[idx,:]
             setattr(self, name, dat)
             if name in ('energy', 'angle'):
                 ix = idx
@@ -189,12 +188,15 @@ class XDIFile(object):
                 if units is not None:
                     xunits = units
 
-        if not HAS_NUMPY:
-            return
-
         # convert energy to angle, or vice versa
-        if ix >= 0 and 'd_spacing' in self.attrs['mono']:
-            dspace = float(self.attrs['mono']['d_spacing'])
+        monodat = {}
+        if 'mono' in  self.attrs:
+            monodat = self.attrs['mono']
+        elif 'monochromator' in  self.attrs:
+            monodat = self.attrs['monochromator']
+
+        if ix >= 0 and 'd_spacing' in monodat:
+            dspace = float(monodat['d_spacing'])
             if dspace < 0: dspace = 0.001
             omega = PLANCK_HC/(2*dspace)
             if xname == 'energy' and not hasattr(self, 'angle'):
