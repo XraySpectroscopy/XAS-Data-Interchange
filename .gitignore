@@ -11,7 +11,6 @@ c/config.h
 c/config.h.in
 c/config.log
 c/config.status
-c/configure
 c/libxdifile.so
 c/stamp-h1
 c/xdi_reader
