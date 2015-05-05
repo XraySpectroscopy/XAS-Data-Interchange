@@ -171,10 +171,6 @@ void _cleanup(SV* obj, long err) {
   XDI_cleanup((INT2PTR(XDIFile*, SvIV(SvRV(obj)))), err);
 }
 
-/* char* _errorstring(SV* obj, int code) { */
-/*  return XDI_errorstring(code); */
-/* } */
-
 void _valid_edges(SV* obj) {
   long i;
   Inline_Stack_Vars;
