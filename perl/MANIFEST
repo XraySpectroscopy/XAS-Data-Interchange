@@ -1,4 +1,5 @@
 Changes
+example/xdi_reader.pl
 lib/Xray/XDI.pm
 lib/Xray/XDI/WriterPP.pm
 lib/Xray/XDIFile.pm
@@ -14,10 +15,14 @@ t/baddata/01_no_xdi_line.t
 t/baddata/02_no_edge.t
 t/baddata/03_no_symbol.t
 t/baddata/06_no_minus_signs.t
+t/baddata/07_columns.t
 t/baddata/11_bad_comment_char.t
 t/baddata/12_no_dspacing.t
 t/baddata/13_inconsistent_columns.t
 t/baddata/15_nonnumeric.t
+t/baddata/18_headers.t
+t/baddata/25_things_missing.t
+t/baddata/28_datatime.t
 t/baddata/99_coverage.t
 t/baddata/test_coverage.sh
 t/gooddata/01_cu_metal_10k.t
