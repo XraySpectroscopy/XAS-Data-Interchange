@@ -14,7 +14,7 @@ my $epsi = 0.001;
 BEGIN { use_ok('Xray::XDI') };
 
 my $here = dirname($0);
-my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_06.xdi');
+my $file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_06.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
 ok(($xdi->errorcode>0), 'bad_06.xdi flagged with warning');

@@ -14,7 +14,7 @@ my $epsi = 0.001;
 BEGIN { use_ok('Xray::XDI') };
 
 my $here = dirname($0);
-my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_02.xdi');
+my $file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_02.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
 $xdi->required;
@@ -22,7 +22,7 @@ ok(($xdi->errorcode>0), 'bad_02.xdi flagged with a warning');
 ok(($xdi->errormessage =~ m{Element.edge missing}), 'correctly identified missing edge symbol');
 
 
-$file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_04.xdi');
+$file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_04.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
 $xdi->required;

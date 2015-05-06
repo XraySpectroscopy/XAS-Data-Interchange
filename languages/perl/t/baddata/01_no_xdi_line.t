@@ -14,7 +14,7 @@ my $epsi = 0.001;
 BEGIN { use_ok('Xray::XDI') };
 
 my $here = dirname($0);
-my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_01.xdi');
+my $file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_01.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 #my $xdi  = Xray::XDI->new;
 #$xdi->file($file);

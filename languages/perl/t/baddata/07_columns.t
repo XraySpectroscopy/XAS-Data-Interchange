@@ -12,28 +12,28 @@ use File::Spec;
 BEGIN { use_ok('Xray::XDI') };
 
 my $here = dirname($0);
-my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_07.xdi');
+my $file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_07.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
 $xdi->recommended;
 ok(($xdi->errorcode>1), 'bad_07.xdi flagged as ok');
 ok(($xdi->errormessage =~ m{Column.1}), 'no column labels');
 
-$file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_08.xdi');
+$file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_08.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
 $xdi->recommended;
 ok(($xdi->errorcode == 0), 'bad_08.xdi flagged as ok');
 ok(($xdi->errormessage =~ m{\A\s*\z}), 'to few column labels');
 
-$file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_09.xdi');
+$file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_09.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
 $xdi->recommended;
 ok(($xdi->errorcode == 0), 'bad_09.xdi flagged as ok');
 ok(($xdi->errormessage =~ m{\A\s*\z}), 'to many column labels');
 
-$file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_10.xdi');
+$file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_10.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
 $xdi->recommended;

@@ -14,19 +14,19 @@ my $epsi = 0.001;
 BEGIN { use_ok('Xray::XDI') };
 
 my $here = dirname($0);
-my $file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_15.xdi');
+my $file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_15.xdi');
 my $xdi  = Xray::XDI->new(file=>$file);
 
 ok(($xdi->errorcode<0), 'bad_15.xdi flagged as failing to import');
 ok(($xdi->errormessage =~ m{non-numeric value}), 'correctly identified NaN as a problem');
 
-$file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_16.xdi');
+$file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_16.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
 ok(($xdi->errorcode<0), 'bad_16.xdi flagged as failing to import');
 ok(($xdi->errormessage =~ m{non-numeric value}), 'correctly identified string as a problem');
 
-$file = File::Spec->catfile($here, '..', '..', '..', 'baddata', 'bad_17.xdi');
+$file = File::Spec->catfile($here, '..', '..', '..', '..', 'baddata', 'bad_17.xdi');
 $xdi  = Xray::XDI->new(file=>$file);
 
 ok(($xdi->errorcode<0), 'bad_17.xdi flagged as failing to import');

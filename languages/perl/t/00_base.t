@@ -15,7 +15,7 @@ BEGIN { use_ok('Xray::XDIFile') };
 
 my $errcode = 0;
 my $here    = dirname($0);
-my $file    = File::Spec->catfile($here, '..', '..', 'data', 'co_metal_rt.xdi');
+my $file    = File::Spec->catfile($here, '..', '..', '..', 'data', 'co_metal_rt.xdi');
 my $xdifile = Xray::XDIFile->new($file, $errcode);
 ok($errcode == 0,                              'error code = 0');
 ok($xdifile =~ m{Xray::XDIFile},               'created Xray::XDIFile object');
