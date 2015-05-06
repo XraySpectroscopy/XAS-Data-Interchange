@@ -3,8 +3,8 @@
 ## This is a replica in perl of the xdi_reader.c test program
 ## the only difference is the order in which the metadata is printed to the screen
 ##
-## to run this *before* installing Xray::XDI, try
-##   perl -Iblib/lib -Iblib/arch example/xdi_reader.pl ../baddata/bad_32.xdi
+## to run this *before* installing Xray::XDI, try using the -I flag like so:
+##   perl -Iblib/lib -Iblib/arch example/xdi_reader.pl ../../baddata/bad_32.xdi
 
 use strict;
 use warnings;
