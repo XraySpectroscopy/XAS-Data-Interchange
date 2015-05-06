@@ -2,7 +2,11 @@
 
 use strict;
 use warnings;
-use Test::More tests => 144;
+use Test::More tests => 154;
+use File::Which qw(which);
+
+ok(which('valgrind'), "valgrind is in the execution path");
+
 
 ## good data
 foreach my $file (qw(co_metal_rt.xdi
@@ -35,10 +39,10 @@ my %return = ('00' => 0, '01' => 1, '02' => 0, '03' => 0, '04' => 0, '05' => 0,
 	      '12' => 0, '13' => 1, '14' => 1, '15' => 1, '16' => 1, '17' => 1,
 	      '18' => 1, '19' => 1, '20' => 1, '21' => 1, '22' => 1, '23' => 0,
 	      '24' => 1, '25' => 0, '26' => 0, '27' => 0, '28' => 0, '29' => 0,
-	      '30' => 0, '31' => 0, '32' => 0);
+	      '30' => 0, '31' => 0, '32' => 0, '33' => 0, '34' => 0, '35' => 0);
 
 ## bad data
-foreach my $i (0 .. 32) {
+foreach my $i (0 .. 35) {
   my $n = sprintf("%2.2d", $i);
   my $command = "valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all ./xdi_reader ../baddata/bad_$n.xdi 2>&1";
   my $x = `$command`;

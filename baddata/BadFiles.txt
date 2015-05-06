@@ -36,6 +36,9 @@ bad_29.xdi   file read(1)   Y     date-time has invalid range (month > 12)
 bad_30.xdi   file read(1)   Y     Invalid element.edge and element.symbol, test accumulation in XDI_required_metadata
 bad_31.xdi   file read(1)   Y     Invalid value for d-spacing, trigger error in XDI_required_metadata
 bad_32.xdi   file read(7)   Y     Missing recommended fields
+bad_33.xdi   file read(1)   Y     Invalid Sample.temperature
+bad_34.xdi   file read(1)   Y     Invalid Facility.energy
+bad_35.xdi   file read(1)   Y     Invalid Facility.current
 
 Notes:
   1. files read, return value > 0, indicating Warning  

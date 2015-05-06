@@ -2,6 +2,7 @@ Changes
 lib/Xray/XDI.pm
 lib/Xray/XDI/WriterPP.pm
 lib/Xray/XDIFile.pm
+LICENSE
 Makefile.PL
 MANIFEST
 README.org

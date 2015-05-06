@@ -9,45 +9,48 @@ least very similar).
 
 See `xdi_reader.c` for an example of a C program using `libxdifile` to
 import and interpret XDI-formatted data.  See the python and perl
-wrappers for examples of language specific implementations which use
-`libxdifile`.
+wrappers for examples of language specific implementations which link
+directly to the `libxdifile` library.
 
 `libxdifile` was written by Matt Newville and Bruce Ravel.
 
 ## XDIFile struct
 
 This is the content of the XDIFile struct.  It will contain the entire
-contents of the XDI file along with a few particularly important items
-(d-spacing, element, and edge).
+contents of the XDI file along with a few particularly important
+metadata items (d-spacing, element, and edge).
 
-| attribute       | type               | explanation |
-| --------------- | ------------------ | ----------- |
-| filename        | char*              | the name of the XDI file |
-| nmetadata       | long               | number of metadata fields |
-| meta\_families  | array of char*     | array of family names found among the metadata, indexed to nmetadata |
+| attribute       | type               | explanation                                                           |
+| --------------- | ------------------ | --------------------------------------------------------------------- |
+| filename        | char*              | the name of the XDI file                                              |
+| nmetadata       | long               | number of metadata fields                                             |
+| meta\_families  | array of char*     | array of family names found among the metadata, indexed to nmetadata  |
 | meta\_keywords  | array of char*     | array of keyword names found among the metadata, indexed to nmetadata |
-| meta\_values    | array of char*     | array of values found among the metadata, indexed to nmetadata |
-| narrays         | long               | number of arrays in data table |
-| npts            | long               | number of rows in data table  |
-| array           | 2D array of double | the data table |
-| narray\_labels  | long               | number of array labels |
-| array\_labels   | array of char*     | array of labels for arrays in the data table |
-| array\_units    | array of char*     | array of units for arrays in the data table |
-| comments        | char*              | the user supplied comments from the XDI file |
-| xdi\_libversion | char*              | the `libxdifile` version number |
-| xdi\_version    | char*              | the XDI file specification version number from the file |
-| extra\_version  | char*              | versioning information for extension fields |
-| dspacing        | double             | the Mono.d-spacing value              |
+| meta\_values    | array of char*     | array of values found among the metadata, indexed to nmetadata        |
+| narrays         | long               | number of arrays in data table                                        |
+| npts            | long               | number of rows in data table                                          |
+| array           | 2D array of double | the data table                                                        |
+| narray\_labels  | long               | number of array labels                                                |
+| array\_labels   | array of char*     | array of labels for arrays in the data table                          |
+| array\_units    | array of char*     | array of units for arrays in the data table                           |
+| comments        | char*              | the user supplied comments from the XDI file                          |
+| xdi\_libversion | char*              | the `libxdifile` version number                                       |
+| xdi\_version    | char*              | the XDI file specification version number from the file               |
+| extra\_version  | char*              | versioning information for extension fields                           |
+| dspacing        | double             | the Mono.d-spacing value                                              |
 | element         | char*              | the Element.symbol value, the 1, 2, or 3 letter symbol of the element |
-| edge            | char*              | the Element.edge value, the the 1 or 2 letter symbol of the edge |
-| error\_lineno   | long               | the line number of a line returning an error |
-| error\_line     | char*              | the line returning an error  |
-| error\_message  | char*              | the error message |
-| nouter          | long               | |
-| outer\_label    | array char*        | |
-| outer\_array    | array of double    | |
-| outer\_breakpts | array of long      | |
+| edge            | char*              | the Element.edge value, the 1 or 2 letter symbol of the edge          |
+| error\_lineno   | long               | the line number of a line returning an error                          |
+| error\_line     | char*              | the line returning an error                                           |
+| error\_message  | char*              | the error message                                                     |
+| nouter          | long               | (\*)                                                                  |
+| outer\_label    | array char*        | (\*)                                                                  |
+| outer\_array    | array of double    | (\*)                                                                  |
+| outer\_breakpts | array of long      | (\*)                                                                  |
 
+(\*) Currently undocumented struct elements intended for support of
+two-dimensional data.  This may be supported in a future version of
+`libxdifile`.
 
 ## API
 
@@ -57,7 +60,7 @@ parsing the file and validating its content.
 The main point of entry is the function `XDI_readfile` which creates
 an `XDIFile` struct, then opens and parses a file for XDI content.
 This function will signal an error and issue a useful error message in
-the even that some content of the file precludes its being understood
+the event that some content of the file precludes its being understood
 as XDI data.  These situations include such things as
 
  * Missing XDI versioning information in the first line of the file
@@ -67,10 +70,22 @@ as XDI data.  These situations include such things as
 
 Certain conditions that are non-conforming with the XDI specification
 but which do not preclude partial interpretation of the XDI file
-result in warning messages at this time.
+result in warning messages issued by `XDI_readfile`.
 
-Validating the content of the XDI metadata is treated as a separate
-step.  There are three main functions for this purpose:
+Validating the content of the XDI metadata is treated in three
+separate steps.  The philosophy of use of the XDI library is:
+
+ 1. Read the XDI file, stopping only in the case of an unrecoverable error, then
+ 2. Check that the metadata identified in the specification as **required** are present, then
+ 3. Check that the metadata identified in the specification as **recommended** are present, then
+ 4. Validate each individual metadata item against its dictionary definition
+
+This allows an application to take a fine-grained approach to how
+strictly it will follow the details of the XDI specification.  Thus, a
+file can be read and used with any level of validation -- including
+_no validation_ -- being performed.
+
+The three validation functions are:
 
 * `XDI_required_metadata`: This function tests that the pieces of
   metadata which are **required** by the specification are present in
@@ -105,10 +120,6 @@ condition of the most recently performed action.  The relation between
 the returned error/warning codes and the error messages are tabulated
 below.
 
-The value of separating most validation chores from the parsing of the
-file is that it allows an application to choose to accept structurally
-compliant data then to perform the level of validation appropriate to
-the task at hand.
 
 
 ### Read an XDI file
@@ -117,6 +128,8 @@ Read an XDI file, store it's content in an XDIFile struct, and return
 an integer return code.
 
 ```C
+	#include "xdifile.h"
+
 	XDIFile *xdifile;
 	int ret;
 
@@ -126,11 +139,11 @@ an integer return code.
 
 ### Interpret the XDI_readfile error code
 
-Interpret the return code by printing the corresponding error message
-to the screen:
+Interpret the `XDI_readfile` return code by printing the corresponding
+error or warning message to the screen:
 
 ```C
-	/* react to a terminal error */
+	/* react to an error reading the file */
 	if (ret < 0) {
 		printf("Error reading XDI file '%s':\n     %s\t(error code = %ld)\n",
 			argv[1], xdifile->error_message, ret);
@@ -149,7 +162,9 @@ to the screen:
 The `xdifile->error_message` attribute will always contain the error
 or warning message from the most recent action.  If an error code
 returns as non-zero, the content of `xdifile->error_message` will
-explain the meaning of the error code in English.
+explain the meaning of the error code in English.  Note that cleanup
+and deallocation must be performed in the event of an error precluding
+the reading of the file.
 
 ### Test for required metadata
 
@@ -193,7 +208,8 @@ This `for` loop iterates through each set of metadata family, keyword,
 and value found in the XDI file.  `XDI_validate_item` tests the value
 to see if it meets the recommendation of the specification.
 Validation tests do not exist for all items in the metadata dictionary
--- `XDI_validate_item` will return 0 for 
+-- `XDI_validate_item` will return 0 for any free-format dictionary
+item.
 
 ```C
 	for (i=0; i < xdifile->nmetadata; i++) {
@@ -271,9 +287,9 @@ translation of a table of error messages into another language.
 | -16  | number of columns changes in data table                      |
 | -32  | non-numeric value in data table: `<word>`                    |
 
-Here `<word>` will be the the text that triggered the error.
+Here `<word>` will be the text that triggered the error.
 
-### XDI_readfile warning codes
+### XDI_readfile and XDI_validate_item warning codes
 
 |  code | message                                                      |
 | ----: | ------------------------------------------------------------ |
@@ -288,13 +304,16 @@ Here `<word>` will be the the text that triggered the error.
 |  256  | Column.1 is not "energy" or "angle"                          |
 |  512  | invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS) |
 | 1024  | invalid timestamp: date out of valid range                   |
+| 2048  | <not used>                                                   |
+| 4096  | bad value in Sample namespace                                |
+| 8192  | bad value in Facility namespace                              |
 
 
 ### XDI_required_metadata return codes
 
-The return code from `XDI_required_metadata` can be interpreted
-bitwise.  That is, a return code of 7 means that all three required
-metadata fields were missing.
+The return code from `XDI_required_metadata` is interpreted bitwise.
+That is, a return code of 7 means that all three required metadata
+fields were missing or invalid.
 
 | code | message                                |
 | ---: | -------------------------------------- |
@@ -305,15 +324,15 @@ metadata fields were missing.
 
 ### XDI_recommended_metadata return codes
 
-The return code from `XDI_recommended_metadata` can be interpreted
+The return code from `XDI_recommended_metadata` is interpreted
 bitwise.  That is, a return code of 7 means that the first three
 recommended metadata fields were missing.
 
-| code | message                                             |
-| ---: | --------------------------------------------------- |
-|  1   | Missing recommended metadata field: Facility.name   |
-|  2   | Missing recommended metadata field: Facility.source |
-|  4   | Missing recommended metadata field: Beamline.name   |
-|  8   | Missing recommended metadata field: Scan.start_time |
-| 16   | Missing recommended metadata field: Column.1        |
+| code | message                                                   |
+| ---: | --------------------------------------------------------- |
+|  1   | Missing recommended metadata field: Facility.name         |
+|  2   | Missing recommended metadata field: Facility.xray\_source |
+|  4   | Missing recommended metadata field: Beamline.name         |
+|  8   | Missing recommended metadata field: Scan.start_time       |
+| 16   | Missing recommended metadata field: Column.1              |
 

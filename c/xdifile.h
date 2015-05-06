@@ -65,6 +65,7 @@ _EXPORT(int)  XDI_required_metadata(XDIFile *xdifile);
 _EXPORT(int)  XDI_recommended_metadata(XDIFile *xdifile);
 _EXPORT(int)  XDI_defined_family(XDIFile *xdifile, char *family);
 _EXPORT(int)  XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value);
+int XDI_validate_facility(XDIFile *xdifile, char *name, char *value);
 int XDI_validate_mono(XDIFile *xdifile, char *name, char *value);
 int XDI_validate_sample(XDIFile *xdifile, char *name, char *value);
 int XDI_validate_scan(XDIFile *xdifile, char *name, char *value);
@@ -152,6 +153,7 @@ static char *ValidElems[] =
 #define WRN_DATE_RANGE     1024
 #define WRN_BAD_DSPACING   2048
 #define WRN_BAD_SAMPLE     4096
+#define WRN_BAD_FACILITY   8192
 
 /* errors reading the XDI file */
 #define ERR_NOTXDI           -1	/* used */

@@ -675,7 +675,7 @@ XDI_required_metadata(XDIFile *xdifile) {
 
 
 /* Facility.name:             1 */
-/* Facility.source:           2 */
+/* Facility.xray_source:      2 */
 /* Beamline.name:             4 */
 /* Scan.start_time:           8 */
 /* Column.1: (energy|angle): 16 */
@@ -730,7 +730,7 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
   /* printf("======== %s %s %s\n", family, name, value); */
 
   if (strcasecmp(family, "facility") == 0) {
-    err = 0;
+    err = XDI_validate_facility(xdifile, name, value);
 
   } else if (strcasecmp(family, "beamline") == 0) {
     err = 0;
@@ -765,11 +765,41 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
   return err;
 }
 
+
+/***************************************************************************/
+/* all tests in the Facility familty should return WRN_BAD_FACILITY if the */
+/* value does not match the definition.  error_message should explain	   */
+/* the problem in a way that is appropruiate to the metadata item	   */
+/***************************************************************************/
+int XDI_validate_facility(XDIFile *xdifile, char *name, char *value) {
+  int err;
+  int regex_status;
+  struct slre_cap caps[3];
+
+  err = 0;
+  strcpy(xdifile->error_message, "");
+
+  if (strcasecmp(name, "current") == 0) {
+    regex_status = slre_match("^\\d+(\\.\\d*)?\\s+m?[aA].*$", value, strlen(value), caps, 2, 0);
+    if (regex_status < 0) {
+      strcpy(xdifile->error_message, "Facility.current not interpretable as a beam current");
+      err = WRN_BAD_FACILITY;
+    }
+  } else if (strcasecmp(name, "energy") == 0) {
+    regex_status = slre_match("^\\d+(\\.\\d*)?\\s+[gmGM][eE][vV].*$", value, strlen(value), caps, 2, 0);
+    if (regex_status < 0) {
+      strcpy(xdifile->error_message, "Facility.energy not interpretable as a storage ring energy");
+      err = WRN_BAD_FACILITY;
+    }
+  }
+
+  return err;
+}
+
+
 int XDI_validate_mono(XDIFile *xdifile, char *name, char *value) {
   int err;
   double dval;
-
-  /* printf("======== >%s< >%s<\n", name, value); */
 
   strcpy(xdifile->error_message, "");
   err = 0;
@@ -790,9 +820,11 @@ int XDI_validate_mono(XDIFile *xdifile, char *name, char *value) {
   return err;
 }
 
+/***********************************************************************/
 /* all tests in the Sample familty should return WRN_BAD_SAMPLE if the */
 /* value does not match the definition.  error_message should explain  */
-/* the problem in a way that is appropruiate to the metadata item */
+/* the problem in a way that is appropruiate to the metadata item      */
+/***********************************************************************/
 int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
   int err;
   int regex_status;
@@ -802,11 +834,15 @@ int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
   strcpy(xdifile->error_message, "");
 
   if (strcasecmp(name, "temperature") == 0) {
-    regex_status = slre_match("^\\d(\\.\\d)?\\s+[CcFfKk].*$", value, strlen(value), caps, 2, 0);
+    regex_status = slre_match("^\\d+(\\.\\d*)?\\s+[CcFfKk].*$", value, strlen(value), caps, 2, 0);
     if (regex_status < 0) {
       strcpy(xdifile->error_message, "Sample.temperature not interpretable as a temperature");
       err = WRN_BAD_SAMPLE;
     }
+  } else if (strcasecmp(name, "stoichiometry") == 0) {
+    /* TODO */
+    /* need a chemical formula parser to validate Sample.stoichiometry */
+    err = 0;
   }
 
   return err;
@@ -861,8 +897,6 @@ int xdi_is_datestring(char *inp) {
 int XDI_validate_scan(XDIFile *xdifile, char *name, char *value) {
   int err;
 
-  /* printf("======== %s %s\n", name, value); */
-
   err = 0;
   strcpy(xdifile->error_message, "");
 
@@ -876,6 +910,10 @@ int XDI_validate_scan(XDIFile *xdifile, char *name, char *value) {
     if (err==WRN_DATE_FORMAT) { strcpy(xdifile->error_message, "invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS)"); }
     if (err==WRN_DATE_RANGE)  { strcpy(xdifile->error_message, "invalid timestamp: date out of valid range"); }
 
+  } else if (strcasecmp(name, "edge_energy") == 0) {
+    /* TODO */
+    /* float + units, units can be eV|keV|inverse Angstroms (the last one is kind of tough ...)  */
+    err = 0;
   } else {
     err = 0;
   }
