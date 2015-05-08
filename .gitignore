@@ -15,30 +15,29 @@ c/libxdifile.so
 c/stamp-h1
 c/xdi_reader
 
-fortran/Makefile
-fortran/config.h
-fortran/config.log
-fortran/config.status
-fortran/stamp-h1
-fortran/xdi_example1
+languages/fortran/Makefile
+languages/fortran/config.h
+languages/fortran/config.log
+languages/fortran/config.status
+languages/fortran/stamp-h1
+languages/fortran/xdi_example1
 
-python/build/*
+languages/python/build/*
 
-perl/_Inline
-perl/_build
-perl/blib
-perl/Build
-perl/META.yml
-perl/MYMETA.yml
-perl/MYMETA.json
-perl/MANIFEST.bak
-perl/Makefile
-perl/Makefile.old
-perl/XDIFile.inl
-perl/pm_to_blib
-_Inline/*
-perl/t/baddata/coverage.txt
-perl/*.inl
+languages/perl/_Inline
+languages/perl/_build
+languages/perl/blib
+languages/perl/Build
+languages/perl/META.yml
+languages/perl/MYMETA.yml
+languages/perl/MYMETA.json
+languages/perl/MANIFEST.bak
+languages/perl/Makefile
+languages/perl/Makefile.old
+languages/perl/XDIFile.inl
+languages/perl/pm_to_blib
+languages/perl/t/baddata/coverage.txt
+languages/perl/*.inl
 
 *.aux
 *.dvi
