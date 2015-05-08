@@ -142,18 +142,18 @@ static char *ValidElems[] =
 #define WRN_NODSPACE          1
 #define WRN_NOMINUSLINE       2
 #define WRN_IGNOREDMETA       4
-/* warnings from metadata value validation */
-#define WRN_NOELEM            8
-#define WRN_NOEDGE           16
-#define WRN_REFELEM          32
-#define WRN_REFEDGE          64
-#define WRN_NOEXTRA         128
-#define WRN_BAD_COL1        256
-#define WRN_DATE_FORMAT     512
-#define WRN_DATE_RANGE     1024
-#define WRN_BAD_DSPACING   2048
-#define WRN_BAD_SAMPLE     4096
-#define WRN_BAD_FACILITY   8192
+/* warnings from metadata value validation, these are not use bitwise */
+#define WRN_NOELEM          100
+#define WRN_NOEDGE          101
+#define WRN_REFELEM         102
+#define WRN_REFEDGE         103
+#define WRN_NOEXTRA         104
+#define WRN_BAD_COL1        105
+#define WRN_DATE_FORMAT     106
+#define WRN_DATE_RANGE      107
+#define WRN_BAD_DSPACING    108
+#define WRN_BAD_SAMPLE      109
+#define WRN_BAD_FACILITY    110
 
 /* errors reading the XDI file */
 #define ERR_NOTXDI           -1	/* used */
@@ -167,6 +167,13 @@ static char *ValidElems[] =
 /* _EXPORT(char*) XDI_errorstring(int errcode); */
 
 
+/* List of required metadata items */
+static char *RequiredMetadata[] =
+  {                             /* these are the bits of the errorcode returned by XDI_recommended_metadata */
+    "Element.symbol",		/* 2^0 */
+    "Element.edge",     	/* 2^1 */
+    "Mono.d_spacing",		/* 2^2 */
+  };
 /* List of recommended metadata items */
 static char *RecommendedMetadata[] =
   {                             /* these are the bits of the errorcode returned by XDI_recommended_metadata */
