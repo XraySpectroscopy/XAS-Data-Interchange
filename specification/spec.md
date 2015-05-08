@@ -59,17 +59,18 @@ analysis toolkits.
 This format is intended to encode a single XAS spectrum in a data file
 with metadata.  It is not intended to encode relationships between
 many XAS measurements or between an XAS measurement and other parts of
-a multi-spectral experiment.
+a multi-spectral experiment.  (Those are worthwhile topics, just not
+the purpose of XDI.)
 
 In order to fulfill these goals, XDI files provide a flexible,
 consistent representation of information common to all XAS
-experiments.  This format is simpler than a format based on XML, HDF,
-or a database; it yields self-documenting files; and it is easy for
-both humans and computers to read.  Its structure is inspired by that
-of Internet electronic mail (See
+experiments.  The format of XDI is simpler than a format based on XML,
+HDF, or a database; it yields self-documenting files; and it is easy
+for both humans and computers to read.  The structure of XDI is
+inspired by that of Internet electronic mail (See
 [RFC822: Standard for ARPA Internet Text Messages](http://www.w3.org/Protocols/rfc822/)),
 a plain-text data format which has proven to be robust, extensible,
-and enduring.  It can be read as is by many existing programs for XAS
+and enduring.  XDI can be read as is by many existing programs for XAS
 and other data analysis and by many scientifc plotting programs.
 
 Due to these advantages, and because of our intention to develop free
@@ -80,8 +81,8 @@ the XAS community.
 ## Scope
 
 We do not intend this specification to dictate the file formats used
-by data acquisition systems during XAS experiments, although this may
-be a suitable format for that purpose.  Any attempt to do so would be
+by data acquisition systems during XAS experiments, although XDI may
+be suitable for that purpose.  Any attempt to do so would be
 unreasonable due to the number of different data acquisition systems
 currently deployed at synchrotrons around the world, the variety of
 experiments performed at these installations, and the continuing
@@ -105,9 +106,9 @@ which can read, manipulate, and write XDI files.
 With their experimental data stored in XDI files, users may choose
 data analysis packages which are capable of reading this format.  It
 is our hope that, as this specification gains wider adoption, users
-will ultimately be freed from the responsibility of understanding file
-formats.  With this aim in mind, we shall assist software developers
-in supporting XDI files.
+will ultimately be freed from the responsibility of understanding
+quirky, beamline-specific file formats.  With this aim in mind, we
+shall assist software developers in supporting XDI files.
 
 
 
@@ -117,10 +118,10 @@ in supporting XDI files.
 XDI files contain two sections, a header with information about one
 scan of an XAS experiment followed by the data collected during that
 scan. The header section consists of versioning information, a series
-of fields that contain information about the scan, an area for users
-to store comments about the experiment, and a sequence of labels for
-the columns of data. The data section contains these columns, with
-each row corresponding to one point of the scan.
+of fields with information about the scan, an area for users to store
+comments about the experiment, and a sequence of labels for the
+columns of data. The data section contains these columns, with each
+row corresponding to one point of the scan.
 
 The header has been designed to contain arbitrary metadata describing
 the contents of the file. This metadata is organized in a way that is
@@ -199,17 +200,18 @@ Header line rules:
    should restrict lines to 2048 characters.
 
 
-Header lines are subdivided into four subsections --- versioning
+Header lines are subdivided into four sections --- versioning
 information, header fields, user comments, and column labels --- with
-two separators, one of which is always **required**.  These
-subsections **must** occur in the following sequence:
+two separators, one of which is always **required**.  These sections
+**must** occur in the following sequence:
 
  1. The **required** first line of the file is the version
     line, described in [Version information](#version-information).
- 1. This is followed by header lines, which can be defined headers
-    or extension headers. These two header types are explained in
+ 1. This is followed by header lines, which can be defined headers or
+    extension headers. These two header types are explained in
     [Header fields](#header-fields).  Some headers are **required**,
-    as explained in [Required elements](#required-elements).
+    as explained in [Required elements](#required-elements).  Others
+    are **recommended**.
  1. The header lines are separated from the user comments by the
     field-end line.  If the comment section is present, this separator
     line **must** also be present. If the comment section is
@@ -239,6 +241,7 @@ otherwise grammatically identical elements of the data file.
 
 
 #### Definitions of separator lines
+
  * **Field-end line:** comment token + field-end token + end-of-line token
 
         # /////////////
@@ -250,21 +253,21 @@ otherwise grammatically identical elements of the data file.
 
 ### Version Information
 
-The first line of the XDI header contains the XDI version to
-which the file conforms.  XDI represents versions of the file format
-with a `<version>.<subversion>.<release>` numbering scheme. The
-`<subversion>` number is incremented when changes are made to
-the format that do not affect compatibility with previous versions, as
-when new defined header fields are defined.  (A parser compliant with
-an earlier minor version would treat the newly defined header as an
-extension field.  Propagated to an output file as an extension field,
-this field would then be interpreted correctly by a more recent
-parser.)  The `<version>` number is incremented when major
+The first line of the XDI header contains the XDI version to which the
+file conforms.  XDI represents versions of the file format with a
+`<version>.<subversion>.<release>` numbering scheme. The
+`<subversion>` number is incremented when changes are made to the
+format that do not affect compatibility with previous versions, as
+when new defined header fields are added to the dictionary.  (A parser
+compliant with an earlier minor version would treat the newly defined
+header as an extension field.  Propagated to an output file as an
+extension field, this field would then be interpreted correctly by a
+more recent parser.)  The `<version>` number is incremented when major
 changes are made to the format, as when the definition of the contents
-of a defined header field is altered.  The `<release>` is
-incremented when the library or its documentation is altered without
-altering the specification in any way.  Use of the `<release>`
-number in XDI files is **optional**.
+of a defined header field is altered.  The `<release>` is incremented
+when the library or its documentation is altered without altering the
+specification in any way.  Use of the `<release>` number in XDI files
+is **optional**.
 
 A series of **optional** entries denoting further versioning
 information, separated by white space, **may** follow the XDI version.
@@ -279,6 +282,9 @@ When an application adds versioning information to this line, it
 optional version entries is undefined but **should** be preserved by
 application reading the file in order to accurately represent the time
 sequence in which applications have manipulated the file.
+
+The slash character (`/`, ASCII 47) is used to separate `XDI` or the
+application name from its version number.
 
 Note that the XDI version, subversion, and release numbers
 **must** be treated as integers that **may** contain more
@@ -310,37 +316,38 @@ name and which uses non-standard versioning.
          # XDI/1.0 XAS!Collect-3000
 
 There are two problems with this.  The versioning information will not
-be recognized as such.  Also the requirement that the application name
-be used as the family name of any extension headers added by the
-program will result in a non-compliant family name.  The exclamation
-point is not an allowed character for family names.
+be recognized as such becasue it does not use the slash character.
+Also the requirement that the application name be used as the family
+name of any extension headers added by the program will result in a
+non-compliant family name.  The exclamation point is not an allowed
+character for family names.
 
 
 ### Header Fields
 
-Immediately following the version line is the header fields
-subsection.  These fields are arranged in a manner similar to the
-header of an Internet electronic mail message, although XDI fields
-**must not** span multiple lines.  Each field consists of a
-case-insensitive name, a separating colon, and an associated value.
-The structure of the name is presented in [XDI fields](#xdi-fields).
-When multiple occurrences of the same field are present the value of
-the last occurrence **must** be used as the value for the field.
+Immediately following the version line is the header fields section.
+These fields are arranged in a manner similar to the header of an
+Internet electronic mail message, although XDI fields **must not**
+span multiple lines.  Each field consists of a case-insensitive name,
+a separating colon, and an associated value.  The structure of the
+name is presented in [XDI fields](#xdi-fields).  When multiple
+occurrences of the same field are present the value of the last
+occurrence **must** be used as the value for the field.
 
-Except in the case of a defined header whose value has a defined
-structure, values are assumed to be free-form text, as explained in
-[Text encoding](#text-encoding).  The defined fields are explained in
-[Defined namespaces](#defined-namespaces).
+Except in the case of a defined header whose value has a structure
+defined in the dictionary, values are assumed to be free-form text, as
+explained in [Text encoding](#text-encoding).  The defined fields are
+explained in [Defined namespaces](#defined-namespaces).
 
-When a user comments section is present, the header fields subsection
+When a user comments section is present, the header fields section
 must end with a field-end line.  When a comments section is absent,
-the header fields subsection **must** end with a field-end line.  See
+the header fields section **must** end with a field-end line.  See
 [Structure of the Header Section](#structure-of-the-header-section)
 for the definitions of the separator lines.
 
 ### User Comments
 
-Following the dividing line at the end of the header fields subsection
+Following the dividing line at the end of the header fields section
 is the area of the header that contains user comments.  This area is
 reserved for comments supplied by the experimenter and **must not** be
 used by software as a place to store other information.  Refer to
@@ -353,7 +360,7 @@ token.  An empty line **must** be treated as a zero-length
 comment line. This section **must** end with a header-end
 separator line.
 
-When extracting the comment subsection from an XDI file, software
+When extracting the comment section from an XDI file, software
 **may** remove no more than one leading space and any trailing
 white space from each comment line but **must not** further alter
 the line's contents, all interior white space **must** be preserved.
@@ -386,16 +393,26 @@ values of the headers in the `Column` namespace.  See
 [The column namespace](#the-column-namespace).
 
 Several common array labels are defined in the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md)
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md)
 and **must** be used when those arrays are present in a file.
 
 ## Data Section
 
 The data section of the file contains white-space-delimited columns of
-integers or floating-point numbers.  Lines in the data section **must
-not** begin with comment tokens.  Lines in the data section **may**
-begin with white space.  Leading white space on a line in the data
-section **must** be ignored.
+integers or floating-point numbers.  The definitions of text
+representation of numbers in the C programming language are used by
+XDI.  In general, this means that XDI numbers are integers and base-10
+numbers as defined by IEEE 754-1985 or
+[IEEE 754-2008](http://dx.doi.org/10.1109/IEEESTD.2008.4610935).
+
+Locale is **not** respected when interpreting floating point numbers.
+The decimal mark **must** be a dot (`.`, ASCII 46).  The decimal mark
+**must not** be a comma (`,`, ASCII 44).
+
+Lines in the data section **must not** begin with comment tokens.
+Lines in the data section **may** begin with white space.  Leading and
+trailing white space on a line in the data section **must** be
+ignored.
 
 The first (left-most) column of data **must** contain the abscissa
 (energy or angle) array.
@@ -404,10 +421,6 @@ Blank lines in this section **must** be discarded.  The number of
 columns **must** be the same for all lines that contain data.  All
 columns, including columns containing a measurement of time, **must**
 be represented as inegers or as floating point numbers.
-
-Locale is **not** respected when interpreting floating point numbers.
-The decimal mark **must** be a dot (`.`, ASCII 46).  The decimal mark
-**must not** be a comma (`,`, ASCII 44).
 
 It is **recommended** that measurements of time be represented as a
 numerical offset relative to the value of the `Scan.start_time`
@@ -421,13 +434,12 @@ parsing rules.  All fields which fail to do so **must** be
 ignored by an application.
 
 XDI fields use a simple namespace concept as their structure.  The
-name of the field **must** be of two words.  The first word in
-the name **must** start with a letter and **must not** start
-with a number, underscore, or dash.  The second word **must**
-consist of letters, numbers, underscore, or dash.  Letters are ASCII
-65 through 90 (`A-Z`) and ASCII 97-122 (`a-z`).  Numbers
-are ASCII 48-57 (`0-9`).  Underscore (`_`) is ASCII 95
-and dash (`-`) is ASCII 45.
+name of the field **must** be composed of two words.  The first word
+in the name **must** start with a letter and **must not** start with a
+number, underscore, or dash.  The second word **must** consist of
+letters, numbers, underscore, or dash.  Letters are ASCII 65 through
+90 (`A-Z`) and ASCII 97-122 (`a-z`).  Numbers are ASCII 48-57 (`0-9`).
+Underscore (`_`) is ASCII 95 and dash (`-`) is ASCII 45.
 
 The two words in the name **must** be separated by the dot
 character (`.`, ASCII 46). The name **must** end with a
@@ -452,7 +464,7 @@ interpret the columns in the data section.
 
 There are two kinds of namespaces. Defined namespaces (see
 [Defined namespaces](#defined-namespaces)) are defined in the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 Extension namespaces (see [Extension headers](#extension-headers)) may be
 added by application developers to insert new metadata into the data file.
 
@@ -462,7 +474,7 @@ Header fields are case insentitive. As an example, the following lines
         # Beamline.name: APS 20BM
 		# beamline.name: APS 20BM
 		# BEAMLINE.NAME: APS 20BM
-		# bEAmlINe.naME: APS 20BM
+		# bEAmlInE.naME: APS 20BM
 
 Capitalization (like the first of these examples) of the namespace is
 **recommended**.
@@ -471,24 +483,24 @@ Capitalization (like the first of these examples) of the namespace is
 ## Defined namespaces
 
 See the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md)
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md)
 for the current list of defined namespaces and defined metadata.
 
 Three defined fields are **required** in a valid XDI file:
 
  1. `Element.symbol`: The symbol of the absorber element
  1. `Element.edge`: The measured absorption edge
- 1. `Mono.d_spacing`: The d-spacing of the monochromator
-    crystal.  This is only **required** when the energy axis is
-    conveyed as monochromator angle or encoder step count.  When the
-    energy axis is conveyed in energy units or pixel count, providing
-    the d-spacing is strongly **recommended** to enable correction
-    of the energy axis for a miscalibration due to inaccuracies in the
-    translation from angular position of the monochromator to energy.
+ 1. `Mono.d_spacing`: The d-spacing of the monochromator crystal.
+    When the energy axis is conveyed as monochromator angle or encoder
+    step count, this is required to translate into energy units.  When
+    the energy axis is conveyed in energy units, this enables
+    correction of the energy axis for a miscalibration due to
+    inaccuracies in the translation from angular position of the
+    monochromator to energy.
 
 All other fields are **optional**, although some are **recommended**
-and constitute good practice, as explained in the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+and constitute best practice, as explained in the
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 
 A header in a defined namespace **should not** appear more than once
 in a file.  When multiple occurrences of the same field are present,
@@ -512,7 +524,7 @@ the data section of the file.
     **must** be used to describe a column when that column is
     present in the data file and identified among the header fields.
     The list of defined column labels is given in the
-    [Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+    [Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md).
  1. The abscissa of the data **must** be in the first
     (left-most) column and **must** be identified by the
     `Column.1` header.
@@ -538,7 +550,7 @@ the data section of the file.
 
 A list of column labels and their meanings along with unit definitions
 for the abscissa are defined in the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 Any such array included in an XDI file must use those label
 definitions.  Along with column labels defining the abscissa and
 various detectors, labels for representing EXAFS data in various
@@ -570,7 +582,7 @@ Extension field namespaces and tags **should not** collide with the
 defined namespaces and tags.  That is, applications which use
 extension namepaces or which define new tags in defined namespaces
 should choose words not already used in the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 
 Applications that read XDI files **may** attempt to parse the values
 of extension fields to extract the additional information about the
@@ -615,7 +627,7 @@ The following is a summary of the required elements of an XDI file:
 
 All other content is **optional**.  When present, certain content
 **must** meet further requirements as explained in the
-[Dictionary of Metadata](https://github.com/bruceravel/XAS-Data-Interchange/blob/master/specification/dictionary.md).
+[Dictionary of Metadata](https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/dictionary.md).
 
 
 # Example XDI File

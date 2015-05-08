@@ -65,12 +65,12 @@ between the metadata name and its value.  Here is an example:
 Some of the tags in this dictionary have formatted values as part of
 their definitions.
 
-* _string_: A string is specifically an ASCII string representable by
-  characters in the the lower 128 of the ASCII set.  This **must** the
-  English-language representation of the value.  For example, the
-  string representing `Facility.name` for the Thai synchrotron
-  **must** be `SLRI` rather than a sequence of characters in the Thai
-  script.
+* _string_: A string is specifically an ASCII string represented by
+  printable characters in the the lower 128 of the ASCII set.  This
+  **must** the English-language representation of the value.  For
+  example, the string representing `Facility.name` for the Thai
+  synchrotron **must** be `SLRI` rather than a sequence of characters
+  in the Thai script.
 
 * _free-format string_: This is a string which can contain any
   character (save end-of-line characters) in any encoding system.  A
@@ -220,19 +220,28 @@ compliant XDI file.
 
  * `Element.edge`: The absorption edge measured.  See above.
 
- * `Mono.d_spacing`: The d-spacing of the monochromator.  This is
-   **required** when the abscissa is expressed in angle or encoder steps.
-   It is required to convert that abscissa into energy.  Also a
-   correction to the energy axis of measured data, which may be
-   required in the case of a miscalibration due to inaccuracies in the
-   translation from angular position of the monochromator to energy,
-   would need the d-spacing.
+ * `Mono.d_spacing`: The d-spacing of the monochromator.  It is
+   required to convert an abscissa represented as monochromator angle
+   or encoder step count into energy.  Also a correction to the energy
+   axis of measured data, which may be required in the case of a
+   miscalibration due to inaccuracies in the translation from angular
+   position of the monochromator to energy, would need the d-spacing.
 
 Most other metadata definitions that follow are **optional** for use
 with XDI.  Some are **recommended** for use with all XDI files.  The
 **recommended** metadata convey information that is of substantive
 value to the interpretation of the data.
 
+## Recommeneded metadata
+
+The current list of recommended metadata, i.e. metadata which
+constitutes best practice when writing any data file, is
+
+ *   `Facility.name`
+ *   `Facility.xray_source`
+ *   `Beamline.name`
+ *   `Scan.start_time`
+ *   `Column.1`
 
 
 ## Defined items in the Facility namespace
@@ -244,7 +253,7 @@ value to the interpretation of the data.
      * _Format_: string
 
 * **Namespace:** `Facility` -- **Tag:** `energy`
-     * _Description_: The energy of the current in the storage ring.
+     * _Description_: The energy of the stored current in the storage ring.
      * _Units_: GeV, MeV
      * _Format_: float + units
 
@@ -268,7 +277,9 @@ value to the interpretation of the data.
 
 * **Namespace:** `Beamline` -- **Tag:** `name`
      * _Description_: The name by which the beamline is known. This is
-       **recommended** for use in all XDI files.
+     **recommended** for use in all XDI files.  For a beamline with a
+     facility designation and a common name (such as 13-BM-B at the
+     APS, also known as GSECARS), the designation is preferred.
      * _Units_: none
      * _Format_: free-format string
 
@@ -341,9 +352,10 @@ versions of this dictionary.
      * _Format_: free-format string
 
 * **Namespace:** `Sample` -- **Tag:** `id`
-     * _Description_: A number or string uniquely identifying the measured
-       sample.  This is intended for interoperation with a database or
-       with laboratory management software.
+     * _Description_: A number or string uniquely identifying the
+       measured sample.  This is intended for interoperation with a
+       database or laboratory management software.  It could be, for
+       example, a bar code number.
      * _Units_: none
      * _Format_: free-format string
 
@@ -370,11 +382,9 @@ versions of this dictionary.
 The Sample namespace is rather open-ended.  It is probably impossible
 to anticipate all the kinds of sample-related metadata that may be
 useful to attach to data.  That said, it would be useful to suggest
-tags for a number of common kinds of extrinsic parameters.
-
-Here are some other possible tags denoting extrinsic parameters of the
-experiment along the line of `Sample.temperature`.  These may be added
-as defined fields in future versions of the XDI specification.
+tags for a number of common kinds of extrinsic parameters along the
+line of `Sample.temperature`.  These may be added as defined fields in
+future versions of the XDI specification.
 
 * `Sample.pressure`
 * `Sample.ph`
@@ -392,7 +402,7 @@ as defined fields in future versions of the XDI specification.
 * `Sample.opacity`
 * `Sample.electrochemical_potential`
 
-Almost all of these examples **should** take a float+units as values.
+Many of these examples would take a float+units as values.
 
 
 
@@ -405,7 +415,7 @@ Almost all of these examples **should** take a float+units as values.
      * _Format_: [ISO 8601 specification for combined dates and times](http://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations)
 
 * **Namespace:** `Scan` -- **Tag:** `end_time`
-     * _Description_: The beginning time of the scan.
+     * _Description_: The ending time of the scan.
      * _Units_: time
      * _Format_: [ISO 8601 specification for combined dates and times](http://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations)
 
@@ -419,8 +429,8 @@ scan parameters, such as integration times, monochromator speed, scan
 boundaries, or step sizes.
 
 An example of a combined date and time representation is
-`2007-04-05T14:30`, which means 2:30 in the afternoon on the day of
-April 5th in the year 2007.
+`2007-04-05T14:30:22`, which means 22 seconds after 2:30 in the
+afternoon on the day of April 5th in the year 2007.
 
 
 
@@ -449,7 +459,8 @@ April 5th in the year 2007.
      * _Units_: none
      * _Format_: one of these 28 1 or 2 character strings (not case sensitive):
   
-               K L L1 L2 L3  M M1 M2 M3 M4 M5 N N1 N2 N3 N4 N5 N6 N7 O O1 O2 O3 O4 O5 O6 O7
+               K L  L1 L2 L3 M  M1 M2 M3 M4 M5
+			   N N1 N2 N3 N4 N5 N6 N7 O  O1 O2 O3 O4 O5 O6 O7
 
        See table 10.10 at
        [IUPAC notation for X-ray absorption edges](http://old.iupac.org/publications/analytical_compendium/Cha10sec348.pdf)
