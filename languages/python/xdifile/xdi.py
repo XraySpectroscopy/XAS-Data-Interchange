@@ -2,11 +2,13 @@
 """
 Read/Write XAS Data Interchange Format for Python
 """
-import os
+import os    
+import sys
+import platform
 import ctypes
 import ctypes.util
 
-__version__ = '1.2.0'
+__version__ = '1.2.2'
 
 from numpy import array, exp, log, sin, arcsin
 
@@ -16,6 +18,29 @@ RAD2DEG  = 180.0/PI
 # from NIST.GOV CODATA:
 # Planck constant over 2 pi times c: 197.3269718 (0.0000044) MeV fm
 PLANCK_HC = 1973.269718 * 2 * PI # hc in eV * Ang = 12398.4193
+
+
+def get_dllname():
+    """get installation directory and name of dll for use and installation"""
+
+    is_64bit   = platform.architecture()[0].lower().startswith('64')
+
+    dllname = 'dlls/darwin/libxdifile.dylib'
+    libdir = 'lib'
+
+    if sys.platform.startswith('win'):
+        libdir  = 'dlls'    
+        dllname = 'dlls/win32/xdifile.dll'
+        if is_64bit:
+            dllname = 'dlls/win64/xdifile.dll'
+    elif sys.platform.startswith('lin'):
+        dllname = 'dlls/linux32/libxdifile.so'
+        if is_64bit:
+            dllname = 'dlls/linux64/libxdifile.so'
+            libdir = 'lib64'
+        
+    return os.path.join(sys.prefix, libdir), dllname
+
 
 class XDIFileStruct(ctypes.Structure):
     "emulate XDI File"
@@ -55,15 +80,25 @@ def add_dot2path():
 
 
 XDILIB = None
+
 def get_xdilib():
     """make initial connection to XDI dll"""
     global XDILIB
     if XDILIB is None:
-        dllpath  = ctypes.util.find_library('xdifile')
-        load_dll = ctypes.cdll.LoadLibrary
-        if os.name == 'nt':
-            load_dll = ctypes.windll.LoadLibrary
-        XDILIB = load_dll(dllpath)
+        dlldir, local_dll = get_dllname()
+        dllname = {'win32': 'xdifile.dll',
+                   'linux2': 'libxdifile.so',
+                   'darwin': 'libxdifile.dylib'}[sys.platform]
+        dllname = os.path.join(dlldir, dllname)
+
+        loaddll = ctypes.cdll.LoadLibrary
+        if sys.platform == 'win32':
+            loaddll = ctypes.windll.LoadLibrary
+
+        if hasattr(sys, 'frozen'): # frozen with py2exe!!
+            dirs.append(os.path.dirname(sys.executable))
+
+        XDILIB = loaddll(dllname)
         XDILIB.XDI_errorstring.restype   = ctypes.c_char_p
     return XDILIB
 
