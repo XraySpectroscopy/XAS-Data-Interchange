@@ -767,7 +767,7 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
 
 
 /***************************************************************************/
-/* all tests in the Facility familty should return WRN_BAD_FACILITY if the */
+/* all tests in the Facility family should return WRN_BAD_FACILITY if the  */
 /* value does not match the definition.  error_message should explain	   */
 /* the problem in a way that is appropruiate to the metadata item	   */
 /***************************************************************************/
@@ -821,7 +821,7 @@ int XDI_validate_mono(XDIFile *xdifile, char *name, char *value) {
 }
 
 /***********************************************************************/
-/* all tests in the Sample familty should return WRN_BAD_SAMPLE if the */
+/* all tests in the Sample family should return WRN_BAD_SAMPLE if the  */
 /* value does not match the definition.  error_message should explain  */
 /* the problem in a way that is appropruiate to the metadata item      */
 /***********************************************************************/
@@ -849,11 +849,12 @@ int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
 }
 
 
+/**************************************************************/
+/* tests if input string is a valid datetime timestamp.	      */
+/* This uses regular expression to check format and validates */
+/* range of values, though not exhaustively.		      */
+/**************************************************************/
 int xdi_is_datestring(char *inp) {
-  /* tests if input string is a valid datetime timestamp.
-     This uses regular expression to check format and validates
-     range of values, though not exhaustively.
-  */
   int regex_status;
   struct slre_cap caps[6];
   int year, month, day, hour, minute, sec;

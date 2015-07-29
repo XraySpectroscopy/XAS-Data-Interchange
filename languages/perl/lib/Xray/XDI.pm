@@ -274,12 +274,20 @@ sub required {
   $self->errormessage($self->xdifile->_error_message);
   return $i;
 };
+sub required_list {
+  my ($self) = @_;
+  return Xray::XDIFile->_required_list;
+};
 sub recommended {
   my ($self) = @_;
   my $i = $self->xdifile->_recommended_metadata;
   $self->errorcode($i);
   $self->errormessage($self->xdifile->_error_message);
   return $i;
+};
+sub recommended_list {
+  my ($self) = @_;
+  return Xray::XDIFile->_recommended_list;
 };
 
 sub validate {

@@ -289,24 +289,31 @@ translation of a table of error messages into another language.
 
 Here `<word>` will be the text that triggered the error.
 
-### XDI_readfile and XDI_validate_item warning codes
+### XDI_readfile warning codes
 
 |  code | message                                                      |
 | ----: | ------------------------------------------------------------ |
 |    1  | no mono.d_spacing given with angle array                     |
 |    2  | no line of minus signs '#-----' separating header from data  |
 |    4  | contains unrecognized header lines                           |
-|    8  | element.symbol missing or not valid                          |
-|   16  | element.edge missing or not valid                            |
-|   32  | element.reference not valid                                  |
-|   64  | element.ref\_edge  not valid                                 |
-|  128  | extension field used without versioning information          |
-|  256  | Column.1 is not "energy" or "angle"                          |
-|  512  | invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS) |
-| 1024  | invalid timestamp: date out of valid range                   |
-| 2048  | <not used>                                                   |
-| 4096  | bad value in Sample namespace                                |
-| 8192  | bad value in Facility namespace                              |
+
+
+### XDI_validate_item warning codes
+
+
+|  code | message                                                      |
+| ----: | ------------------------------------------------------------ |
+|  100  | element.symbol missing or not valid                          |
+|  101  | element.edge missing or not valid                            |
+|  102  | element.reference not valid                                  |
+|  103  | element.ref\_edge  not valid                                 |
+|  104  | extension field used without versioning information          |
+|  105  | Column.1 is not "energy" or "angle"                          |
+|  106  | invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS) |
+|  107  | invalid timestamp: date out of valid range                   |
+|  108  | <not used>                                                   |
+|  109  | bad value in Sample namespace                                |
+|  110  | bad value in Facility namespace                              |
 
 
 ### XDI_required_metadata return codes

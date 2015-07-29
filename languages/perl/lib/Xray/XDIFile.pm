@@ -160,10 +160,30 @@ int _required_metadata(SV* obj) {
   return ret;
 }
 
+void _required_list(SV* obj) {
+  long i;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  for (i=0; i < sizeof(RequiredMetadata)/sizeof(RequiredMetadata[0]); i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( RequiredMetadata[i], 0 )));
+  }
+  Inline_Stack_Done;
+}
+
 int _recommended_metadata(SV* obj) {
   int ret;
   ret = XDI_recommended_metadata((INT2PTR(XDIFile*, SvIV(SvRV(obj)))));
   return ret;
+}
+
+void _recommended_list(SV* obj) {
+  long i;
+  Inline_Stack_Vars;
+  Inline_Stack_Reset;
+  for (i=0; i < sizeof(RecommendedMetadata)/sizeof(RecommendedMetadata[0]); i++) {
+    Inline_Stack_Push(sv_2mortal(newSVpv( RecommendedMetadata[i], 0 )));
+  }
+  Inline_Stack_Done;
 }
 
 void _cleanup(SV* obj, long err) {
