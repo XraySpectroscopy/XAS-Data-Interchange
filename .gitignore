@@ -4,14 +4,15 @@
 *~
 *#
 
-c/autom4te.cache/*
-c/Makefile
-c/aclocal.m4
-c/config.log
-c/config.status
-c/libxdifile.so
-c/stamp-h1
-c/xdi_reader
+lib/autom4te.cache/*
+lib/Makefile
+lib/aclocal.m4
+lib/config.log
+lib/config.status
+lib/libxdifile.so
+lib/stamp-h1
+lib/xdi_reader
+lib/writetest
 
 languages/fortran/Makefile
 languages/fortran/config.h
