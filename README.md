@@ -11,7 +11,7 @@ files containing single-scan XAS data.
 
 
 **This is a work in progress.  Version 1.0 of the XDI specification has
-not yet been released.**
+not yet been declared done.**
 
 
 Specification Documents
@@ -27,21 +27,23 @@ Implementations
 ---------------
 
 Implementations are found in directories named according to the
-programming language.  At this time, we provide
+programming language.  The main C library is in `lib/`, all others are
+under `languages`.
 
- * C (written by Matt Newville with input from Bruce Ravel)
+At this time, we provide
+
+ * C (written by Matt Newville and Bruce Ravel)
  * Python (written by Matt Newville)
  * Perl (written by Bruce Ravel)
  * Fortran 77 (written by Matt Newville)
  
 We encourage the contribution of new language implementations,
-especially:
+such as:
 
  * Matlab
  * IDL
  * LabView
- * C++
- * Fortran 95
+ * Fortran 95 or later
  * Java
 
 and any other language that gets used by XAS practitioners.
@@ -51,6 +53,24 @@ follow the package distribution conventions used by that language
 community.  Unit testing is strongly encouraged.  So is complete
 documentation of the building, installation, and use of the language
 package.
+
+Build
+-----
+
+cd into the `lib/` directory and do:
+
+	~> ./configure
+	~> make
+	~> sudo make install
+
+This will install static and dynamic libraries to `/usr/local/lib` and
+header files to `/usr/local/include`.
+
+Obviously, you will need a C compiler.
+
+To build the language specific interfaces, cd to the folder under
+`languages/` and follow the build instructions there.
+
 
 Other files
 -----------
@@ -69,4 +89,4 @@ Other files
 		data/co_metal_rt.xdi: XAS Data Interchange file -- XDI specification 1.0
 
    It also defines an icon and a registry entry for XDI files on
-   Windows.
+   Windows.  (The Windows reg entry does not currently work)

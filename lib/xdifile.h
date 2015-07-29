@@ -59,6 +59,7 @@ typedef struct {
 } XDIFile;
 
 _EXPORT(int)  XDI_readfile(char *filename, XDIFile *xdifile) ;
+_EXPORT(void) XDI_writefile(XDIFile *xdifile, char *filename) ;
 _EXPORT(int)  XDI_get_array_index(XDIFile *xdifile, long n, double *out);
 _EXPORT(int)  XDI_get_array_name(XDIFile *xdifile, char *name, double *out);
 _EXPORT(int)  XDI_required_metadata(XDIFile *xdifile);

@@ -570,6 +570,66 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 
 }
 
+_EXPORT(void)
+XDI_writefile(XDIFile *xdifile, char *filename) {
+  int i, j, count;
+
+  char quote[1025];
+  const char s[2] = "\n";
+  char *token;
+
+  int regex_status;
+  struct slre_cap caps[3];
+
+  FILE *fp;
+  fp = fopen(filename, "w");
+  
+  /* version line */
+  strcpy(quote, xdifile->comments);
+  fprintf(fp, "# XDI/%s %s\n", xdifile->xdi_version, xdifile->extra_version);
+
+  /* metadata section */
+  for (i=0; i < xdifile->nmetadata; i++) {
+        fprintf(fp, "# %s.%s: %s\n",
+		xdifile->meta_families[i],
+		xdifile->meta_keywords[i],
+		xdifile->meta_values[i]);
+  }
+
+  /* user comments */
+  fprintf(fp, "#////////////////////////\n");
+  count = 0;
+  token = strtok(quote, s);   /* get the first token */
+  while( token != NULL ) {    /* walk through other tokens, skipping empty */
+    if (count == 0) {	      /* take care with empty first token */
+      regex_status = slre_match("^\\s*$", token, strlen(token), caps, 2, 0);
+      if (regex_status < 0) {
+	fprintf(fp, "#%s\n", token );
+      }
+    } else {
+      fprintf(fp, "#%s\n", token );
+    }
+    ++count;
+    token = strtok(NULL, s);
+  }
+  fprintf(fp, "#------------------------\n");
+
+  /* column labels */
+  fprintf(fp, "# ");
+  for (i = 0; i < xdifile->narrays; i++) {
+    fprintf(fp, " %s  ", xdifile->array_labels[i]);
+  }
+  fprintf(fp, "\n");
+  
+  /* data table */
+  for (i = 0; i < xdifile->npts; i++ ) {
+    for (j = 0; j < xdifile->narrays; j++ ) {
+      fprintf(fp, "  %-12.8g", xdifile->array[j][i]);
+    }
+    fprintf(fp, "\n");
+  }
+  
+}
 
 /* ============================================================================ */
 /* array management section                                                     */

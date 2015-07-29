@@ -120,6 +120,7 @@ condition of the most recently performed action.  The relation between
 the returned error/warning codes and the error messages are tabulated
 below.
 
+To export data as a valid XDI file, use `XDI_writefile`.
 
 
 ### Read an XDI file
@@ -254,6 +255,14 @@ The array names are held in the `Column.N` metadata fields.
 The return value is 0 if an array with that index is in the data
 table.  That is, the index argument must be smaller than the `narrays`
 attribute. The return value is -1 if the array cannot be retrieved.
+
+### Write an XDI file
+
+Write an XDI file from the  content of the XDIFile struct.
+
+```C
+	XDI_writefile(xdifile, "outfile.xdi");
+```
 
 ### Destroy and deallocate the XDIFile struct
 
