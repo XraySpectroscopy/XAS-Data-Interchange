@@ -2,7 +2,9 @@
 XAS Data Interchange
 ====================
 
-			 
+[![License Public Domain](https://img.shields.io/badge/license-public_domain-blue.svg)](http://choosealicense.com/licenses/unlicense/)	 
+
+
 
 This README file explains the XAS Data Interchange (XDI) distribution.
 The XDI distribution contains the specification documents and various
