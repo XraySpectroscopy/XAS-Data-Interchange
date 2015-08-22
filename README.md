@@ -23,6 +23,9 @@ Specification Documents
 
  * The [metadata dictionary](specification/dictionary.md), version 1.0.
 
+ * Bruce's [presentation on XDI](https://speakerdeck.com/bruceravel/xas-data-interchange-a-file-format-for-a-single-xas-spectrum) at the XAFS16 satellite meeting on [Data acquisition, treatment, storage – quality assurance in XAFS spectroscopy](https://indico.desy.de/conferenceDisplay.py?ovw=True&confId=10169)
+ 
+
 
 
 Implementations
