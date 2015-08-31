@@ -919,7 +919,7 @@ int xdi_is_datestring(char *inp) {
   struct slre_cap caps[6];
   int year, month, day, hour, minute, sec;
   char word[4] = {'\0'};
-  regex_status = slre_match("^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[T ](\\d\\d?):(\\d\\d):(\\d\\d).*$",
+  regex_status = slre_match("^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[Tt ](\\d\\d?):(\\d\\d):(\\d\\d).*$",
 			    inp, strlen(inp), caps, 6, 0);
 			    /* SLRE_INT, sizeof(sec), &year, */
 			    /* SLRE_INT, sizeof(sec), &month, */
