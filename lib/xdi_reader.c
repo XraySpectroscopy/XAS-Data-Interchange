@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "strutil.h"
 #include "xdifile.h"
 
 #ifndef min
