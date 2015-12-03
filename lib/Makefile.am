@@ -20,4 +20,4 @@ libxdifile_la_SOURCES = \
 	xdifile.c \
 	slre.h \
 	slre.c
-libxdifile_la_LDFLAGS = $(EXTRA_LDFLAGS)
+libxdifile_la_LDFLAGS = $(EXTRA_LDFLAGS) -version-info @LIB_CURRENT@:@LIB_REVISION@:@LIB_AGE@
