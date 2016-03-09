@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
-from xdifile import __version__, get_dllname
-
-dlldir, dllname = get_dllname()
+from xdifile import __version__
 
 setup(name         = 'xdifile',
       version      = __version__,
@@ -11,7 +9,5 @@ setup(name         = 'xdifile',
       url          = 'http://xas.org/XasDataLibrary',
       license      = 'Public Domain',
       description  = 'x-ray absorption spectra library',
-      data_files   = [(dlldir, [dllname])],
       package_dir  = {'xdifile': 'xdifile'},
       packages     = ['xdifile'])
-
