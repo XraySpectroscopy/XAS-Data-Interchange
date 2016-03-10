@@ -18,4 +18,4 @@
 
 """
 
-from .xdi import XDIFile, get_dllname, __version__ 
+from .xdi import XDIFile, get_dllname, get_localdll, __version__

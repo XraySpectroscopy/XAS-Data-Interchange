@@ -88,6 +88,26 @@ def add_dot2path():
     paths.insert(0, os.path.abspath(os.curdir))
     os.environ['PATH'] = sep.join(paths)
 
+def get_localdll():
+    """get installation directory and name of dll for use and installation"""
+
+    is_64bit   = platform.architecture()[0].lower().startswith('64')
+
+    dllname = 'dlls/darwin/libxdifile.dylib'
+    libdir = 'lib'
+
+    if sys.platform.startswith('win'):
+        libdir  = 'dlls'
+        dllname = 'dlls/win32/xdifile.dll'
+        if is_64bit:
+            dllname = 'dlls/win64/xdifile.dll'
+    elif sys.platform.startswith('lin'):
+        dllname = 'dlls/linux32/libxdifile.so'
+        if is_64bit:
+            dllname = 'dlls/linux64/libxdifile.so'
+            libdir = 'lib64'
+
+    return os.path.join(sys.prefix, libdir), dllname
 
 XDILIB = None
 def get_dllname():
