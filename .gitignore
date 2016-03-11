@@ -3,12 +3,20 @@
 *.a
 *~
 *#
+*.swp
 
 lib/autom4te.cache/*
 lib/Makefile
+lib/Makefile.in
+lib/config.h.in
+lib/libxdifile.pc
+lib/build-aux
+lib/build
+lib/m4
 lib/aclocal.m4
 lib/config.log
 lib/config.status
+lib/configure
 lib/libxdifile.so
 lib/stamp-h1
 lib/xdi_reader

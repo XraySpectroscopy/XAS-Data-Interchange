@@ -58,7 +58,7 @@ int readlines(char *filename, char **textlines) {
   int  is_newline;
   char *orig_text, *orig_thisline;
 
-  finp = fopen(filename, "r");
+  finp = fopen(filename, "rb");
   if (finp == NULL) {
     printf("Error opening %s: %s\n", filename, strerror(errno));
     return -errno;
