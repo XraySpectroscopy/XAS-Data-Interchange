@@ -20,6 +20,7 @@
 /* OTHER DEALINGS IN THE SOFTWARE.                                              */
 
 
+#include <pcre.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +34,6 @@
 #define min( a, b ) ( ((a) < (b)) ? (a) : (b) )
 #endif
 
-#include "slre.h"
 #include "strutil.h"
 #include "xdifile.h"
 
@@ -121,12 +121,14 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   int   is_newline, fnlen, mode, valid, stat;
   int   has_minusline, has_angle, has_energy;
   /* const char *regex_status; */
+
+
   int regex_status;
-  struct slre_cap caps[1];
-
-  int n_edges = sizeof(ValidEdges)/sizeof(char*);
-  int n_elems = sizeof(ValidElems)/sizeof(char*);
-
+  pcre *reDataline, *reKey, *reFamily;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  
   iret = 0;
 
 
@@ -234,11 +236,26 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
      nheader= index of first line that does not start with '#'
   */
   for (i = 1; i < ilen ; i++) {
-    regex_status = slre_match(DATALINE, textlines[i], strlen(textlines[i]), NULL, 0, 0);
+    reDataline = pcre_compile(DATALINE, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+    if (reDataline == NULL) {
+      sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", DATALINE, pcreErrorStr);
+      pcre_free(reDataline);
+      return ERR_REGEX;
+    }
+    regex_status = pcre_exec(reDataline,
+			     NULL,
+			     textlines[i], 
+			     strlen(textlines[i]),   // length of string
+			     0,                      // Start looking at this point
+			     0,                      // OPTIONS
+			     subStrVec,
+			     30);                    // Length of subStrVec
     if ((strlen(textlines[i]) > 3) && (regex_status >= 0)) {
-  	/* (strncmp(textlines[i], TOK_COMM, 1) != 0))  { */
+      /* (strncmp(textlines[i], TOK_COMM, 1) != 0))  { */
+      pcre_free(reDataline);
       break;
     }
+    pcre_free(reDataline);
   }
   nheader = i+1;
   if (nheader < 1) {nheader = 1;}
@@ -273,7 +290,21 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    family name cannot start with number
 	    key cannot contain '.'
 	   */
-	  regex_status = slre_match(FAMILYNAME, words[0], strlen(words[0]), caps, 1, 0);
+
+	  reFamily = pcre_compile(FAMILYNAME, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+	  if (reFamily == NULL) {
+	    sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", FAMILYNAME, pcreErrorStr);
+	    pcre_free(reFamily);
+	    return ERR_REGEX;
+	  }
+	  regex_status = pcre_exec(reFamily,
+				   NULL,
+				   words[0], 
+				   strlen(words[0]),       // length of string
+				   0,                      // Start looking at this point
+				   0,                      // OPTIONS
+				   subStrVec,
+				   30);                    // Length of subStrVec
 	  if (regex_status < 0) {
 	    xdifile->nmetadata = ndict+1;
 	    strcpy(xdifile->error_message, words[0]);
@@ -285,10 +316,25 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    for (i = 0; i < MAX_COLUMNS; i++) {
 	      free(col_labels[i]);
 	    }
+	    pcre_free(reFamily);
 	    return ERR_META_FAMNAME;
 	  }
+	  pcre_free(reFamily);
 
-	  regex_status = slre_match(KEYNAME,  words[1], strlen(words[1]), caps, 1, 0);
+	  reKey = pcre_compile(KEYNAME, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+	  if (reKey == NULL) {
+	    sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", KEYNAME, pcreErrorStr);
+	    pcre_free(reKey);
+	    return ERR_REGEX;
+	  }
+	  regex_status = pcre_exec(reKey,
+				   NULL,
+				   words[1], 
+				   strlen(words[1]),       // length of string
+				   0,                      // Start looking at this point
+				   0,                      // OPTIONS
+				   subStrVec,
+				   30);                    // Length of subStrVec
 	  if (regex_status < 0) {
 	    xdifile->nmetadata = ndict+1;
 	    strcpy(xdifile->error_message, words[1]);
@@ -300,8 +346,10 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	    for (i = 0; i < MAX_COLUMNS; i++) {
 	      free(col_labels[i]);
 	    }
+	    pcre_free(reKey);
 	    return ERR_META_KEYNAME;
 	  }
+	  pcre_free(reKey);
 
 	  COPY_STRING(xdifile->meta_families[ndict], words[0]);
 	  COPY_STRING(xdifile->meta_keywords[ndict], words[1]);
@@ -566,6 +614,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   for (i = 0; i < MAX_COLUMNS; i++) {
     free(col_labels[i]);
   }
+
   return iret;
 
 }
@@ -579,7 +628,11 @@ XDI_writefile(XDIFile *xdifile, char *filename) {
   char *token;
 
   int regex_status;
-  struct slre_cap caps[3];
+  pcre *reCompiled;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  const char *psubStrMatchStr;
 
   FILE *fp;
   fp = fopen(filename, "w");
@@ -602,7 +655,15 @@ XDI_writefile(XDIFile *xdifile, char *filename) {
   token = strtok(quote, s);   /* get the first token */
   while( token != NULL ) {    /* walk through other tokens, skipping empty */
     if (count == 0) {	      /* take care with empty first token */
-      regex_status = slre_match("^\\s*$", token, strlen(token), caps, 2, 0);
+      reCompiled = pcre_compile("^\\s*$", 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+      regex_status = pcre_exec(reCompiled,
+			       NULL,
+			       token, 
+			       strlen(token),   // length of string
+			       0,               // Start looking at this point
+			       0,               // OPTIONS
+			       subStrVec,
+			       10);             // Length of subStrVec
       if (regex_status < 0) {
 	fprintf(fp, "#%s\n", token );
       }
@@ -783,9 +844,13 @@ _EXPORT(int)
 XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
   int regex_status;
   int err, j;
-  int n_edges = sizeof(ValidEdges)/sizeof(char*);
-  int n_elems = sizeof(ValidElems)/sizeof(char*);
-  struct slre_cap caps[1];
+  pcre *reCompiled;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  const char *psubStrMatchStr;
+  char sample_regex[100] = {'\0'};
+  char emessage[100] = {'\0'};
 
   /* printf("======== %s %s %s\n", family, name, value); */
 
@@ -815,11 +880,24 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
 
   } else {
     err = 0;
-    regex_status = slre_match(family, xdifile->extra_version, strlen(xdifile->extra_version), caps, 1, 0);
+    reCompiled = pcre_compile(family, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+    if (reCompiled == NULL) {
+      printf("ERROR: Could not compile '%s': %s\n", family, pcreErrorStr);
+      exit(1);
+    }
+    regex_status = pcre_exec(reCompiled,
+			     NULL,
+			     xdifile->extra_version, 
+			     strlen(xdifile->extra_version), // length of string
+			     0,                              // Start looking at this point
+			     0,                              // OPTIONS
+			     subStrVec,
+			     10);                            // Length of subStrVec
     if (regex_status < 0) {
       err = WRN_NOEXTRA;
       strcpy(xdifile->error_message, "extension field used without versioning information");
     };
+    pcre_free(reCompiled);
   }
 
   return err;
@@ -834,25 +912,55 @@ XDI_validate_item(XDIFile *xdifile, char *family, char *name, char *value) {
 int XDI_validate_facility(XDIFile *xdifile, char *name, char *value) {
   int err;
   int regex_status;
-  struct slre_cap caps[3];
+  pcre *reCompiled;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  const char *psubStrMatchStr;
 
+  char facility_regex[100] = {'\0'};
+  char emessage[100] = {'\0'};
+  
   err = 0;
   strcpy(xdifile->error_message, "");
 
+  /*********************************************************************************/
+  /* set facility_regex to the regexp appropriate for this item, if it has a test  */
+  /* also set an appropriate error message                                         */
+  /*********************************************************************************/
   if (strcasecmp(name, "current") == 0) {
-    regex_status = slre_match("^\\d+(\\.\\d*)?\\s+m?[aA].*$", value, strlen(value), caps, 2, 0);
-    if (regex_status < 0) {
-      strcpy(xdifile->error_message, "Facility.current not interpretable as a beam current");
-      err = WRN_BAD_FACILITY;
-    }
+    strcpy(facility_regex, FACILITY_CURRENT);
+    strcpy(emessage, "Facility.current not interpretable as a beam current");
   } else if (strcasecmp(name, "energy") == 0) {
-    regex_status = slre_match("^\\d+(\\.\\d*)?\\s+[gmGM][eE][vV].*$", value, strlen(value), caps, 2, 0);
-    if (regex_status < 0) {
-      strcpy(xdifile->error_message, "Facility.energy not interpretable as a storage ring energy");
-      err = WRN_BAD_FACILITY;
-    }
+    strcpy(facility_regex, FACILITY_ENERGY);
+    strcpy(emessage, "Facility.energy not interpretable as a storage ring energy");
   }
 
+  /*************************************************************************/
+  /* if this item in the Facility namespace has a test, then run that test */
+  /*************************************************************************/
+  if (strcasecmp(facility_regex, "") != 0) {
+    reCompiled = pcre_compile(facility_regex, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+    if (reCompiled == NULL) {
+      sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", facility_regex, pcreErrorStr);
+      pcre_free(reCompiled);
+      return ERR_REGEX;
+    }
+    regex_status = pcre_exec(reCompiled,
+			     NULL,
+			     value, 
+			     strlen(value),          // length of string
+			     0,                      // Start looking at this point
+			     0,                      // OPTIONS
+			     subStrVec,
+			     30);                    // Length of subStrVec
+    if (regex_status < 0) {
+      strcpy(xdifile->error_message, emessage);
+      err = WRN_BAD_FACILITY;
+    }
+    pcre_free(reCompiled);
+  }
+  
   return err;
 }
 
@@ -888,23 +996,56 @@ int XDI_validate_mono(XDIFile *xdifile, char *name, char *value) {
 int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
   int err;
   int regex_status;
-  struct slre_cap caps[2];
-
+  pcre *reCompiled;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  const char *psubStrMatchStr;
+  char sample_regex[100] = {'\0'};
+  char emessage[100] = {'\0'};
+  
   err = 0;
   strcpy(xdifile->error_message, "");
 
+  /*******************************************************************************/
+  /* set sample_regex to the regexp appropriate for this item, if it has a test  */
+  /* also set an appropriate error message                                       */
+  /*******************************************************************************/
   if (strcasecmp(name, "temperature") == 0) {
-    regex_status = slre_match("^\\d+(\\.\\d*)?\\s+[CcFfKk].*$", value, strlen(value), caps, 2, 0);
-    if (regex_status < 0) {
-      strcpy(xdifile->error_message, "Sample.temperature not interpretable as a temperature");
-      err = WRN_BAD_SAMPLE;
-    }
+    strcpy(sample_regex, SAMPLE_TEMPERATURE);
+    strcpy(emessage, "Sample.temperature not interpretable as a temperature");
   } else if (strcasecmp(name, "stoichiometry") == 0) {
     /* TODO */
     /* need a chemical formula parser to validate Sample.stoichiometry */
+    strcpy(sample_regex, "");
     err = 0;
   }
 
+  /***********************************************************************/
+  /* if this item in the Sample namespace has a test, then run that test */
+  /***********************************************************************/
+  if (strcasecmp(sample_regex, "") != 0) {
+    reCompiled = pcre_compile(sample_regex, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+    if (reCompiled == NULL) {
+      sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", sample_regex, pcreErrorStr);
+      return ERR_REGEX;
+    }
+    regex_status = pcre_exec(reCompiled,
+			     NULL,
+			     value, 
+			     strlen(value),          // length of string
+			     0,                      // Start looking at this point
+			     0,                      // OPTIONS
+			     subStrVec,
+			     30);                    // Length of subStrVec
+    
+    if (regex_status < 0) {
+      strcpy(xdifile->error_message, emessage);
+      err = WRN_BAD_SAMPLE;
+    }
+    pcre_free(reCompiled);
+  }
+  
   return err;
 }
 
@@ -914,35 +1055,67 @@ int XDI_validate_sample(XDIFile *xdifile, char *name, char *value) {
 /* This uses regular expression to check format and validates */
 /* range of values, though not exhaustively.		      */
 /**************************************************************/
-int xdi_is_datestring(char *inp) {
+int xdi_is_datestring(XDIFile *xdifile, char *inp) {
+
   int regex_status;
-  struct slre_cap caps[6];
+  pcre *reCompiled;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  const char *match1, *match2, *match3, *match4, *match5, *match6;
+
   int year, month, day, hour, minute, sec;
   char word[5] = {'\0'};
-  regex_status = slre_match("^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[Tt ](\\d\\d?):(\\d\\d):(\\d\\d).*$",
-			    inp, strlen(inp), caps, 6, 0);
-			    /* SLRE_INT, sizeof(sec), &year, */
-			    /* SLRE_INT, sizeof(sec), &month, */
-			    /* SLRE_INT, sizeof(sec), &day, */
-			    /* SLRE_INT, sizeof(sec), &hour, */
-			    /* SLRE_INT, sizeof(sec), &minute, */
-			    /* SLRE_INT, sizeof(sec), &sec); */
 
-  if (regex_status < 0) { return WRN_DATE_FORMAT;}
+  /* printf("%s\n", ISODATE); */
+  /* printf("%s\n", inp); */
 
-  sprintf(word, "%.*s", caps[0].len, caps[0].ptr);
-  year = atoi(word);
-  sprintf(word, "%.*s", caps[1].len, caps[1].ptr);
-  month = atoi(word);
-  sprintf(word, "%.*s", caps[2].len, caps[2].ptr);
-  day = atoi(word);
-  sprintf(word, "%.*s", caps[3].len, caps[3].ptr);
-  hour = atoi(word);
-  sprintf(word, "%.*s", caps[4].len, caps[4].ptr);
-  minute = atoi(word);
-  sprintf(word, "%.*s", caps[5].len, caps[5].ptr);
-  sec = atoi(word);
+  reCompiled = pcre_compile(ISODATE, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+  if (reCompiled == NULL) {
+    sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", ISODATE, pcreErrorStr);
+    pcre_free(reCompiled);
+    return ERR_REGEX;
+  }
+  regex_status = pcre_exec(reCompiled,
+			   NULL,
+			   inp, 
+			   strlen(inp),	           // length of string
+			   0,                      // Start looking at this point
+			   0,                      // OPTIONS
+			   subStrVec,
+			   30);                    // Length of subStrVec
 
+  if (regex_status < 0) {
+    pcre_free(reCompiled);
+    return WRN_DATE_FORMAT;
+  }
+
+  pcre_get_substring(inp, subStrVec, regex_status, 1, &(match1));
+  year = atoi(match1);
+
+  pcre_get_substring(inp, subStrVec, regex_status, 2, &(match2));
+  month = atoi(match2);
+
+  pcre_get_substring(inp, subStrVec, regex_status, 3, &(match3));
+  day = atoi(match3);
+
+  pcre_get_substring(inp, subStrVec, regex_status, 4, &(match4));
+  hour = atoi(match4);
+
+  pcre_get_substring(inp, subStrVec, regex_status, 5, &(match5));
+  minute = atoi(match5);
+
+  pcre_get_substring(inp, subStrVec, regex_status, 6, &(match6));
+  sec = atoi(match6);
+
+  pcre_free_substring(match1);
+  pcre_free_substring(match2);
+  pcre_free_substring(match3);
+  pcre_free_substring(match4);
+  pcre_free_substring(match5);
+  pcre_free_substring(match6);
+  pcre_free(reCompiled);
+  
   if ((year   < 1900) ||
       (month  < 1)    || (month  > 12) ||
       (day    < 1)    || (day    > 31) ||
@@ -962,12 +1135,12 @@ int XDI_validate_scan(XDIFile *xdifile, char *name, char *value) {
   strcpy(xdifile->error_message, "");
 
   if (strcasecmp(name, "start_time") == 0) {
-    err = xdi_is_datestring(value);
+    err = xdi_is_datestring(xdifile, value);
     if (err==WRN_DATE_FORMAT) { strcpy(xdifile->error_message, "invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS)"); }
     if (err==WRN_DATE_RANGE)  { strcpy(xdifile->error_message, "invalid timestamp: date out of valid range"); }
 
   } else if (strcasecmp(name, "end_time") == 0) {
-    err = xdi_is_datestring(value);
+    err = xdi_is_datestring(xdifile, value);
     if (err==WRN_DATE_FORMAT) { strcpy(xdifile->error_message, "invalid timestamp: format should be ISO 8601 (YYYY-MM-DD HH:MM:SS)"); }
     if (err==WRN_DATE_RANGE)  { strcpy(xdifile->error_message, "invalid timestamp: date out of valid range"); }
 
@@ -1038,19 +1211,36 @@ int XDI_validate_element(XDIFile *xdifile, char *name, char *value) {
 }
 
 int XDI_validate_column(XDIFile *xdifile, char *name, char *value) {
-  int err, re1, re2;
-  struct slre_cap caps[2];
+  int err; /* , re1, re2; */
+  int regex_status;
+  pcre *reCompiled;
+  const char *pcreErrorStr;
+  int pcreErrorOffset;
+  int subStrVec[30];
+  const char *psubStrMatchStr;
 
   err = 0;
   strcpy(xdifile->error_message, "");
 
   if (strcasecmp(name, "1") == 0) {
-    re1 = slre_match("energy", value, strlen(value), caps, 2, 0);
-    re2 = slre_match("angle",  value, strlen(value), caps, 2, 0);
-    if ((re1 < 0) && (re2 < 0)) {
+    reCompiled = pcre_compile(COLUMNONE, 0, &pcreErrorStr, &pcreErrorOffset, NULL);
+    if (reCompiled == NULL) {
+      sprintf(xdifile->error_message, "ERROR: Could not compile '%s': %s\n", COLUMNONE, pcreErrorStr);
+      return ERR_REGEX;
+    }
+    regex_status = pcre_exec(reCompiled,
+			     NULL,
+			     value, 
+			     strlen(value),          // length of string
+			     0,                      // Start looking at this point
+			     0,                      // OPTIONS
+			     subStrVec,
+			     30);                    // Length of subStrVec  
+    if (regex_status < 0) {
       err = err + WRN_BAD_COL1;
       strcpy(xdifile->error_message, "Column.1 is not \"energy\" or \"angle\"");
     }
+    pcre_free(reCompiled);
   }
 
   return err;

@@ -35,7 +35,7 @@ typedef struct {
   long npts;             /* number of data points for all arrays */
   long narray_labels;    /* number of labeled arrays (may be < narrays) */
   long nouter;           /* number of points in outer scan */
-  long error_lineno;     /* line numberfor any existing error */
+  long error_lineno;     /* line number for any existing error */
   double dspacing;       /* monochromator d spacing */
   char *xdi_libversion;  /* XDI version of library */
   char *xdi_version;     /* XDI version string from file*/
@@ -95,13 +95,24 @@ _EXPORT(void) XDI_cleanup(XDIFile *xdifile, long err);
 #define TOK_OUTER_VAL  "outer.value"     /* value for outer scan position */
 #define TOK_OUTER_NAME "outer.name"      /* name for outer scan position */
 
-#define FAMILYNAME "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
-#define KEYNAME    "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$"
+/***********************/
+/* were used with SLRE */
+/***********************/
+/* #define FAMILYNAME "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_][ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$" */
+/* #define KEYNAME    "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789]+$" */
+/* #define ISODATE    "^(\\d\\d\\d\\d)-(\\d\\d?)-(\\d\\d?)[Tt ](\\d\\d?):(\\d\\d):(\\d\\d).*$" */
 
-/* #define FAMILYNAME "(?i)^[a-z_][a-z0-9_]+$" */
-/* #define KEYNAME    "(?i)^[a-z0-9_]+$" */
-
-#define DATALINE "^([ \\t]*[-+]*?[0-9\\.])"
+/******************/
+/* used with PCRE */
+/******************/
+#define DATALINE           "^([ \\t]*[-+]*?[0-9\\.])"
+#define FAMILYNAME         "^[A-Za-z_][A-Za-z0-9_]+$"
+#define KEYNAME            "^[A-Za-z0-9_]+$"
+#define ISODATE            "(\\d{4})-(\\d{1,2})-(\\d{1,2})[Tt ](\\d{1,2}):(\\d{1,2}):(\\d{1,2})"
+#define COLUMNONE          "energy|angle"
+#define SAMPLE_TEMPERATURE "^\\d+(?:\\.\\d*)?\\s+[CcFfKk].*$"       /* e.g.  273 K    */
+#define FACILITY_CURRENT   "^\\d+(?:\\.\\d*)?\\s+m?[aA].*$"         /* e.g.  101 mA   */
+#define FACILITY_ENERGY    "^\\d+(?:\\.\\d*)?\\s+[gmGM][eE][vV].*$" /* e.g.  7.00 GeV */
 
 /* Notes:
    1. The absorption edge must be one of those listed in ValidEdges below
@@ -143,7 +154,7 @@ static char *ValidElems[] =
 #define WRN_NODSPACE          1
 #define WRN_NOMINUSLINE       2
 #define WRN_IGNOREDMETA       4
-/* warnings from metadata value validation, these are not use bitwise */
+/* warnings from metadata value validation, these are not used bitwise */
 #define WRN_NOELEM          100
 #define WRN_NOEDGE          101
 #define WRN_REFELEM         102
@@ -164,6 +175,7 @@ static char *ValidElems[] =
 #define ERR_NCOLS_CHANGE    -16	/* used */
 #define ERR_NONNUMERIC      -32	/* used */
 #define ERR_MEMERROR        -64	/* NOT used */
+#define ERR_REGEX          -128	/* NOT used */
 
 /* _EXPORT(char*) XDI_errorstring(int errcode); */
 
