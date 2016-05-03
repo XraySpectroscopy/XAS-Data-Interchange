@@ -14,6 +14,23 @@ directly to the `libxdifile` library.
 
 `libxdifile` was written by Matt Newville and Bruce Ravel.
 
+## Installation
+
+This requires the regular expression library [PCRE](http://pcre.org).
+Packages for PCRE are available for many platforms.  A Windows package
+is available here ...
+
+```bash
+./configure
+make
+sudo make install
+```
+
+There is also a simple test script that runs the `xdi_reader` program
+through [Valgrind](http://valgrind.org/).  It is called
+`test_valgrind.pl` and uses perl and perl's
+[Test::More](https://metacpan.org/pod/Test::More).
+
 ## XDIFile struct
 
 This is the content of the XDIFile struct.  It will contain the entire
@@ -295,6 +312,7 @@ translation of a table of error messages into another language.
 |  -8  | `<word>` -- not formatted as Family.Key: Value               |
 | -16  | number of columns changes in data table                      |
 | -32  | non-numeric value in data table: `<word>`                    |
+| -128 | Error parsing regular expression with PCRE                   |
 
 Here `<word>` will be the text that triggered the error.
 
