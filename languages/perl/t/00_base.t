@@ -47,7 +47,6 @@ ok($xdifile->_extra_version =~ m{GSE},         'extra_version');
 
 ok(ucfirst($xdifile->_element) eq 'Co',        'element');
 ok(ucfirst($xdifile->_edge) eq 'K',            'edge');
-print $xdifile->_dspacing, $/;
 ok(abs($xdifile->_dspacing - 3.13555) < $epsi, 'dspacing');
 ok($xdifile->_comments =~ m{room temperature}, 'comments');
 ok($xdifile->_nmetadata == 19,                 'nmetadata');

@@ -11,7 +11,7 @@ our @ISA = qw(Exporter);
 our $VERSION = '1.00';
 
 use Inline C => 'DATA',
-           LIBS => '-lxdifile',
+           LIBS => '-lxdifile -lpcre',
            VERSION => '1.00',
            NAME => 'Xray::XDIFile';
 
@@ -41,7 +41,7 @@ Import an XDI file:
   my $errcode;
   my $xdifile = Xray::XDIFile->new('data.dat', $errcode);
 
-See xdifile.h for meaning of error codes.
+See xdifile.h for meanings of error codes.
 
 Export an XDI file:
 
@@ -64,6 +64,11 @@ this object are all preceded with an underscore.
 
 L<Inline>
 
+=item *
+
+PCRE from L<http://pcre.org> must already be installed on your
+computer and available to the compiler.
+
 =back
 
 =head1 BUGS AND LIMITATIONS
@@ -77,7 +82,7 @@ Newx should have this comment block explaining it:
     perl that doesn't have Newx then we resort to using New.
 
 Regarding INT2PTR, see
-Lhttp://www.mail-archive.com/inline%40perl.org/msg02689.html>.  The
+L<http://www.mail-archive.com/inline%40perl.org/msg02689.html>.  The
 use of PTR2IV in new was the result of trial and error, rather than
 deep understanding.
 
