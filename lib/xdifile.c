@@ -116,7 +116,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   double *outer_arr, outer_arr0;
   long   *outer_pts;
   FILE *inpFile;
-  long  file_length, ilen, index, i, j, k, nx, maxcol;
+  long  file_length, ilen, index, i, j, k, nx, maxcol, ll;
   long  npts_, ncols, icol, nheader, nwords, ndict;
   long  ignored_headerline, iret, code, ipt, nouter, iouter;
   int   is_newline, fnlen, mode, valid, stat;
@@ -234,7 +234,8 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
     if (nwords > 1) {
       strcpy(this, "");
       for (i=1; i<nwords; i++) {
-	strcat(this, cwords[i]);
+	ll = min(79, strlen(cwords[i]));
+	strncat(this, cwords[i], ll);
       }
       strcpy(xdifile->extra_version, this);
     }
