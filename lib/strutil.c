@@ -114,6 +114,20 @@ int readlines(char *filename, char **textlines) {
   return ilen;
 }
 
+int split(char *inp, char **out, int maxwords) {
+  int count, i;
+  char * pch;
+  pch = strtok (inp, " \n\r\t");
+  count = 0;
+  while (pch != NULL) {
+    out[count] = pch;
+    count++;
+    /* printf ("%s\n",pch); */
+    pch = strtok (NULL, " \n\t\r");
+  }
+  return count;
+};
+
 int make_words(char *inp, char **out, int maxwords) {
   int  i, nwords;
   nwords = 0;

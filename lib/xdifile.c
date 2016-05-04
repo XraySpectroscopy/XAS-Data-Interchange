@@ -103,6 +103,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   char *c, *line, *firstline, *interline, *fullline, *mkey,  *mval;
   char *reword;
   char tlabel[32] = {'\0'};
+  char this[80] = {'\0'};
   char comments[1025] = {'\0'};
   char elem[4] = {'\0'};
   char edge[3] = {'\0'};
@@ -203,7 +204,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   if (strncmp(textlines[0], TOK_COMM, 1) == 0)  {
     firstline = textlines[0]; firstline++;
     firstline[strcspn(firstline, CRLF)] = '\0';
-    nwords = make_words(firstline, cwords, 2);
+    nwords = split(firstline, cwords, 2);
     if (nwords < 1) {
       strcpy(xdifile->error_message, "not an XDI file, no XDI versioning information in first line");
       for (j=0; j<=ilen; j++) {
@@ -227,8 +228,15 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       firstline = firstline+5;
       strcpy(xdifile->xdi_version, firstline);
     }
-    if (nwords > 1) { /* extra version tags */
-      strcpy(xdifile->extra_version, cwords[1]);
+    /*************************************************************/
+    /* gather up all the extra version tags into a single string */
+    /*************************************************************/
+    if (nwords > 1) {
+      strcpy(this, "");
+      for (i=1; i<nwords; i++) {
+	strcat(this, cwords[i]);
+      }
+      strcpy(xdifile->extra_version, this);
     }
   }
 
@@ -372,7 +380,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
 	if (strncasecmp(mkey, TOK_COLUMN, strlen(TOK_COLUMN)) == 0) {
 	  j = atoi(mkey+7)-1;
 	  if ((j > -1) && (j < MAX_COLUMNS)) {
-	    ncols = make_words(mval, cwords, 2);
+	    ncols = split(mval, cwords, 2);
 	    free(col_labels[j]);
 	    COPY_STRING(col_labels[j], cwords[0]);
 	    if (ncols == 2) {
@@ -466,7 +474,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
   outer_pts[0] = 1;
 
   COPY_STRING(line, textlines[i]);
-  ncols = make_words(line, words, MAX_WORDS);
+  ncols = split(line, words, MAX_WORDS);
 
   strcpy(xdifile->comments, comments);
   COPY_STRING(xdifile->filename, filename);
@@ -548,7 +556,7 @@ XDI_readfile(char *filename, XDIFile *xdifile) {
       free(mkey);
     } else {
       /* COPY_STRING(line, textlines[i]); */
-      icol = make_words(textlines[i], words, MAX_WORDS);
+      icol = split(textlines[i], words, MAX_WORDS);
       if (icol != ncols) {
 	strcpy(xdifile->error_message, "number of columns changes in data table");
 	free(line);

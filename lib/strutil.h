@@ -28,6 +28,7 @@
 /* Read function */
 int readlines(char *filename, char **lines);
 int make_words(char *inp, char **out, int maxwords);
+int split(char *inp, char **out, int maxwords);
 int split_on(char *inp, char *delim, char **out) ;
 
 #define COPY_STRING(dest,src)  dest=calloc(strlen(src)+1, sizeof(char));\
